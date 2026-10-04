@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/1-banner.png" alt="Rambler Bangla: Bengali stays Bengali in Gboard voice typing" width="100%"></p>
+<p align="center"><img src="docs/assets/3-banner.png" alt="Rambler Bangla: Bengali stays Bengali in Gboard voice typing" width="100%"></p>
 
 # Rambler Bangla
 
@@ -6,11 +6,11 @@
 
 [![Static test suite](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg)](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml)
 
-Rambler Bangla is a fail-closed, fingerprint-guarded patch that stops Gboard
+Rambler Bangla is a fail-closed, fingerprint-guarded patch intended to keep Gboard
 18.3.1's Rambler / Jetson **Lite** cleanup stage from Romanizing Bengali,
-while preserving every other cleanup behavior. Bengali stays in Bengali
-Unicode for `bn-BD`, `bn-IN` and `bn-Beng`; Romanization happens only for an
-explicit Latin variant (`bn-Latn`); English always stays Latin. No
+while leaving its other cleanup behavior in place. The design keeps Bengali in Bengali
+Unicode for `bn-BD`, `bn-IN` and `bn-Beng`, Romanizes only for an
+explicit Latin variant (`bn-Latn`), and keeps English in Latin. No
 transliteration is added and no cleanup stage is disabled.
 
 **What this repository is:** a patch that you apply to a Gboard 18.3.1 APK
@@ -20,14 +20,14 @@ DEX, signing key or model file, and there is no prebuilt download here.
 
 ## Showcase
 
-<p align="center"><img src="docs/assets/2-poster.png" alt="Rambler Bangla feature poster (mock illustration)" width="480"></p>
+<p align="center"><img src="docs/assets/4-poster.png" alt="Rambler Bangla feature poster (mock illustration)" width="480"></p>
 
 | Feature | Status |
 | --- | --- |
-| Fail-closed script-gate patch: Bengali stays Bengali Unicode, English stays Latin | Covered by the static suite on a synthetic fixture (17 end-to-end checks, 51 policy assertions). Not yet proven on a real device. |
-| One language per sentence in multilingual voice typing | V29.3 maintainer test build. Host corpus of 292 cases passes; field iteration continues. |
-| Real Bangla spellings for English words (CMU-derived table plus reviewed overrides) | V29.3 maintainer test build. The release notes report a blind check of 85 of 200 exact, so expect misses. |
-| Protected text: #hashtags, @handles, links, emails and times stay Latin | In the V29.3 test corpus. |
+| Fail-closed script-gate patch, intended to keep Bengali in Bengali Unicode and English in Latin | Covered by the static suite on a synthetic fixture (17 end-to-end checks, 51 policy assertions). Not yet proven on a real device. |
+| One language per sentence in multilingual voice typing (intended) | V29.3 maintainer test build. Passed the 292-case host corpus at release (historical result, not phone proof); field iteration continues. |
+| Table-based Bangla spellings for English words (CMU-derived table plus reviewed overrides) | V29.3 maintainer test build. The release notes report a blind check of 85 of 200 exact (historical), so expect misses. |
+| Protected text: #hashtags, @handles, links, emails and times kept in Latin letters | Intended; checked in the V29.3 test corpus only. |
 | Clipboard drag-to-reorder | Listed in the V29.3 notes. In development. |
 | Side-by-side install under its own package id | Documented in `docs/SIDE-BY-SIDE.md`. |
 
@@ -37,17 +37,16 @@ DEX, signing key or model file, and there is no prebuilt download here.
 ### Headline features (V29.3)
 
 - **Multilingual voice typing, one language per sentence**: on the
-  multilingual layout (abc → বাংলা), each dictated sentence is written fully
-  in Bangla script or fully in English. Start in either language and switch
-  whenever you like; the keyboard follows you sentence by sentence.
+  multilingual layout (abc → বাংলা), each dictated sentence is meant to come out
+  in Bangla script or in English, not mixed. Maintainer test build; edge cases remain.
 - **Real Bangla spellings for English words**: English words spoken inside
-  Bangla come out as proper transliterations (কোম্পানি, টেলিভিশন, বার্লিন)
+  Bangla are meant to come out as transliterations (কোম্পানি, টেলিভিশন, বার্লিন)
   instead of letter-by-letter output. Transliteration only, never
   translation.
 - **Clipboard drag-to-reorder**: in the clipboard panel, long-press an item,
   drag it to a new spot, and drop it to change the order.
-- **Protected text**: #hashtags, @handles, links, emails and times stay in
-  Latin letters on every voice path, so they keep working.
+- **Protected text**: #hashtags, @handles, links, emails and times are meant to stay in
+  Latin letters on the voice paths covered by the test corpus.
 
 ### How each layout behaves
 
