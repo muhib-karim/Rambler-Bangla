@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/3-banner.png" alt="Rambler Bangla: Bengali stays Bengali in Gboard voice typing" width="100%"></p>
+<p align="center"><img src="docs/assets/3-banner.png" alt="Rambler Bangla: Bengali-first voice typing patch for Gboard (in development)" width="100%"></p>
 
 # Rambler Bangla
 
