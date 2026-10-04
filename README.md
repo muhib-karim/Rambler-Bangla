@@ -4,6 +4,8 @@
 
 **Status: in development.** Source only, no APKs. Illustrations are mock-ups with synthetic text.
 
+> **Read this first.** Behavior described below is design intent for the V29.3 maintainer test build and its historical host-test results. It has not been re-verified on a current device or signed build, and the on-device path is still under review. Treat anything not marked as tested in the repository as unverified.
+
 [![Static test suite](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg)](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml)
 
 Rambler Bangla is a fail-closed, fingerprint-guarded patch intended to keep Gboard
@@ -43,12 +45,14 @@ DEX, signing key or model file, and there is no prebuilt download here.
   Bangla are meant to come out as transliterations (কোম্পানি, টেলিভিশন, বার্লিন)
   instead of letter-by-letter output. Transliteration only, never
   translation.
-- **Clipboard drag-to-reorder**: in the clipboard panel, long-press an item,
+- **Clipboard drag-to-reorder (in development)**: in the clipboard panel, long-press an item,
   drag it to a new spot, and drop it to change the order.
 - **Protected text**: #hashtags, @handles, links, emails and times are meant to stay in
   Latin letters on the voice paths covered by the test corpus.
 
-### How each layout behaves
+### How each layout is designed to behave
+
+Design intent for the V29.3 test build; not re-verified on a current device.
 
 | Layout | Voice and typing result |
 | --- | --- |
@@ -63,7 +67,7 @@ the abc → বাংলা layout.
 
 ### Settings
 
-Both switches are in the keyboard's settings, in the Rambler section.
+Design intent, not re-verified on a current device. Both switches are in the keyboard's settings, in the Rambler section.
 
 **Bangla script correction** (on by default)
 - On: Rambler converts Romanized Bangla to Bangla script, applies the
@@ -75,7 +79,7 @@ Both switches are in the keyboard's settings, in the Rambler section.
   odd result comes from Rambler or from Gboard itself.
 
 **Rambler diagnostics** (off by default)
-- Use it only when reporting a problem.
+- Use it only when reporting a problem. It is a privacy-sensitive feature and has not been re-audited for the current build.
 - Turn it on, reproduce the problem (dictate or type the same text), then
   turn it off. Turning it off saves a log to your Downloads folder as
   `RamblerBangla-diag-<date>-<time>.txt` and shows "Rambler diag saved to
@@ -116,7 +120,7 @@ Both switches are in the keyboard's settings, in the Rambler section.
   spelling errors, language-switch edge cases) and iteration is continuing
   in the open. Design: `docs/V29-DESIGN.md`. Acceptance fixtures:
   `docs/V29-FIXTURES.md`. Build record: `ledger/v29-provenance.md`.
-- **v28d: last stable baseline.** Evidence and status detail:
+- **v28d: last stable baseline (historical, not re-verified).** Evidence and status detail:
   `docs/EVIDENCE.md`, `docs/V28-SEGMENT-LOCK.md`, `ledger/v28-provenance.md`.
 
 ## How it works
