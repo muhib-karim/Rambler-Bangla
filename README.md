@@ -1,6 +1,10 @@
+<p align="center"><img src="docs/assets/1-banner.png" alt="Rambler Bangla: Bengali stays Bengali in Gboard voice typing" width="100%"></p>
+
 # Rambler Bangla
 
-[![Static test suite](https://github.com/ai-dev-2024/Rambler-Bangla/actions/workflows/tests.yml/badge.svg)](https://github.com/ai-dev-2024/Rambler-Bangla/actions/workflows/tests.yml)
+**Status: in development.** Source only, no APKs. Illustrations are mock-ups with synthetic text.
+
+[![Static test suite](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg)](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml)
 
 Rambler Bangla is a fail-closed, fingerprint-guarded patch that stops Gboard
 18.3.1's Rambler / Jetson **Lite** cleanup stage from Romanizing Bengali,
@@ -13,6 +17,20 @@ transliteration is added and no cleanup stage is disabled.
 you obtain yourself. It contains source code, a fingerprint profile, rename
 tooling, tests and audit documents. It does not redistribute any Google APK,
 DEX, signing key or model file, and there is no prebuilt download here.
+
+## Showcase
+
+<p align="center"><img src="docs/assets/2-poster.png" alt="Rambler Bangla feature poster (mock illustration)" width="480"></p>
+
+| Feature | Status |
+| --- | --- |
+| Fail-closed script-gate patch: Bengali stays Bengali Unicode, English stays Latin | Covered by the static suite on a synthetic fixture (17 end-to-end checks, 51 policy assertions). Not yet proven on a real device. |
+| One language per sentence in multilingual voice typing | V29.3 maintainer test build. Host corpus of 292 cases passes; field iteration continues. |
+| Real Bangla spellings for English words (CMU-derived table plus reviewed overrides) | V29.3 maintainer test build. The release notes report a blind check of 85 of 200 exact, so expect misses. |
+| Protected text: #hashtags, @handles, links, emails and times stay Latin | In the V29.3 test corpus. |
+| Clipboard drag-to-reorder | Listed in the V29.3 notes. In development. |
+| Side-by-side install under its own package id | Documented in `docs/SIDE-BY-SIDE.md`. |
+
 
 ## Features
 
@@ -191,7 +209,7 @@ For a real patched APK, `scripts/verify_apk.sh` checks the output offline
 and can compare it with the stock APK. The dated validation record and the
 evidence behind each anchor are in [`docs/VALIDATION.md`](docs/VALIDATION.md)
 and [`docs/EVIDENCE.md`](docs/EVIDENCE.md). The full 2026-09-20 suite log is
-attached to the [v29.3 release](https://github.com/ai-dev-2024/Rambler-Bangla/releases/tag/v29.3)
+attached to the [v29.3 release](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3)
 and is no longer kept in the tree.
 
 ## Toolchain
