@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/3-banner.png" alt="Rambler Bangla: Bengali-first voice typing patch for Gboard (in development)" width="100%"></p>
+<p align="center"><img src="docs/assets/1-rb-banner.png" alt="Rambler Bangla: Bengali-first voice typing patch for Gboard (in development)" width="100%"></p>
 
 # Rambler Bangla
 
@@ -33,6 +33,12 @@ DEX, signing key or model file, and there is no prebuilt download here.
 | Clipboard drag-to-reorder | Listed in the V29.3 notes. In development. |
 | Side-by-side install under its own package id | Documented in `docs/SIDE-BY-SIDE.md`. |
 
+
+## Brand
+
+Palette, wordmark, voice-wave motif and clear-space rule are in the [brand reference sheet](docs/assets/2-rb-brand-sheet.png). Colours: Deep Navy `#0B1F3B`, Rambler Blue `#2D6FA3`, Amber Accent `#F6B13E`. Text in the images is synthetic.
+
+<p align="center"><a href="docs/assets/2-rb-brand-sheet.png"><img src="docs/assets/2-rb-brand-sheet.png" alt="Rambler Bangla brand reference: wordmark, voice-wave motif, colour palette, typography, clear space" width="720"></a></p>
 
 ## Features
 
