@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rambler Bangla: Bengali-first voice typing for Gboard</title>
+<meta name="description" content="Rambler Bangla keeps Bengali dictation in Bengali script, with per-sentence language, real Bangla spellings for English words and protected text. Open source, GPL-3.0.">
+<meta property="og:title" content="Rambler Bangla">
+<meta property="og:description" content="Bengali-first voice typing for Gboard. Open source.">
+<meta property="og:image" content="https://muhib-karim.github.io/Rambler-Bangla/assets/1-banner.png">
+<link rel="icon" href="assets/4-favicon.png">
+<style>
+:root{--navy:#0B1F3B;--blue:#2D6FA3;--amber:#F6B13E;--ink:#E7EEF7;--mute:#8FB8E3;--card:#10304f}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Bengali",sans-serif;background:var(--navy);color:var(--ink);line-height:1.6}
+a{color:var(--amber)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+nav{display:flex;align-items:center;gap:20px;padding:16px 0;flex-wrap:wrap}
+nav img{width:36px;height:36px;border-radius:10px}
+nav b{font-size:1.1rem;margin-right:auto}
+nav a{color:var(--mute);text-decoration:none;font-size:.95rem}
+nav a:hover{color:#fff}
+.hero{padding:40px 0 30px;text-align:center}
+.hero img.banner{width:100%;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.hero h1{font-size:clamp(1.8rem,4vw,2.6rem);margin:28px 0 8px}
+.hero p{color:var(--mute);font-size:1.1rem;max-width:680px;margin:0 auto 22px}
+.btn{display:inline-block;padding:11px 22px;border-radius:999px;font-weight:600;text-decoration:none;margin:4px}
+.btn.p{background:var(--amber);color:var(--navy)}
+.btn.s{border:2px solid var(--blue);color:#fff}
+section{padding:36px 0}
+h2{font-size:1.6rem;margin:0 0 6px}
+h2+p{color:var(--mute);margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:20px}
+.card{background:var(--card);border:1px solid rgba(45,111,163,.5);border-radius:16px;padding:20px}
+.card h3{margin:0 0 6px;font-size:1.1rem}
+.card p{margin:0;color:#c9d9ea;font-size:.97rem}
+.tag{display:inline-block;font-size:.75rem;padding:2px 10px;border-radius:999px;margin-bottom:10px;background:rgba(246,177,62,.15);color:var(--amber)}
+.tag.ok{background:rgba(120,200,140,.15);color:#8fd6a2}
+table{width:100%;border-collapse:collapse;margin-top:16px;background:var(--card);border-radius:12px;overflow:hidden}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid rgba(45,111,163,.35);font-size:.95rem;vertical-align:top}
+th{color:var(--amber)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.two img{width:100%;border-radius:16px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.steps{counter-reset:s;list-style:none;margin:0;padding:0}.steps li{counter-increment:s;background:var(--card);border:1px solid rgba(45,111,163,.5);border-radius:14px;padding:12px 16px 12px 56px;margin-bottom:10px;position:relative}.steps li:before{content:counter(s);position:absolute;left:16px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--amber);color:var(--navy);font-weight:700;text-align:center;line-height:28px}.steps b{display:block}.steps span{color:#c9d9ea;font-size:.93rem}
+.note{border-left:4px solid var(--amber);background:rgba(246,177,62,.08);padding:14px 18px;border-radius:8px;margin-top:18px}
+code{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:6px;font-size:.9em}
+footer{padding:30px 0 50px;color:var(--mute);font-size:.9rem;border-top:1px solid rgba(45,111,163,.35);margin-top:30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><img src="assets/2-icon-512.png" alt="Rambler Bangla icon"><b>Rambler Bangla</b>
+<a href="#features">Features</a><a href="#layouts">Layouts</a><a href="#how">How it works</a><a href="#brand">Icon</a><a href="#builds">Builds</a><a href="#status">Status</a>
+<a href="https://github.com/muhib-karim/Rambler-Bangla">GitHub</a></nav>
+
+<header class="hero">
+<img class="banner" src="assets/1-banner.png" alt="Rambler Bangla: Bengali-first voice typing for Gboard">
+<h1>Dictate in Bangla. Get Bangla.</h1>
+<p>Rambler Bangla is an open-source patch layer that keeps Gboard's voice cleanup from turning Bengali into Latin letters, and handles mixed Bangla and English one sentence at a time.</p>
+<a class="btn p" href="https://github.com/muhib-karim/Rambler-Bangla">View on GitHub</a>
+<a class="btn s" href="https://github.com/muhib-karim/Rambler-Bangla/releases">Release notes</a>
+</header>
+
+<section id="features">
+<h2>Features</h2>
+<p>What the project does today, with the evidence level stated for each.</p>
+<div class="grid">
+<div class="card"><span class="tag ok">On-device confirmed</span><h3>Bangla and English together</h3><p>Dictate Bangla, English or both on the multilingual layout. Each sentence is written fully in Bangla script or fully in English, so output is not a jumble of both.</p></div>
+<div class="card"><span class="tag">Test build, host-tested</span><h3>Real Bangla spellings for English words</h3><p>English words spoken inside Bangla come out as Bangla spellings (কোম্পানি, টেলিভিশন, বার্লিন). Built from the CMU Pronouncing Dictionary plus reviewed overrides. Transliteration only, never translation.</p></div>
+<div class="card"><span class="tag">Test build, host-tested</span><h3>Protected text</h3><p>#hashtags, @handles, links, emails and times stay in Latin letters on every voice path.</p></div>
+<div class="card"><span class="tag ok">Static suite in CI</span><h3>Fail-closed patching</h3><p>The patcher proves it is looking at the exact Gboard 18.3.1 build it expects. A single mismatch means no output at all. 17 end-to-end checks and 51 policy assertions run on every push.</p></div>
+<div class="card"><span class="tag">Settings</span><h3>Bangla script correction switch</h3><p>On by default. Turn it off and you get Gboard's own output unchanged, which is handy for telling whether an odd result comes from Rambler or from Gboard.</p></div>
+<div class="card"><span class="tag">Settings</span><h3>Opt-in diagnostics</h3><p>Off by default. Turn it on only to report a problem. The log stays on your phone and you read it before sharing.</p></div>
+<div class="card"><span class="tag">In development</span><h3>Clipboard drag-to-reorder</h3><p>Long-press a clipboard item and drag it to reorder. Listed in the V29.3 notes, still being smoothed out.</p></div>
+<div class="card"><span class="tag">Install</span><h3>Own package id, side by side</h3><p>The test build uses its own package identity and installs next to the stock keyboard. Updates signed with the same key install over the top.</p></div>
+</div>
+</section>
+
+<section id="layouts">
+<h2>Which keyboard does what</h2>
+<p>Design intent for the V29.3 test build.</p>
+<table>
+<tr><th>Layout</th><th>Result</th></tr>
+<tr><td>English (US)</td><td>English only. Rambler changes nothing.</td></tr>
+<tr><td>বাংলা (native)</td><td>Bangla only. Romanized Bangla and English words become Bangla script.</td></tr>
+<tr><td>abc → বাংলা</td><td>Multilingual. Each sentence is Bangla script or English, decided per sentence.</td></tr>
+<tr><td>Bangla (Latin)</td><td>Treated as Bangla: output is Bangla script.</td></tr>
+</table>
+</section>
+
+<section id="how">
+<div class="two">
+<div><h2>How it works</h2>
+<p>The patcher never edits bytes by offset. It disassembles the APK, checks SHA-256 string fingerprints, confirms method anchors, finds the enabled-languages register by dataflow, and only then inserts two hook calls. If any check fails it exits with status 2 and writes nothing.</p>
+<p>The repository holds the source, fingerprint profile, rename tooling, tests and audit records. It contains no Google binaries, keys or model files.</p></div>
+<ol class="steps"><li><b>Fingerprint sweep</b><span>Every SHA-256 string fingerprint in the profile must be found.</span></li><li><b>Anchors</b><span>Cleanup-builder and prompt-owner methods must match exactly.</span></li><li><b>Dataflow</b><span>The enabled-languages register is found by tracing, not guessing.</span></li><li><b>Two hooks</b><span>Script gate and override rule, nothing else changed.</span></li><li><b>Repack</b><span>Only the touched DEX is rebuilt. You sign it with your own key.</span></li></ol>
+</div>
+</section>
+
+<section id="brand">
+<h2>Icon and brand</h2>
+<p>The Bangla letter র with an amber underline on a Rambler Blue to Deep Navy gradient. Colours: Deep Navy #0B1F3B, Rambler Blue #2D6FA3, Amber #F6B13E.</p>
+<img src="assets/3-icon-showcase.png" alt="Rambler Bangla icon in circle, squircle and rounded square masks and at launcher sizes" style="width:100%;border-radius:16px;margin-top:12px">
+</section>
+
+<section id="builds">
+<h2>Recent maintainer builds</h2>
+<p>October 2026 test builds, with the evidence level for each claim.</p>
+<table>
+<tr><th>Item</th><th>Level</th></tr>
+<tr><td>Updates signed with the same key install over the existing app</td><td>Confirmed on the maintainer's phone</td></tr>
+<tr><td>Gboard AI writing-tools icon visible again on build 253</td><td>Confirmed on the maintainer's phone; cause not proven</td></tr>
+<tr><td>Build 253 compatibility update (stale ids retargeted, no behaviour flags changed)</td><td>Two static reviews passed, no runtime proof</td></tr>
+<tr><td>Stray "123" labels suppressed on pinned and list items</td><td>Static review only</td></tr>
+<tr><td>Clipboard recents setting, masking default off</td><td>Static review only</td></tr>
+<tr><td>Clause segmentation, phonetic typing with EN/BN toggle, Bangla (Latin)</td><td>Planned, not working yet</td></tr>
+</table>
+</section>
+
+<section id="status">
+<h2>Status and distribution</h2>
+<div class="note"><b>Source release, no public APK.</b> A patched keyboard contains Google's proprietary Gboard code, which cannot be redistributed. You apply the patch to a Gboard 18.3.1 APK you obtain yourself, then sign it with your own key. Illustrations on this page are mock-ups with synthetic text.</div>
+<p>Latest tagged release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3">v29.3</a>. Per-version build records are in the <a href="https://github.com/muhib-karim/Rambler-Bangla/tree/main/ledger">ledger</a>; known limits are listed in the release notes.</p>
+<p>Bangla is not on Google's official list of languages for cloud rewrite, so Rambler Bangla only improves the on-device path. It does not add Bangla to Google's cloud service.</p>
+</section>
+
+<footer>
+Rambler Bangla is a derivative of PixelBoard by Akshay Kadam (GPL-3.0), built with the Morphe patch engine and smali/baksmali. See <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a>. Licensed GPL-3.0. Not affiliated with Google.
+</footer>
+</div>
+</body>
+</html>
