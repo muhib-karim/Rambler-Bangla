@@ -1,44 +1,45 @@
-<p align="center"><img src="docs/assets/1-rb-banner.png" alt="Rambler Bangla: Bengali-first voice typing patch for Gboard (in development)" width="100%"></p>
+<p align="center"><img src="docs/assets/1-banner.png" alt="Rambler Bangla: Bengali-first voice typing for Gboard" width="100%"></p>
+
+<p align="center">
+<a href="https://muhib-karim.github.io/Rambler-Bangla/"><b>Website</b></a> ·
+<a href="docs/V29.3-RELEASE-NOTES.md">Release notes</a> ·
+<a href="CHANGELOG.md">Changelog</a> ·
+<a href="docs/assets/3-icon-showcase.png">Icon</a> ·
+<a href="SECURITY.md">Security</a>
+</p>
+
+<p align="center">
+<a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg" alt="Static test suite"></a>
+<img src="https://img.shields.io/badge/license-GPL--3.0-2D6FA3" alt="GPL-3.0">
+<img src="https://img.shields.io/badge/Gboard-18.3.1-0B1F3B" alt="Gboard 18.3.1">
+<img src="https://img.shields.io/badge/distribution-source%20only-F6B13E" alt="Source only">
+</p>
 
 # Rambler Bangla
 
-**Status: in development.** Source only, no APKs. Illustrations are mock-ups with synthetic text.
+**Dictate in Bangla. Get Bangla.** Rambler Bangla is an open-source patch layer for Gboard 18.3.1 that keeps the voice cleanup stage from Romanizing Bengali, and handles mixed Bangla and English one sentence at a time.
 
-> **Read this first.** Behavior described below is design intent for the V29.3 maintainer test build and its historical host-test results. It has not been re-verified on a current device or signed build, and the on-device path is still under review. Treat anything not marked as tested in the repository as unverified.
+<p align="center"><img src="docs/assets/2-icon-512.png" alt="Rambler Bangla icon: Bangla letter র with an amber underline on a blue gradient" width="160"></p>
 
-[![Static test suite](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg)](https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml)
+> **Honest status.** This is a maintainer project with test builds. Host tests and a static CI suite back the claims below; the on-device results listed are from the maintainer's own phone. Anything marked "intended" is design, not proof. There is no public APK (see [Distribution](#distribution)).
 
-Rambler Bangla is a fail-closed, fingerprint-guarded patch intended to keep Gboard
-18.3.1's Rambler / Jetson **Lite** cleanup stage from Romanizing Bengali,
-while leaving its other cleanup behavior in place. The design keeps Bengali in Bengali
-Unicode for `bn-BD`, `bn-IN` and `bn-Beng`, Romanizes only for an
-explicit Latin variant (`bn-Latn`), and keeps English in Latin. No
-transliteration is added and no cleanup stage is disabled.
+## Highlights
 
-**What this repository is:** a patch that you apply to a Gboard 18.3.1 APK
-you obtain yourself. It contains source code, a fingerprint profile, rename
-tooling, tests and audit documents. It does not redistribute any Google APK,
-DEX, signing key or model file, and there is no prebuilt download here.
+| Feature | What you get | Evidence |
+| --- | --- | --- |
+| **Bangla stays Bangla** | Fail-closed patch keeps Bengali dictation in Bengali Unicode for `bn-BD`, `bn-IN` and `bn-Beng`, and English in Latin | 17 end-to-end checks and 51 policy assertions in CI on a synthetic fixture; Bangla-only and English-only layouts confirmed on a real device |
+| **Bangla and English together** | One language per sentence on the multilingual layout (abc → বাংলা) | 292-case host corpus; confirmed on a real device with a few misses in quick mid-sentence switches |
+| **Real Bangla spellings for English words** | কোম্পানি, টেলিভিশন, বার্লিন instead of letter-by-letter output. CMU-derived table plus reviewed overrides | Blind check 85 of 200 exact (historical), so expect misses |
+| **Protected text** | #hashtags, @handles, links, emails and times stay in Latin letters | Checked in the V29.3 test corpus |
+| **Settings you control** | Bangla script correction switch (on by default) and opt-in diagnostics (off by default) | Documented below |
+| **Clipboard drag-to-reorder** | Long-press an item and drag it | Listed in V29.3 notes, in development |
+| **Own package id** | Installs beside the stock keyboard; updates signed with the same key install in place | [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md) |
 
-## Showcase
+## Icon and brand
 
-<p align="center"><img src="docs/assets/4-poster.png" alt="Rambler Bangla feature poster (mock illustration)" width="480"></p>
+<p align="center"><a href="docs/assets/3-icon-showcase.png"><img src="docs/assets/3-icon-showcase.png" alt="Icon in circle, squircle and rounded-square masks and at launcher sizes" width="720"></a></p>
 
-| Feature | Status |
-| --- | --- |
-| Fail-closed script-gate patch, intended to keep Bengali in Bengali Unicode and English in Latin | Covered by the static suite on a synthetic fixture (17 end-to-end checks, 51 policy assertions). Not yet proven on a real device. |
-| One language per sentence in multilingual voice typing (intended) | V29.3 maintainer test build. Passed the 292-case host corpus at release (historical result, not phone proof); field iteration continues. |
-| Table-based Bangla spellings for English words (CMU-derived table plus reviewed overrides) | V29.3 maintainer test build. The release notes report a blind check of 85 of 200 exact (historical), so expect misses. |
-| Protected text: #hashtags, @handles, links, emails and times kept in Latin letters | Intended; checked in the V29.3 test corpus only. |
-| Clipboard drag-to-reorder | Listed in the V29.3 notes. In development. |
-| Side-by-side install under its own package id | Documented in `docs/SIDE-BY-SIDE.md`. |
-
-
-## Brand
-
-Palette, wordmark, voice-wave motif and clear-space rule are in the [brand reference sheet](docs/assets/2-rb-brand-sheet.png). Colours: Deep Navy `#0B1F3B`, Rambler Blue `#2D6FA3`, Amber Accent `#F6B13E`. Text in the images is synthetic.
-
-<p align="center"><a href="docs/assets/2-rb-brand-sheet.png"><img src="docs/assets/2-rb-brand-sheet.png" alt="Rambler Bangla brand reference: wordmark, voice-wave motif, colour palette, typography, clear space" width="720"></a></p>
+Colours: Deep Navy `#0B1F3B`, Rambler Blue `#2D6FA3`, Amber `#F6B13E`. The full reference sheet is [here](docs/assets/2-rb-brand-sheet.png). Text in the images is synthetic.
 
 ## Features
 
@@ -115,19 +116,31 @@ Design intent, not re-verified on a current device. Both switches are in the key
   `docs/SIDE-BY-SIDE.md`.
 - **Source only**: this repository distributes no APKs.
 
+
+## Maintainer builds, October 2026
+
+Test builds 245 to 253 are private maintainer builds (see [Distribution](#distribution)). Each claim carries its evidence level.
+
+| Item | Level |
+| --- | --- |
+| Updates signed with the same key install over the existing app, no uninstall | Confirmed on the maintainer's phone (build 253 over 251) |
+| Gboard AI writing-tools (refinement) icon visible again on build 253 | Confirmed on the maintainer's phone. Cause of the return is not proven; 253 is a compatibility-only change |
+| Build 253: compatibility update that retargets three stale internal ids and adds an observer, with no behaviour flags changed | Two independent static reviews passed; no runtime proof |
+| Stray "123" labels suppressed on pinned and list items (display only) | Static review only. Unpinned path clean on the phone; the pinned fix is not phone-confirmed |
+| Clipboard recents setting (default 5, range 5 to 10) and masking default off | Static review only |
+| Multilingual clause segmentation, phonetic typing with an EN/BN toggle, Bangla (Latin) layout | Planned or in progress. Not working yet |
+
 ## Project status
 
-- **V29.3 (2026-09-24): maintainer test build.** One language per sentence
-  in multilingual dictation, plus English loanword spelling in Bangla voice
-  output (CMU-derived table + checked overrides). Typing is unchanged.
-  Notes: `docs/V29.3-RELEASE-NOTES.md`. Build record: `ledger/v29.3-provenance.md`.
-- **V29 (2026-09-23): field iteration, in development.** Not a stable
-  release: this cycle's field reports documented open bugs (residual
-  spelling errors, language-switch edge cases) and iteration is continuing
-  in the open. Design: `docs/V29-DESIGN.md`. Acceptance fixtures:
-  `docs/V29-FIXTURES.md`. Build record: `ledger/v29-provenance.md`.
-- **v28d: last stable baseline (historical, not re-verified).** Evidence and status detail:
-  `docs/EVIDENCE.md`, `docs/V28-SEGMENT-LOCK.md`, `ledger/v28-provenance.md`.
+See [`CHANGELOG.md`](CHANGELOG.md) for the full history. In short:
+
+- **V29.3 (2026-09-24), tagged [v29.3](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3):** one language per sentence in multilingual dictation, English loanword spelling in Bangla voice output. Notes: [`docs/V29.3-RELEASE-NOTES.md`](docs/V29.3-RELEASE-NOTES.md). Build record: [`ledger/v29.3-provenance.md`](ledger/v29.3-provenance.md).
+- **V29 (2026-09-23):** field iteration. Design: [`docs/V29-DESIGN.md`](docs/V29-DESIGN.md), fixtures: [`docs/V29-FIXTURES.md`](docs/V29-FIXTURES.md).
+- **v28d:** last stable baseline (historical). Evidence: [`docs/EVIDENCE.md`](docs/EVIDENCE.md), [`docs/V28-SEGMENT-LOCK.md`](docs/V28-SEGMENT-LOCK.md).
+
+## Distribution
+
+This repository is source only. A patched keyboard contains Google's proprietary Gboard code, which is not licensed for redistribution, so no APK is published here. You apply the patch to a Gboard 18.3.1 APK you obtain yourself and sign it with your own key. See [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md).
 
 ## How it works
 
