@@ -23,6 +23,12 @@
 
 > **Honest status.** This is a maintainer project with test builds. Host tests and a static CI suite back the claims below; the on-device results listed are from the maintainer's own phone. Anything marked "intended" is design, not proof. There is no public APK (see [Distribution](#distribution)).
 
+## What the showcase proves
+
+The public site and README separate device-confirmed behavior, host-tested behavior, static checks and planned work. UI illustrations use synthetic text and are mock-ups, not screenshots proving every feature works on a phone.
+
+The CI suite builds and patches a synthetic APK fixture. It does not install the keyboard on a device or prove real Gboard runtime behavior. This remains a source-only distribution: supply your own compatible Gboard APK and signing key. Do not upload a patched Google APK, a signing key or private diagnostic output here.
+
 ## Highlights
 
 | Feature | What you get | Evidence |
