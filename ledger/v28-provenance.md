@@ -45,7 +45,7 @@ byte-for-byte (k1/k2/k3).
 ## Gate
 - CI smoke (install + launch + IME register/enable on a disposable AVD):
   passed on the exact v28d production bytes, run
-  https://github.com/ai-dev-2024/Rambler-Bangla/actions/runs/35773952365 (3m12s).
+  https://github.com/muhib-karim/Rambler-Bangla/actions/runs/35773952365 (3m12s).
 
 ## Open items
 - Loan renderings inside Bangla segments come from the engine's existing

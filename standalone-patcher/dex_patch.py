@@ -151,7 +151,14 @@ def param_slots(proto, is_static):
             i = params.index(";", i) + 1
             slots += 1
         elif c == "[":
-            i += 1
+            # Arrays are one reference slot, whatever the element type.
+            while params[i] == "[":
+                i += 1
+            if params[i] == "L":
+                i = params.index(";", i) + 1
+            else:
+                i += 1
+            slots += 1
         elif c in "JD":
             slots += 2
             i += 1
