@@ -51,7 +51,7 @@ footer{padding:30px 0 50px;color:var(--mute);font-size:.9rem;border-top:1px soli
 <body>
 <div class="wrap">
 <nav><img src="assets/2-icon-512.png" alt="Rambler Bangla icon"><b>Rambler Bangla</b>
-<a href="#features">Features</a><a href="#layouts">Layouts</a><a href="#how">How it works</a><a href="#brand">Icon</a><a href="#builds">Builds</a><a href="#status">Status</a>
+<a href="#features">Features</a><a href="#layouts">Layouts</a><a href="#how">How it works</a><a href="#brand">Icon</a><a href="#builds">Builds</a><a href="#status">Status</a><a href="#docs">Docs</a>
 <a href="https://github.com/muhib-karim/Rambler-Bangla">GitHub</a></nav>
 
 <header class="hero">
@@ -59,7 +59,8 @@ footer{padding:30px 0 50px;color:var(--mute);font-size:.9rem;border-top:1px soli
 <h1>Dictate in Bangla. Get Bangla.</h1>
 <p>Rambler Bangla is an open-source patch layer that keeps Gboard's voice cleanup from turning Bengali into Latin letters, and handles mixed Bangla and English one sentence at a time.</p>
 <a class="btn p" href="https://github.com/muhib-karim/Rambler-Bangla">View on GitHub</a>
-<a class="btn s" href="https://github.com/muhib-karim/Rambler-Bangla/releases">Release notes</a>
+<a class="btn s" href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">Latest release</a>
+<a class="btn s" href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/USER_GUIDE.md">User guide</a>
 </header>
 
 <section id="features">
@@ -93,7 +94,8 @@ footer{padding:30px 0 50px;color:var(--mute);font-size:.9rem;border-top:1px soli
 <div class="two">
 <div><h2>How it works</h2>
 <p>The patcher never edits bytes by offset. It disassembles the APK, checks SHA-256 string fingerprints, confirms method anchors, finds the enabled-languages register by dataflow, and only then inserts two hook calls. If any check fails it exits with status 2 and writes nothing.</p>
-<p>The repository holds the source, fingerprint profile, rename tooling, tests and audit records. It contains no Google binaries, keys or model files.</p></div>
+<p>The repository holds the source, fingerprint profile, rename tooling, tests and audit records. It contains no Google binaries, keys or model files.</p>
+<p>Full pipeline, runtime policy and CI design: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/ARCHITECTURE.md">ARCHITECTURE.md</a>.</p></div>
 <ol class="steps"><li><b>Fingerprint sweep</b><span>Every SHA-256 string fingerprint in the profile must be found.</span></li><li><b>Anchors</b><span>Cleanup-builder and prompt-owner methods must match exactly.</span></li><li><b>Dataflow</b><span>The enabled-languages register is found by tracing, not guessing.</span></li><li><b>Two hooks</b><span>Script gate and override rule, nothing else changed.</span></li><li><b>Repack</b><span>Only the touched DEX is rebuilt. You sign it with your own key.</span></li></ol>
 </div>
 </section>
@@ -121,12 +123,25 @@ footer{padding:30px 0 50px;color:var(--mute);font-size:.9rem;border-top:1px soli
 <section id="status">
 <h2>Status and distribution</h2>
 <div class="note"><b>Source release, no public APK.</b> A patched keyboard contains Google's proprietary Gboard code, which cannot be redistributed. You apply the patch to a Gboard 18.3.1 APK you obtain yourself, then sign it with your own key. Illustrations on this page are mock-ups with synthetic text.</div>
-<p>Latest tagged release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3">v29.3</a>. Per-version build records are in the <a href="https://github.com/muhib-karim/Rambler-Bangla/tree/main/ledger">ledger</a>; known limits are listed in the release notes.</p>
+<p>Latest tagged release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3">v29.3</a>. Per-version build records are in the <a href="https://github.com/muhib-karim/Rambler-Bangla/tree/main/ledger">ledger</a>; known limits are listed in the <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/V29.3-RELEASE-NOTES.md">release notes</a> and the <a href="https://github.com/muhib-karim/Rambler-Bangla#limitations">README</a>.</p>
 <p>Bangla is not on Google's official list of languages for cloud rewrite, so Rambler Bangla only improves the on-device path. It does not add Bangla to Google's cloud service.</p>
 </section>
 
+<section id="docs">
+<h2>Documentation</h2>
+<p>Everything lives in the repository. Start with the quick start or the user guide.</p>
+<div class="grid">
+<div class="card"><h3><a href="https://github.com/muhib-karim/Rambler-Bangla#quick-start">Quick start</a></h3><p>Fetch the pinned toolchain, build the runtime, then verify, patch and verify your own Gboard 18.3.1 APK.</p></div>
+<div class="card"><h3><a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/USER_GUIDE.md">User guide</a></h3><p>Prerequisites, signing with your own key, installing on your own device, settings and exit codes.</p></div>
+<div class="card"><h3><a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/ARCHITECTURE.md">Architecture</a></h3><p>Fingerprints, anchors, dataflow, the smali patch, the Java policy runtime and the synthetic-APK CI suite.</p></div>
+<div class="card"><h3><a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/CHANGELOG.md">Changelog</a></h3><p>Version history and the evidence level of each maintainer build.</p></div>
+<div class="card"><h3><a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/README.md">All docs</a></h3><p>Index of design records, evidence, validation and licensing documents.</p></div>
+<div class="card"><h3><a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/CONTRIBUTING.md">Contributing</a></h3><p>How to run the suites before a pull request. Security problems: see <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/SECURITY.md">SECURITY.md</a>.</p></div>
+</div>
+</section>
+
 <footer>
-Rambler Bangla is a derivative of PixelBoard by Akshay Kadam (GPL-3.0), built with the Morphe patch engine and smali/baksmali. See <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a>. Licensed GPL-3.0. Not affiliated with Google.
+Rambler Bangla is a derivative of PixelBoard by Akshay Kadam (GPL-3.0), built with the Morphe patch engine and smali/baksmali. See <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a>. Licensed <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/LICENSE">GPL-3.0</a>. Not affiliated with Google. <a href="https://github.com/muhib-karim/Rambler-Bangla">Source on GitHub</a>.
 </footer>
 </div>
 </body>
