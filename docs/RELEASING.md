@@ -126,8 +126,19 @@ keystore or password. `.gitignore` blocks `*.keystore`, `*.jks`, `*.apk`,
 The maintainer signs private test builds with their own key, kept outside the
 repository. Only the signer certificate's SHA-256 is recorded, in the
 provenance record. Changing the key means existing installs cannot update in
-place and must be uninstalled first (this happened between V29 and V29.3), so
-key changes are called out in the release notes and provenance record.
+place and must be uninstalled first (this happened between V29 and V29.3, and
+again for V29.4), so key changes are called out in the release notes and
+provenance record.
+
+Since V29.4 the maintainer key lives only in GitHub Actions secrets
+(`RAMBLER_KEYSTORE_BASE64`, `RAMBLER_KEYSTORE_PASSWORD`, `RAMBLER_KEY_ALIAS`,
+`RAMBLER_KEY_PASSWORD`), plus an offline backup kept by the maintainer. The
+manual workflow `.github/workflows/maintainer-key-check.yml` decodes the key
+into the runner's temp directory, signs the synthetic CI fixture with it,
+checks the signer against `EXPECTED_CERT_SHA256`
+(`679cfdec6cef6ab17a9778cde4d3bbf3b8ccfe6ae2380d3da11679aae01e2e78`), writes the
+result to the job summary and deletes the key. It uploads no APK. Run it after
+any change to the key secrets.
 
 The fixture in CI is signed with a throwaway key generated locally by
 `fixtures/build_fixture.sh` at test time. It is not a release key.
