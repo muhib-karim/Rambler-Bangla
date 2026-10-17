@@ -94,15 +94,15 @@ jobs:
         run: |
           "$BUILD_TOOLS/apksigner" verify -v --print-certs "$RUNNER_TEMP/fixture-maintainer.apk" \
             > "$RUNNER_TEMP/verify.txt"
-          digests="$(grep -E '^Signer #[0-9]+ certificate SHA-256 digest:' "$RUNNER_TEMP/verify.txt" || true)"
+          digests="$(grep -E 'certificate SHA-256 digest:' "$RUNNER_TEMP/verify.txt" | awk '{print $NF}' | sort -u || true)"
           {
             echo "apksigner: $(basename "$BUILD_TOOLS")"
-            grep -E '^Verified using|^Number of signers' "$RUNNER_TEMP/verify.txt" || true
+            grep -E '^Verified using|^Number of signers|certificate SHA-256 digest' "$RUNNER_TEMP/verify.txt" || true
             echo "$digests"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$(printf '%s\n' "$digests" | grep -c .)" -ne 1 ] \
-            || [ "$(printf '%s\n' "$digests" | awk '{print $NF}')" != "$EXPECTED_CERT_SHA256" ]; then
+            || [ "$digests" != "$EXPECTED_CERT_SHA256" ]; then
             echo "::error::fixture signer does not match EXPECTED_CERT_SHA256"
             exit 1
           fi
