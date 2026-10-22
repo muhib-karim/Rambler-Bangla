@@ -1,6 +1,16 @@
 # Changelog
 
-All notable changes to Rambler Bangla. Dates are AEST/AEDT. Test builds are maintainer builds, not public downloads; see the README's Distribution section.
+All notable changes to Rambler Bangla. Dates are AEST/AEDT. Test builds are maintainer builds, not public downloads; see the README section "Source only, no APKs".
+
+## [29.4.1] - 2026-10-21
+
+Docs only. No patcher, runtime, fingerprint or signing changes, and no APKs.
+
+- README rewritten as the project homepage: what and why, architecture mermaid (fingerprint guard, smali patch, policy runtime, verify), device-free CI, build from source, fail-closed safety, source-only and legal note, FAQ, roadmap and links. Latest release now points at v29.4.
+- GitHub Pages landing page restyled to match: mobile-first, WCAG AA colour tokens, skip link and landmarks, native FAQ, no scripts, external fonts or trackers.
+- New stdlib unit tests (`tests/python/test_docs_homepage.py`) keep the README and the site honest: required sections, badges, local links, quoted test count, contrast, no trackers. The CI unit job now runs 40 tests.
+- CI: `ci.yml` bumps `actions/checkout` 4 to 7, `actions/setup-python` 5 to 7 and `actions/setup-java` 4 to 6 (Dependabot #15, #17, #16).
+- Docs index lists the V29.4 release notes; project memory files for coding agents (`AGENTS.md`, `CLAUDE.md`, `docs/PROJECT_BRAIN.md`), `TASKS.md`, `HANDOFF.md` and `SKILLS_USED.md`.
 
 ## V29.4 - 2026-10-18
 
