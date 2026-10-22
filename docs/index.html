@@ -23,7 +23,8 @@
   --r:14px;--gut:clamp(16px,4vw,32px);--ease:cubic-bezier(.16,1,.3,1)
 }
 *{box-sizing:border-box}
-html{scrollbar-color:var(--line) var(--bg-deep);scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html{scrollbar-color:var(--line) var(--bg-deep);-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 body{margin:0;font:1rem/1.6 var(--sans);background:var(--bg);color:var(--text);caret-color:var(--accent)}
 ::selection{background:var(--accent);color:var(--on-accent)}
 a{color:var(--accent);text-underline-offset:.2em;text-decoration-thickness:1px}
@@ -206,7 +207,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 <li><h3>Real Bangla spellings</h3><p>English words inside Bangla come out as <span class="bn" lang="bn">কোম্পানি, টেলিভিশন, বার্লিন</span>. Transliteration only, never translation.</p><span class="level"><b>Host-tested</b><br>Blind check 85 of 200 exact (historical)</span></li>
 <li><h3>Protected text</h3><p>#hashtags, @handles, links, emails and times stay in Latin letters.</p><span class="level"><b>Host-tested</b><br>V29.3 test corpus</span></li>
 <li><h3>Settings you control</h3><p>Bangla script correction switch (on by default) and opt-in diagnostics (off by default).</p><span class="level"><b>Design intent</b><br>Not re-verified on a current device</span></li>
-<li><h3>Own package id</h3><p>Installs beside the stock keyboard; updates signed with the same key install in place.</p><span class="level"><b class="ok">On device</b><br>See SIDE-BY-SIDE.md</span></li>
+<li><h3>Own package id</h3><p>Installs beside the stock keyboard; updates signed with the same key install in place.</p><span class="level"><b class="ok">On device</b><br>See <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/SIDE-BY-SIDE.md">SIDE-BY-SIDE.md</a></span></li>
 </ul>
 </div>
 </section>
@@ -255,6 +256,7 @@ bash tests/run_tests.sh   <span class="c"># TEST SUITE: 17 passed, 0 failed</spa
 <span class="c"># 1. fingerprint guard</span>
 python3 standalone-patcher/dex_patch.py analyze \
   --apk gboard-18.3.1.apk --profile fingerprints/gboard-18.3.1.json
+<span class="c"># build the runtime DEX first (javac + d8, see the README)</span>
 <span class="c"># 2-3. smali patch + policy runtime (exit 2, no output, on any miss)</span>
 python3 standalone-patcher/dex_patch.py patch \
   --apk gboard-18.3.1.apk --out out.apk \
@@ -275,10 +277,10 @@ scripts/verify_apk.sh single out.apk --profile fingerprints/gboard-18.3.1.json</
 <ul class="ticks">
 <li><b>Exact build or nothing.</b> Any fingerprint, anchor or dataflow miss exits 2 and writes no APK.</li>
 <li><b>No double patching.</b> An already patched APK is refused.</li>
-<li><b>Hash-only profile.</b> No Google strings are reproduced.</li>
+<li><b>Hash-based profile.</b> SHA-256 hashes plus short identifying fragments; the full prompt text is never reproduced.</li>
 <li><b>Never signs, never uploads.</b> Patcher and verifier run offline; you sign with your own key.</li>
 <li><b>No network code</b> in the patch layer, and diagnostics are off by default and stay on your phone.</li>
-<li><b>On-device path only.</b> Bangla is not on Google's cloud rewrite list, so only the on-device cleanup path changes.</li>
+<li><b>On-device path only.</b> Bangla is not on Google's cloud rewrite list, so only the on-device cleanup path changes. It does not add Bangla to Google's cloud service.</li>
 </ul>
 </div>
 </div>
@@ -308,7 +310,7 @@ scripts/verify_apk.sh single out.apk --profile fingerprints/gboard-18.3.1.json</
 </div>
 <div class="prose">
 <p>A patched keyboard contains Google's proprietary Gboard code, which is not licensed for redistribution. You apply the patch to a Gboard 18.3.1 APK you obtain yourself, for your own device, and sign it with your own key. Releases are tagged source plus notes.</p>
-<div class="callout"><p><b>Legal note.</b> Rambler Bangla is an independent project. Not affiliated with Google, nor endorsed or sponsored by it. Gboard is a trademark of Google LLC, named only to identify the target app. The repository holds no Google binaries, keys, model files or verbatim strings. Modifying software may be restricted by its terms or by local law; checking that is your responsibility, and the software comes with no warranty (GPL-3.0). Details: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/LICENSING-AUDIT.md">LICENSING-AUDIT.md</a>.</p></div>
+<div class="callout"><p><b>Legal note.</b> Rambler Bangla is an independent project. Not affiliated with Google, nor endorsed or sponsored by it. Gboard is a trademark of Google LLC, named only to identify the target app. The repository holds no Google binaries, keys, model files or full prompt text; the profile keeps SHA-256 hashes plus short identifying fragments. Modifying software may be restricted by its terms or by local law; checking that is your responsibility, and the software comes with no warranty (GPL-3.0). Details: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/LICENSING-AUDIT.md">LICENSING-AUDIT.md</a>.</p></div>
 </div>
 </div>
 </section>
@@ -348,6 +350,12 @@ scripts/verify_apk.sh single out.apk --profile fingerprints/gboard-18.3.1.json</
 <li>Phonetic typing with an EN/BN toggle, and a proper Bangla (Latin) layout.</li>
 <li>Clipboard drag-to-reorder, still in development.</li>
 <li>Better loanword accuracy than the historical 85 of 200 exact.</li>
+</ul>
+<h3>Limitations</h3>
+<ul class="ticks">
+<li>Exactly one target build, Gboard 18.3.1. Any other build is refused by design.</li>
+<li>CI proves the patching pipeline on a synthetic fixture, not runtime behaviour inside real Gboard.</li>
+<li>Loanword spelling is approximate.</li>
 </ul>
 </div>
 </section>

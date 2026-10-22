@@ -54,16 +54,16 @@ Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into L
 | **Settings you control** | Bangla script correction switch (on by default) and opt-in diagnostics (off by default) | Design intent, see [Settings](#settings) |
 | **Own package id** | Installs beside the stock keyboard; updates signed with the same key install in place | [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md) |
 
-A real run of both suites on a dev machine, rendered from the terminal output (no phone, no Google binaries):
+A real run of both suites on a dev machine, rendered from the terminal output (no phone, no Google binaries). It predates the homepage tests, so it shows the 26 patcher helper tests:
 
-<p align="center"><img src="docs/assets/test-run.svg" alt="Terminal output of the V29.4 run: TEST SUITE 17 passed, 0 failed, and the patcher unit tests OK" width="760"></p>
+<p align="center"><img src="docs/assets/test-run.svg" alt="Terminal output of an October 2026 run, before the homepage tests were added: TEST SUITE 17 passed, 0 failed, and the 26 patcher helper tests OK" width="760"></p>
 
 ## How it works
 
 ```mermaid
 flowchart LR
     APK[/"Your Gboard 18.3.1 APK<br/>(you supply it)"/] --> G
-    PROF[("fingerprints/gboard-18.3.1.json<br/>SHA-256 hashes only")] --> G
+    PROF[("fingerprints/gboard-18.3.1.json<br/>SHA-256 fingerprints")] --> G
     G["1 · Fingerprint guard<br/>hash sweep · method anchors · dataflow trace"]
     G -->|exact build| P["2 · Smali patch<br/>insert two hooks · repack the touched DEX"]
     G -. any miss .-> STOP(["exit 2 · no output written"])
@@ -75,10 +75,10 @@ flowchart LR
 
 The patcher never edits bytes by offset. It disassembles the APK with baksmali and only patches once every check has passed:
 
-1. **Fingerprint guard.** `fingerprints/gboard-18.3.1.json` lists SHA-256 hashes of strings the target build must contain (never the strings themselves, so no Google text is reproduced here). One miss means an unrecognized build. The cleanup-builder method and the method that owns the cleanup prompt must then exist with the exact class, name and signature in the profile. Finally, the patcher traces the `{ENABLED_LANGUAGES}` placeholder to its `String.replace` call to find the register that holds the enabled languages, rather than trusting a hard-coded register.
+1. **Fingerprint guard.** `fingerprints/gboard-18.3.1.json` lists SHA-256 hashes of strings the target build must contain, plus short identifying fragments such as the rule heading; the full Google prompt text is never reproduced. One miss means an unrecognized build. The cleanup-builder method and the method that owns the cleanup prompt must then exist with the exact class, name and signature in the profile. Finally, the patcher traces the `{ENABLED_LANGUAGES}` placeholder to its `String.replace` call to find the register that holds the enabled languages, rather than trusting a hard-coded register.
 2. **Smali patch.** Two calls into `GboardRamblerLiteScriptRuntime` are inserted into the cleanup builder. The original rule string stays in place as the fail-safe input. Only the touched DEX is reassembled.
 3. **Policy runtime.** The pure-Java runtime is compiled with `javac`, dexed with d8 and added as an extra DEX. At runtime, hook B replaces the injected "Hinglish Override" rule and hook A rewrites only the Romanization bullet of the prompt's SCRIPT GATE, based on the enabled languages. It is a set of `String` to `String` functions with no Android or network dependencies.
-4. **Verify.** `scripts/verify_apk.sh` checks the output offline, on its own or against the stock APK. The patcher never signs: you re-sign the result with your own key (and optionally rename the package with `rename/` so it installs side by side).
+4. **Verify.** `scripts/verify_apk.sh` checks the output offline, on its own or against the stock APK. The patcher never signs: you re-sign the result with your own key (and optionally rename the package with `rename/` so it installs side by side; upstream builds also rename the package and bypass signature checks, see [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md)).
 
 Further runtime layers in the maintainer builds: segment-locked multilingual dictation (V28), Bangla spelling normalization with a 2,265-pair roman-to-script table (V29), and a loanword spelling table built from the CMU Pronouncing Dictionary plus reviewed overrides (V29.3, see `data/loanspell/`). The full pipeline, runtime policy and CI design are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -139,11 +139,11 @@ scripts/verify_apk.sh compare /path/to/stock.apk /path/to/out.apk
 
 The patcher would rather do nothing than guess.
 
-- **Exact build or nothing.** Any fingerprint, anchor or dataflow miss prints `FAIL-CLOSED ABORT: ...`, exits with status 2 and writes no output APK. A Python error exits 1, also with no output.
+- **Exact build or nothing.** Any fingerprint, anchor or dataflow miss prints `FAIL-CLOSED ABORT: ...`, exits with status 2 and writes no output APK. An uncaught Python error exits 1: if it happens during the final repack (for example a mistyped `--extension-dex` path), delete any partial `--out` file and run again.
 - **No double patching.** An APK that already references the runtime is refused, so a patch cannot be applied twice.
-- **Hash-only profile.** The fingerprint profile stores SHA-256 hashes, never Google's strings.
+- **Hash-based profile.** The fingerprint profile stores SHA-256 hashes plus short identifying fragments, never the full prompt text.
 - **Minimal footprint.** Two hook calls in one method plus one extra DEX. The stock rule string is kept as the fail-safe input.
-- **Never signs, never uploads.** The patcher and `verify_apk.sh` run offline; you sign with your own key. Only `bootstrap_tools.sh` touches the network, and it checks each download's SHA-256.
+- **Never signs, never uploads.** The patcher and `verify_apk.sh` run offline; you sign with your own key. Only the setup steps touch the network: `bootstrap_tools.sh` checks each download's SHA-256, and `pip` installs the pinned `androguard==4.1.4`.
 - **Tested refusals.** CI asserts the refusals too (static suite stage 4), not just the happy path.
 
 ### Privacy
@@ -151,7 +151,7 @@ The patcher would rather do nothing than guess.
 - **No network code in the patch layer.** The runtime sources in `extension-src/` use no networking APIs.
 - **No new data collection.** Diagnostics are off by default. When turned on, the log is written to the phone's Downloads folder and stays there unless you share it.
 - **Sensitive fields pass through.** Password and other sensitive input fields are meant to be left untouched. Any case where conversion runs in one is a security bug (see [`SECURITY.md`](SECURITY.md)).
-- **On-device path only.** Bangla is not on Google's list of languages for cloud rewrite, so Rambler only changes the on-device cleanup path. This project does not audit Gboard's own network behaviour.
+- **On-device path only.** Bangla is not on Google's list of languages for cloud rewrite, so Rambler only changes the on-device cleanup path. It does not add Bangla to Google's cloud service, and this project does not audit Gboard's own network behaviour.
 
 ## Layouts and settings
 
@@ -172,14 +172,14 @@ Gboard's combined "EN · BN" keyboard reports itself as English (US), so it beha
 
 Design intent, not re-verified on a current device. Both switches are in the keyboard's settings, in the Rambler section.
 
-- **Bangla script correction** (on by default). Off means Rambler converts nothing, for voice or typing, and you get Gboard's own output unchanged. Useful if you prefer Romanized Bangla, or to tell whether an odd result comes from Rambler or from Gboard.
+- **Bangla script correction** (on by default). On, Rambler converts Romanized Bangla to Bangla script, applies the loanword spellings and follows the per-layout rules above. Off means Rambler converts nothing, for voice or typing, and you get Gboard's own output unchanged. Useful if you prefer Romanized Bangla, or to tell whether an odd result comes from Rambler or from Gboard.
 - **Rambler diagnostics** (off by default). Turn it on only to report a problem, reproduce it, then turn it off: a log is saved to Downloads as `RamblerBangla-diag-<date>-<time>.txt`. It records the active layout and the text before and after each conversion, so read it before you share it. Not yet re-audited for the current build.
 
 ## Source only, no APKs
 
 This repository is **source only and publishes no APKs**, now or later. A patched keyboard contains Google's proprietary Gboard code, which is not licensed for redistribution. You apply the patch to a Gboard 18.3.1 APK you obtain yourself, for your own device, and sign it with your own key. Releases such as [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4) are tagged source plus notes.
 
-**Legal note.** Rambler Bangla is an independent project and is **not affiliated with Google**, nor endorsed or sponsored by it. Gboard is a trademark of Google LLC, used here only to name the app the patch targets. The repository contains no Google binaries, keys, model files or verbatim strings (fingerprints are hashes). Modifying software you use may be restricted by its terms of service or by the law where you live; checking that is your responsibility, and the software comes with no warranty (GPL-3.0, sections 15 and 16). Never upload a patched Google APK, a signing key or private diagnostic output to this repository. The full review is in [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md).
+**Legal note.** Rambler Bangla is an independent project and is **not affiliated with Google**, nor endorsed or sponsored by it. Gboard is a trademark of Google LLC, used here only to name the app the patch targets. The repository contains no Google binaries, keys, model files or full prompt text: the profile holds SHA-256 hashes plus short identifying fragments. Modifying software you use may be restricted by its terms of service or by the law where you live; checking that is your responsibility, and the software comes with no warranty (GPL-3.0, sections 15 and 16). Never upload a patched Google APK, a signing key or private diagnostic output to this repository. The full review is in [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md).
 
 ## FAQ
 
@@ -214,9 +214,9 @@ Turn off **Bangla script correction** and try again. If the result is the same, 
 
 ### Released
 
-- **V29.4.1 (2026-10-21):** docs only, this README and the website refresh. No code changes.
-- **V29.4 (2026-10-18)**, tag [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4): source release and new maintainer signing key; no conversion changes. Notes: [`docs/V29.4-RELEASE-NOTES.md`](docs/V29.4-RELEASE-NOTES.md). Build record: [`ledger/v29.4-provenance.md`](ledger/v29.4-provenance.md).
-- **V29.3 (2026-09-24)**, tag [v29.3](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3): one language per sentence in multilingual dictation, English loanword spelling in Bangla voice output. Notes: [`docs/V29.3-RELEASE-NOTES.md`](docs/V29.3-RELEASE-NOTES.md).
+- **V29.4.1 (2026-10-21, docs only, untagged):** this README and the website refresh. No code changes.
+- **V29.4 (2026-10-18)**, tag [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4): source release and new maintainer signing key; no conversion changes. Builds signed with the new key cannot install over a V29.3 build: uninstall once first. Notes: [`docs/V29.4-RELEASE-NOTES.md`](docs/V29.4-RELEASE-NOTES.md). Build record: [`ledger/v29.4-provenance.md`](ledger/v29.4-provenance.md).
+- **V29.3 (2026-09-24)**, tag [v29.3](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3): one language per sentence in multilingual dictation, English loanword spelling in Bangla voice output. Notes: [`docs/V29.3-RELEASE-NOTES.md`](docs/V29.3-RELEASE-NOTES.md). Build record: [`ledger/v29.3-provenance.md`](ledger/v29.3-provenance.md).
 - **V29 (2026-09-23):** field iteration. Design: [`docs/V29-DESIGN.md`](docs/V29-DESIGN.md), fixtures: [`docs/V29-FIXTURES.md`](docs/V29-FIXTURES.md).
 - **v28d:** last stable baseline (historical). Evidence: [`docs/V28-SEGMENT-LOCK.md`](docs/V28-SEGMENT-LOCK.md).
 
@@ -261,7 +261,7 @@ These are planned or in progress and **not working yet**.
 ```
 extension-src/        Java policy runtime (pure Java, no Android deps) + V29.x helpers
 standalone-patcher/   dex_patch.py: fingerprint/dataflow-anchored smali patcher
-fingerprints/         gboard-18.3.1.json fail-closed profile (hashes only)
+fingerprints/         gboard-18.3.1.json fail-closed profile (hashes and short fragments)
 fixtures/             synthetic APK fixture (smali sources, manifest, build script)
 tests/                run_tests.sh static suite, python/ unit tests, Java policy test, v29.3 corpus
 scripts/              bootstrap_tools.sh, verify_apk.sh, clip_e2e.py (emulator driver)

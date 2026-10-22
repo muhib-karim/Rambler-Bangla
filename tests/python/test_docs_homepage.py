@@ -25,6 +25,20 @@ def headings(markdown):
     return [m.group(1).strip() for m in re.finditer(r"^#{2,3} +(.+)$", markdown, re.M)]
 
 
+def github_slug(heading):
+    """Anchor GitHub generates for a Markdown heading."""
+    slug = re.sub(r"[^\w\- ]", "", heading.strip().lower())
+    return slug.replace(" ", "-")
+
+
+def css_tokens(html):
+    """First definition of each --token: #hex in the page (later overrides ignored)."""
+    tokens = {}
+    for name, value in re.findall(r"--([a-z-]+):\s*(#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\b)", html):
+        tokens.setdefault(name, value)
+    return tokens
+
+
 def relative_luminance(hex_colour):
     hex_colour = hex_colour.lstrip("#")
     if len(hex_colour) == 3:
@@ -98,10 +112,15 @@ class ReadmeHomepageTests(unittest.TestCase):
         self.assertNotRegex(self.text, r"[Ll]atest (tagged )?release[^\n]*v29\.3\b")
 
     def test_relative_links_resolve(self):
+        slugs = {github_slug(h) for h in headings(self.text)}
         missing = []
         for target in re.findall(r"\]\(([^)\s]+)\)|(?:href|src)=\"([^\"]+)\"", self.text):
             link = next(t for t in target if t)
-            if link.startswith(("http://", "https://", "#", "mailto:")):
+            if link.startswith("#"):
+                if link[1:] not in slugs:
+                    missing.append(link)
+                continue
+            if link.startswith(("http://", "https://", "mailto:")):
                 continue
             path = link.split("#", 1)[0]
             if path and not os.path.exists(os.path.join(ROOT, path)):
@@ -130,8 +149,8 @@ class PagesSiteTests(unittest.TestCase):
         for tag, attrs in self.tags:
             if tag == "script":
                 self.fail("the site must not load any script")
-            if tag == "link" and attrs.get("rel") == "stylesheet":
-                self.fail("the site must not load an external stylesheet")
+            if tag == "link" and attrs.get("href", "").startswith(("http://", "https://", "//")):
+                self.fail(f"remote <link> would leak visits: {attrs.get('href')}")
             if tag in ("img", "iframe", "source"):
                 src = attrs.get("src", "")
                 self.assertFalse(src.startswith(("http://", "https://", "//")),
@@ -139,9 +158,10 @@ class PagesSiteTests(unittest.TestCase):
         for tracker in ("google-analytics", "googletagmanager", "gtag(", "plausible",
                         "matomo", "clarity.ms", "hotjar", "segment.io", "fonts.googleapis"):
             self.assertNotIn(tracker, self.html)
+        self.assertNotRegex(self.html, r"@import|url\(\s*['\"]?(https?:)?//")
 
     def test_colour_tokens_meet_wcag_aa(self):
-        tokens = dict(re.findall(r"--([a-z-]+):\s*(#[0-9A-Fa-f]{3,6})", self.html))
+        tokens = css_tokens(self.html)
         for fg, bg in (("text", "bg"), ("muted", "bg"), ("accent", "bg"),
                        ("text", "surface"), ("muted", "surface"), ("on-accent", "accent")):
             self.assertIn(fg, tokens)
