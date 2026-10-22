@@ -34,6 +34,7 @@ change it. The project overview is in the [repository README](../README.md).
 
 | Document | What it covers |
 | --- | --- |
+| [V29.4-RELEASE-NOTES.md](V29.4-RELEASE-NOTES.md) | V29.4 release notes (tag `v29.4`): source release and new maintainer signing key |
 | [V29.3-RELEASE-NOTES.md](V29.3-RELEASE-NOTES.md) | V29.3 release notes (tag `v29.3`) |
 | [releases/v29.3-notes-revised-DRAFT.md](releases/v29.3-notes-revised-DRAFT.md) | Draft revised wording for the V29.3 notes |
 

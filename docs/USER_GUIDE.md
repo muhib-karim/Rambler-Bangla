@@ -230,7 +230,7 @@ Two switches live in the keyboard settings, in the Rambler section:
 | --- | --- | --- |
 | `dex_patch.py` | `0` | `analyze` printed its report, or `patch` wrote the output APK. |
 | `dex_patch.py` | `2` | Fail-closed abort (`FAIL-CLOSED ABORT: ...` on stderr). No output APK is written. Also returned for invalid arguments, for example `patch` without `--out`. |
-| `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. No output APK is written. |
+| `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. Errors before the final repack write no output APK; an error during the repack (for example a mistyped `--extension-dex` path) can leave a partial `--out` file, so delete it and run again. |
 | `verify_apk.sh` | `1` | `single`: the APK failed the zip integrity check (`zip CORRUPT`). |
 | `verify_apk.sh` | `2` | Unknown subcommand; the usage line is printed. |
 | `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. |
