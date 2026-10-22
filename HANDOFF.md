@@ -42,3 +42,11 @@ every binary asset. `git diff --stat origin/main..HEAD` lists only docs, the new
 ## CI runs
 
 `ci.yml` and `tests.yml` trigger on pull requests and pushes to `main` only, so they were dispatched on this branch.
+
+| Head | Workflow | Run | Result |
+| --- | --- | --- | --- |
+| `acb57fb` | CI (`ci.yml`, checkout v7, setup-python v7, setup-java v6) | 39732633550 | success: "Ran 40 tests", "TEST SUITE: 17 passed, 0 failed" |
+| `acb57fb` | Static test suite (`tests.yml`) | 39732636153 | success |
+
+The final head (this commit, which only records these runs) was dispatched the same way; check it with
+`gh run list --branch docs/readme-refresh`. Pages returned HTTP 200 after the push (it still serves `main`).

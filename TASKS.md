@@ -13,7 +13,7 @@ no APKs or binaries. The coordinator opens and merges the PR.
 | 4 | Pages landing page restyle to match (mobile-first, contrast, no trackers) | `docs(site): restyle landing page` | done |
 | 5 | Dependabot action bumps in `ci.yml` | `ci: bump checkout 7, setup-python 7, setup-java 6` | done |
 | 6 | CHANGELOG [29.4.1], SKILLS_USED.md, HANDOFF.md, this file | `docs: v29.4.1 changelog, skills and handoff` | done |
-| 7 | Push via the gated push script, CI green on the head, Pages 200 | — | in progress |
+| 7 | Push via the gated push script, CI green on the head, Pages 200 | — | done (CI green on `acb57fb`: runs 39732633550, 39732636153) |
 
 ## Dependabot PRs
 
@@ -24,7 +24,8 @@ no APKs or binaries. The coordinator opens and merges the PR.
 | #17 | `actions/setup-python` 5 to 7 (ci.yml) | green | applied |
 
 `ci.yml` and `tests.yml` run on pull requests and pushes to `main`, not on branch pushes, so their runs on this
-branch are started with `workflow_dispatch`. The bumps stay only if those runs are green.
+branch are started with `workflow_dispatch`. The bumps stay only if those runs are green: they were (run 39732633550 used checkout v7, setup-python v7 and
+setup-java v6).
 
 ## Review
 
