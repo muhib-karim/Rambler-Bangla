@@ -3,6 +3,21 @@
 Which coding-agent skill drove which change, per release. Skills are reusable instruction packs for the agent;
 none of them ships code into this repository.
 
+## V29.5
+
+Clipboard Recent | History (branch `feature/clipboard-history`). A stopped earlier attempt left two local draft
+commits; this session reviewed them against the rc4 disassembly, fixed them and squashed them.
+
+| Skill or practice | Application |
+| --- | --- |
+| Plan mode (Claude Code) | Read the task and addendum, traced the stock clipboard path and layouts in the disassembly, and wrote the plan before any edit. The task authorised execution after planning. |
+| Test-driven development (practice, skill not loaded) | Red then green for the store/pin/policy harness (compile red on the new API) and for the hook-target guard (missing method, plus the stale `beginCapture` hook caught by the profile test). |
+| `verification-before-completion` (loaded) | Every claim in HANDOFF and the PR comes from a command run in this session: unit suite, real build, independent baksmali diff of the output, dex ref counts, zipalign, badging diff, throwaway-key `apksigner verify`, gitleaks and CI. |
+| Fresh-context code review (subagent) | A read-only reviewer with no prior context checked crash safety, privacy, lifecycle and build guards on the full diff. Findings and fixes are in the PR description. |
+| `git-workflow-and-versioning` (practice) | Dedicated feature branch, never pushed before the squash, small logical commits, secret scan, PR only. No merge or release. |
+
+No skill wrote code into the repository. No Google code, APK, dex or key was committed.
+
 ## v29.4.1
 
 Docs-only README and homepage refresh (branch `docs/readme-refresh`).
