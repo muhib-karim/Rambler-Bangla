@@ -36,3 +36,4 @@ long-press Pin/Unpin/Delete, persistent, sensitive clips skipped) on the dedicat
 - 2026-10-22 06:14Z claude-opus-5-5: pushed, CI green on acb57fb with bumped actions; handoff recorded. Next: coordinator PR + merge.
 - 2026-10-23 18:12Z Codex: store, bridge/UI and guarded build drafted (local only); stopped before review.
 - 2026-10-23 19:05Z claude-opus-5-5: reviewed the draft against the rc4 disassembly, fixed capture/UI/store/build defects, added pins, built and verified the APK, rewrote docs. Next: PR + CI.
+- 2026-10-23 19:20Z claude-opus-5-5: PR #20 open, CI green; fixed Codex P2 (private window now monotonic), rebuilt and re-verified APK f416f7d4. Next: coordinator signs + device checklist.

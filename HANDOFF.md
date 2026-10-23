@@ -46,7 +46,7 @@ A clip is recorded only if all of these hold:
 - If an editor session is active, it is not a password field and not `IME_FLAG_NO_PERSONALIZED_LEARNING`.
 - No private session (one of those editors, or Gboard incognito) was running at the clip's timestamp, give or take
   1 s. This still holds if focus moved on before the read was handled. Private sessions less than 20 s apart count
-  as one.
+  as one. The window runs on the monotonic clock, so changing the wall clock can't move a copy out of it.
 - It is a live copy: the clip timestamp is within 10 s of now. A re-read when the process restarts can't import a clip
   copied earlier, for example while incognito.
 - It is plain text from `ClipData.Item.getText()`, between 1 and 32,768 characters. URIs, HTML and images are never
@@ -79,11 +79,11 @@ Java step at a time, `-Xmx2g`; the script waits for 3 GiB free.
 
 - `python3 -m unittest discover -s tests/python`: 49 tests, OK, including the JVM store and policy harness.
 - A real build from rc4 (SHA-256 `d834ee67…cd2c`) exited 0. The output APK's SHA-256 is
-  `e94fdc9abf8bac093d0636e6ed5a5b66996f8d6e19d31213a7847ea34a7175fd`. Then, checked independently:
+  `f416f7d462c9fb2571c5a4fd6847fd70c8bcad9e16fb9d3c0ef7e884644f118a`. Then, checked independently:
   - baksmali of the output's classes2/3 against the base: same class sets, and only `aeij`, `kvk` and
     `ClipboardKeyboard` differ, by the seven hook lines plus label renumbering;
   - classes6 holds only the 25 runtime classes;
-  - method refs: classes2 64,595, classes3 62,801, classes6 286;
+  - method refs: classes2 64,595, classes3 62,801, classes6 287;
   - `zipalign -c -P 16 4` passes and `aapt2 dump badging` is identical to the base;
   - a throwaway debug-signed copy passes `apksigner verify` (key and copy deleted).
 - The static suite runs in CI (shared-machine rule).
