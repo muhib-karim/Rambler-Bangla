@@ -216,25 +216,41 @@ public final class ClipHistoryStoreTest {
         check(!ClipHistoryPolicy.fresh(0, 5_000));
 
         // A copy made during a private session is refused even if focus left before the read was handled.
+        // The window runs on the monotonic clock; w(e) is the wall time when nothing moved the clock.
         ClipHistoryPolicy.PrivateWindow window = new ClipHistoryPolicy.PrivateWindow();
-        check(!window.covers(1_000));
+        check(!window.covers(w(1_000), w(1_000), 1_000));
         window.enter(10_000);
-        check(window.covers(9_000) && window.covers(50_000) && !window.covers(8_999));
+        check(window.covers(w(9_000), w(9_500), 9_500) && window.covers(w(50_000), w(50_000), 50_000));
+        check(!window.covers(w(8_999), w(9_500), 9_500));
         window.leave(12_000);
-        check(window.covers(12_000) && window.covers(13_000) && !window.covers(13_001));
+        check(window.covers(w(12_000), w(12_100), 12_100) && window.covers(w(13_000), w(13_100), 13_100));
+        check(!window.covers(w(13_001), w(13_100), 13_100));
         window.leave(14_000);
-        check(!window.covers(13_500));
+        check(!window.covers(w(13_500), w(14_100), 14_100));
         // Private sessions close together merge, so a short normal gap between them is refused too.
         window.enter(20_000);
-        check(window.covers(9_500) && window.covers(16_000));
+        check(window.covers(w(9_500), w(20_100), 20_100) && window.covers(w(16_000), w(20_100), 20_100));
         window.leave(21_000);
         window.enter(60_000);
-        check(!window.covers(15_000) && window.covers(60_000));
+        check(!window.covers(w(15_000), w(60_100), 60_100) && window.covers(w(60_000), w(60_100), 60_100));
+        window.leave(61_000);
+        // The wall clock jumps back 50 s inside a private session: the copy still falls inside the window.
+        ClipHistoryPolicy.PrivateWindow jumped = new ClipHistoryPolicy.PrivateWindow();
+        long offset = 1_000_000;
+        jumped.enter(100_000);                    // wall 1_100_000
+        long back = offset - 50_000;              // from monotonic 101_000 on, wall = monotonic + back
+        long copy = 102_000 + back;               // copied at monotonic 102_000
+        jumped.leave(102_500);
+        check(jumped.covers(copy, 102_600 + back, 102_600));
+        check(!jumped.covers(104_000 + back, 104_100 + back, 104_100));
 
         check(ClipHistoryPolicy.sameClip(100, 100));
         check(!ClipHistoryPolicy.sameClip(100, 101));
         check(!ClipHistoryPolicy.sameClip(0, 0));
     }
+
+    /** Wall time for a monotonic time when the clock never moved. */
+    static long w(long elapsed) { return elapsed + 1_000_000; }
 
     static void privacy() throws Exception {
         ClassLoader loader = ClipHistoryStoreTest.class.getClassLoader();

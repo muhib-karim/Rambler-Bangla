@@ -38,6 +38,8 @@ public final class ClipHistoryPolicy {
     /**
      * When private editor sessions ran, so a copy made inside one is refused even if focus has moved on before the
      * clipboard read is handled. Sessions less than MERGE_MS apart are merged; the gap between them counts as private.
+     * Kept on the monotonic clock (elapsedRealtime), so a wall-clock change cannot move a copy out of the window;
+     * the clip's wall timestamp is mapped with the current wall/monotonic offset, read moments after the copy.
      * Main thread only.
      */
     public static final class PrivateWindow {
@@ -47,19 +49,20 @@ public final class ClipHistoryPolicy {
         private long end = -1;
         private boolean open;
 
-        public void enter(long now) {
-            if (!open && (start < 0 || now - end > MERGE_MS)) start = now;
+        public void enter(long elapsed) {
+            if (!open && (start < 0 || elapsed - end > MERGE_MS)) start = elapsed;
             open = true;
         }
 
-        public void leave(long now) {
+        public void leave(long elapsed) {
             if (!open) return;
             open = false;
-            end = now;
+            end = elapsed;
         }
 
-        public boolean covers(long clipTimestamp) {
-            return start >= 0 && clipTimestamp >= start - SLACK_MS && (open || clipTimestamp <= end + SLACK_MS);
+        public boolean covers(long clipWall, long nowWall, long nowElapsed) {
+            long clip = clipWall - (nowWall - nowElapsed);
+            return start >= 0 && clip >= start - SLACK_MS && (open || clip <= end + SLACK_MS);
         }
     }
 

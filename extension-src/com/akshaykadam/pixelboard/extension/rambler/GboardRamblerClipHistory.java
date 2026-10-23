@@ -7,6 +7,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
+import android.os.SystemClock;
 import android.os.UserManager;
 import android.util.AtomicFile;
 import android.view.View;
@@ -44,20 +45,20 @@ public final class GboardRamblerClipHistory {
     public static void start(InputMethodService service, EditorInfo info) {
         try {
             ime = new WeakReference<>(service);
-            long now = System.currentTimeMillis();
+            long now = SystemClock.elapsedRealtime();
             boolean privateSession = info == null
                     || ClipHistoryPolicy.privateEditor(info.inputType, info.imeOptions) || incognito(service);
             if (privateSession) PRIVATE.enter(now); else PRIVATE.leave(now);
             if (panel.get() != null && (privateSession || !showable(service))) closePanel();
         } catch (Throwable ignored) {
-            try { PRIVATE.enter(System.currentTimeMillis()); } catch (Throwable alsoIgnored) { /* fail closed */ }
+            try { PRIVATE.enter(SystemClock.elapsedRealtime()); } catch (Throwable alsoIgnored) { /* fail closed */ }
             closePanel();
         }
     }
 
     /** onFinishInput and onDestroy entry (main thread). */
     public static void finish() {
-        try { ime = new WeakReference<>(null); PRIVATE.leave(System.currentTimeMillis()); closePanel(); }
+        try { ime = new WeakReference<>(null); PRIVATE.leave(SystemClock.elapsedRealtime()); closePanel(); }
         catch (Throwable ignored) { closePanel(); }
     }
 
@@ -91,7 +92,7 @@ public final class GboardRamblerClipHistory {
                     EditorInfo info = started ? service.getCurrentInputEditorInfo() : null;
                     if (started && info == null) return;
                     // Copied while a private session ran, even if focus moved on before this read was handled.
-                    if (PRIVATE.covers(timestamp)) return;
+                    if (PRIVATE.covers(timestamp, System.currentTimeMillis(), SystemClock.elapsedRealtime())) return;
                     if (!ClipHistoryPolicy.recordClip(started, started ? info.inputType : 0,
                             started ? info.imeOptions : 0, enabled, ClipHistoryGboardPrivacy.incognito(loader),
                             sensitive, masked)) return;
