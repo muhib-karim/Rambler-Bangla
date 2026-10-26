@@ -51,7 +51,6 @@ Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into L
 | **Bangla and English together** | One language per sentence on the multilingual layout (abc → বাংলা) | 292-case host corpus. Confirmed on a real device, with a few misses in quick mid-sentence switches |
 | **Real Bangla spellings for English words** | কোম্পানি, টেলিভিশন, বার্লিন instead of letter-by-letter output, from a CMU-derived table plus reviewed overrides | Blind check: 85 of 200 exact (historical), so expect misses |
 | **Protected text** | #hashtags, @handles, links, emails and times stay in Latin letters | Checked in the V29.3 test corpus |
-| **Clipboard Recent / History (V29.5)** | A Recent \| History toggle in the clipboard panel: up to 50 unique text clips kept across restarts, newest first, plus up to 10 pinned. Tap pastes; long-press pins or deletes. Sensitive clips, password fields and incognito are skipped | Static and host-tested only; on-device testing pending. See [HANDOFF.md](HANDOFF.md) |
 | **Settings you control** | Bangla script correction switch (on by default) and opt-in diagnostics (off by default) | Design intent, see [Settings](#settings) |
 | **Own package id** | Installs beside the stock keyboard; updates signed with the same key install in place | [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md) |
 
