@@ -23,6 +23,8 @@ jobs:
         run: python3 -m unittest discover -s tests/python -v
       - name: Self-test the static-suite pass gate
         run: bash .github/scripts/ci_gate_selftest.sh
+      - name: Self-test the APK URL allowlist
+        run: bash .github/scripts/url_allowlist_selftest.sh
 
   static-suite:
     name: Static suite (fixture build + patch + fail-closed checks)

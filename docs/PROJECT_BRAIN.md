@@ -7,8 +7,10 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Status
 
-- Branch `tab/production-grade` holds a production-grade pass: 11 commits on
-  top of `main`, **not pushed**. Nothing on it has run in GitHub Actions yet.
+- Branch `tab/production-grade` holds a production-grade pass and is open as
+  PR #23. The maintainer reported CI green on its first 11 commits
+  (2026-11-10). The APK URL allowlist fix made after review is committed
+  locally and **not pushed**.
 - What the pass changed:
   - CI pass gate for the static suite (`set -euo pipefail` plus the exact
     `TEST SUITE: N passed, 0 failed` line), with
@@ -19,31 +21,32 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
   - `scripts/verify_apk.sh single` exits 1 on a failed signature, a `MISSING`
     fingerprint or a `NOT FOUND` method, and accepts only `--profile <file>`.
   - `scripts/bootstrap_tools.sh` deletes partial or mismatched downloads.
-  - `ci.yml` actions pinned by commit SHA; the onboarding probe validates the
-    APK URL like the other emulator workflows.
-- Checked locally: 66 Python unit tests and the gate self-test pass.
+  - `ci.yml` actions pinned by commit SHA.
+  - `android-smoke.yml`, `clipboard-e2e.yml` and
+    `keyboard-onboarding-probe.yml` share one APK URL check: https only, and
+    the allowlist is matched against the real host (authority without
+    userinfo or port). `.github/scripts/url_allowlist_selftest.sh` runs that
+    block from the workflows and fails if the three copies differ; the `unit`
+    job runs it.
+- Checked locally: 66 Python unit tests and both self-tests pass.
   `verify_apk.sh` and `bootstrap_tools.sh` were exercised with stubs only.
-- **Not** checked locally: the static suite (`tests/run_tests.sh`), which
-  `AGENTS.md` reserves for CI. The patcher changes first meet a real
-  smali/baksmali round trip when this branch runs in CI.
+- The static suite (`tests/run_tests.sh`) is never run locally; `AGENTS.md`
+  reserves it for CI.
 - `README.md` quotes the number of Python unit tests, and
   `tests/python/test_docs_homepage.py` fails if it is wrong. Update the number
   whenever a test is added or removed.
 
 ## Next step
 
-1. Push `tab/production-grade` and open the pull request(s). The three
-   `patcher:` commits belong in their own reviewed PR (`AGENTS.md`). Confirm the
-   static suite is green there before merging anything.
+1. Push the allowlist fix to PR #23 and confirm CI is green again, including
+   the new self-test step. `AGENTS.md` asks for patcher changes in their own
+   reviewed PR; PR #23 carries the three `patcher:` commits with the rest, so
+   split them out if the reviewer wants that.
 2. Follow-ups found during the pass, none started:
    - **guava bump** in the pinned toolchain. Skipped because
      `tools-src/toolchain.sha256` must be re-pinned against real downloads
      (`UPDATE_SHA=1 bash scripts/bootstrap_tools.sh`) and the static suite
      re-run.
-   - **APK URL allowlist gap** in `android-smoke.yml`, `clipboard-e2e.yml` and
-     `keyboard-onboarding-probe.yml`: the host is cut at the first `/` only, so
-     `https://storeX.example?x=.gofile.io` matches `store*.gofile.io`. Cut at
-     `/`, `?` and `#` in all three together. The SHA-256 check still applies.
    - **No automated test runs `verify_apk.sh`.** Add a fixture run to the
      static suite; that changes the "17 checks" count quoted in `README.md`,
      `CONTRIBUTING.md` and `docs/RELEASING.md`.
@@ -62,3 +65,6 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
   baseline, `bootstrap_tools.sh` download handling, `ci.yml` SHA pins and
   self-test step, onboarding-probe URL allowlist, README known limitations,
   user-guide environment variables, this file. Not pushed.
+- 2026-11-10: After review on PR #23, fixed the APK URL host parsing in the
+  three emulator workflows and added `url_allowlist_selftest.sh` (1 commit).
+  Not pushed.
