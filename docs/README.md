@@ -12,6 +12,7 @@ change it. The project overview is in the [repository README](../README.md).
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Patcher pipeline (fingerprints, anchors, dataflow, smali patch, verify), the Java policy runtime, `extension-src`, and the CI suite with its synthetic APK |
 | [RELEASING.md](RELEASING.md) | Versioning, changelog, release notes, tags, the GitHub Release, fingerprint updates and signing policy |
 | [SIDE-BY-SIDE.md](SIDE-BY-SIDE.md) | The package rename that lets a build install next to the stock keyboard, and its verification results |
+| [PROJECT_BRAIN.md](PROJECT_BRAIN.md) | Working memory for coding agents (see `AGENTS.md`): current status, next step and a session log |
 
 ## Evidence and validation
 
