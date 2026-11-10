@@ -70,6 +70,9 @@ def smali_class_path(class_type):
     return class_type.strip()[1:-1] + ".smali"
 
 
+UNICODE_ESC_RE = re.compile(r"[0-9a-fA-F]{4}")
+
+
 def smali_unescape(s):
     out = []
     i = 0
@@ -87,7 +90,13 @@ def smali_unescape(s):
         table = {"n": "\n", "r": "\r", "t": "\t", "b": "\b", "f": "\f",
                  "\\": "\\", '"': '"', "'": "'"}
         if e == "u":
-            out.append(chr(int(s[i:i + 4], 16)))
+            # Exactly four hex digits. int() alone would accept a short tail,
+            # a sign or underscores and decode the wrong character.
+            digits = s[i:i + 4]
+            if not UNICODE_ESC_RE.fullmatch(digits):
+                raise PatchError("malformed \\u escape in smali string: \\u%s"
+                                 % digits)
+            out.append(chr(int(digits, 16)))
             i += 4
         elif e in table:
             out.append(table[e])
@@ -111,15 +120,30 @@ INVOKE_RE = re.compile(
     r'^\s*invoke-\w+(?:/range)?\s*\{(?P<regs>[^}]*)\},\s*(?P<ref>\S+)\s*$')
 
 
+RANGE_RE = re.compile(
+    r'^\s*(?P<p0>[vp])(?P<n0>\d+)\s*\.\.\s*(?P<p1>[vp])(?P<n1>\d+)\s*$')
+
+
 def parse_invoke(line):
     m = INVOKE_RE.match(line)
     if not m:
         return None
-    regs = [r.strip() for r in m.group("regs").split(",") if r.strip()]
-    if ".." in m.group("regs"):
-        base, last = [r.strip() for r in m.group("regs").split("..")]
-        n0, n1 = int(base[1:]), int(last[1:])
-        regs = ["v%d" % n for n in range(n0, n1 + 1)]
+    body = m.group("regs")
+    if ".." in body:
+        # A range keeps its v/p prefix: {p1 .. p3} is p1,p2,p3, never v1..v3.
+        # A mixed range cannot be expanded without the method's register
+        # layout, so it aborts instead of guessing.
+        r = RANGE_RE.match(body)
+        if not r:
+            raise PatchError("malformed register range {%s}" % body.strip())
+        if r.group("p0") != r.group("p1"):
+            raise PatchError("mixed v/p register range {%s}" % body.strip())
+        n0, n1 = int(r.group("n0")), int(r.group("n1"))
+        if n1 < n0:
+            raise PatchError("descending register range {%s}" % body.strip())
+        regs = ["%s%d" % (r.group("p0"), n) for n in range(n0, n1 + 1)]
+    else:
+        regs = [x.strip() for x in body.split(",") if x.strip()]
     return regs, m.group("ref")
 
 
@@ -131,8 +155,8 @@ def method_bounds(lines, name, proto):
     start = None
     for i, line in enumerate(lines):
         if line.startswith(".method"):
-            sig = line.split(None, 1)[1].strip()
-            if sig.endswith(name + proto):
+            # Whole-token match: "d(...)V" must not match "xd(...)V".
+            if line.split()[-1] == name + proto:
                 if start is not None:
                     raise PatchError("duplicate method %s%s" % (name, proto))
                 start = i

@@ -44,6 +44,13 @@ class SmaliStringTests(unittest.TestCase):
         with self.assertRaises(dp.PatchError):
             dp.smali_unescape(r"\q")
 
+    def test_unescape_rejects_malformed_unicode(self):
+        # Short tail, non-hex, sign, underscore, nothing at all.
+        for bad in (r"\u12", r"\uZZZZ", r"\u+abc", r"\u1_23", "\\u"):
+            with self.subTest(bad=bad):
+                with self.assertRaises(dp.PatchError):
+                    dp.smali_unescape(bad)
+
     def test_parse_const_string(self):
         self.assertEqual(dp.parse_const_string('    const-string v1, "{ENABLED_LANGUAGES}"'),
                          ("v1", "{ENABLED_LANGUAGES}"))
@@ -65,6 +72,16 @@ class InvokeParseTests(unittest.TestCase):
     def test_parse_invoke_range(self):
         regs, _ = dp.parse_invoke("    invoke-static/range {v3 .. v5}, Lx;->y()V")
         self.assertEqual(regs, ["v3", "v4", "v5"])
+
+    def test_parse_invoke_range_keeps_param_prefix(self):
+        regs, _ = dp.parse_invoke("    invoke-virtual/range {p1 .. p3}, " + dp.STRING_REPLACE)
+        self.assertEqual(regs, ["p1", "p2", "p3"])
+
+    def test_parse_invoke_rejects_unresolvable_ranges(self):
+        for regs in ("v14 .. p1", "p0 .. v2", "v5 .. v3", "v3 .. ", "v3 .. v4 .. v5"):
+            with self.subTest(regs=regs):
+                with self.assertRaises(dp.PatchError):
+                    dp.parse_invoke("    invoke-static/range {%s}, Lx;->y()V" % regs)
 
     def test_parse_invoke_empty_and_non_invoke(self):
         self.assertEqual(dp.parse_invoke("    invoke-static {}, Lx;->y()V"), ([], "Lx;->y()V"))
@@ -118,6 +135,14 @@ class FixtureSmaliTests(unittest.TestCase):
     def test_method_bounds_missing(self):
         with self.assertRaises(dp.PatchError):
             dp.method_bounds(self.lines, "nope", "()V")
+
+    def test_method_bounds_matches_whole_method_token(self):
+        lines = [".method public static xd()V", ".end method",
+                 ".method public static d()V", ".end method"]
+        self.assertEqual(dp.method_bounds(lines, "d", "()V"), (2, 3))
+        # A longer name that merely ends with the target is not the target.
+        with self.assertRaises(dp.PatchError):
+            dp.method_bounds(lines[:2], "d", "()V")
 
     def test_find_enabled_languages_site(self):
         start, end = dp.method_bounds(self.lines, "d", CLEANUP_PROTO)
