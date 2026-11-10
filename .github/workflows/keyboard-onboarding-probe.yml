@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       apk_url:
-        description: "HTTPS URL for production APK"
+        description: "HTTPS URL for the production APK (host must be allowlisted)"
         required: true
         type: string
       expected_sha256:
@@ -25,15 +25,50 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Download verified APK
+      - name: Validate APK host and download APK
         env:
           APK_URL: ${{ inputs.apk_url }}
         shell: bash
         run: |
           set -euo pipefail
           test -n "$APK_URL"
-          curl -sS --fail --location --retry 3 --retry-all-errors --connect-timeout 30 --max-time 300 --output "$APK_PATH" "$APK_URL"
+          if [[ "$APK_URL" != https://* ]]; then
+            echo "APK URL must use https" >&2
+            exit 1
+          fi
+          host="${APK_URL#https://}"
+          host="${host%%/*}"
+          host="$(printf '%s' "$host" | tr 'A-Z' 'a-z')"
+          case "$host" in
+            litter.catbox.moe|catbox.moe|gofile.io|store*.gofile.io|tmpfiles.org)
+              echo "APK host allowlisted: $host"
+              ;;
+            *)
+              echo "APK host not allowlisted: $host" >&2
+              exit 1
+              ;;
+          esac
+          # tmpfiles.org page URLs do not serve the file directly; the page
+          # embeds a fresh /dl/ token link. Scrape it and download from this
+          # same runner so any token/IP binding is satisfied.
+          if [[ "$host" == "tmpfiles.org" ]]; then
+            dl="$(curl -sS --fail --location --connect-timeout 30 --max-time 60 "$APK_URL" \
+              | grep -oE 'https://tmpfiles\.org/dl/[^"]+' | head -n 1)"
+            if [[ -z "$dl" ]]; then
+              echo "No /dl/ link found on tmpfiles page" >&2
+              exit 1
+            fi
+            APK_URL="$dl"
+          fi
+          # Only the host is ever logged; the full URL stays out of the logs.
+          if ! curl -sS --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 30 --max-time 300 \
+              --output "$APK_PATH" "$APK_URL" 2>download.err; then
+            echo "Download failed from host: $host" >&2
+            exit 1
+          fi
           echo "$EXPECTED_SHA256  $APK_PATH" | sha256sum --check --strict
+          ls -lh "$APK_PATH"
       - name: Enable KVM
         shell: bash
         run: |
