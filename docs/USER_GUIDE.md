@@ -102,7 +102,8 @@ scripts/verify_apk.sh single /path/to/gboard-18.3.1.apk \
 
 Every `fingerprint` line should say `FOUND` and every `method` line should say
 `found in`. If anything says `MISSING` or `NOT FOUND`, this is not the profiled
-build and patching will refuse it.
+build and patching will refuse it; the script prints `profile check: FAILED`
+and exits 1.
 
 ## 4. Patch
 
@@ -149,6 +150,11 @@ scripts/verify_apk.sh compare /path/to/gboard-18.3.1.apk /path/to/rambler-unsign
 Expect one more DEX entry than the stock APK. After signing, `compare` reports a
 different signer; that is expected when the build is re-signed with a non-Google
 key.
+
+`single` exits 1 if the signature does not verify. The patcher output is
+unsigned, so on that file it prints `signature: FAILED` and exits 1 even when
+every other line is fine. Run it again on the signed APK from step 6 and expect
+exit 0.
 
 ## 6. Rename, sign and install on your own device
 
@@ -231,8 +237,9 @@ Two switches live in the keyboard settings, in the Rambler section:
 | `dex_patch.py` | `0` | `analyze` printed its report, or `patch` wrote the output APK. |
 | `dex_patch.py` | `2` | Fail-closed abort (`FAIL-CLOSED ABORT: ...` on stderr). No output APK is written. Also returned for invalid arguments, for example `patch` without `--out`. |
 | `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. No output APK is written: the output is built in a temporary file next to `--out` and renamed into place only on success. |
-| `verify_apk.sh` | `1` | `single`: the APK failed the zip integrity check (`zip CORRUPT`). |
-| `verify_apk.sh` | `2` | Unknown subcommand; the usage line is printed. |
+| `verify_apk.sh` | `0` | `single`: every check that ran passed. Signature verification is skipped, with a notice, when the apksig frontend has not been built. |
+| `verify_apk.sh` | `1` | `single`: the zip integrity check failed (`zip CORRUPT`), the signature did not verify (`signature: FAILED`), or the profile check found a `MISSING` fingerprint or a `NOT FOUND` method (`profile check: FAILED`). |
+| `verify_apk.sh` | `2` | Unknown subcommand, or `single` arguments other than `<apk>` or `<apk> --profile <file>`; the usage line is printed. |
 | `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. |
 
 ### Common fail-closed messages

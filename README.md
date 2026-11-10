@@ -130,6 +130,7 @@ python3 standalone-patcher/dex_patch.py patch \
   --profile fingerprints/gboard-18.3.1.json --extension-dex build/ext-dex/classes.dex
 
 # 4. Verify the output offline, alone or against the stock APK
+#    (single exits 1 until the APK is signed: the signature check is part of it)
 scripts/verify_apk.sh single /path/to/out.apk --profile fingerprints/gboard-18.3.1.json
 scripts/verify_apk.sh compare /path/to/stock.apk /path/to/out.apk
 ```
