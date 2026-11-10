@@ -243,11 +243,13 @@ Test builds 245 to 253 are private maintainer builds. Each claim carries its evi
 
 These are planned or in progress and **not working yet**.
 
-### Limitations
+### Known limitations
 
 - Supports exactly one target build, Gboard 18.3.1. Any other build is refused by design.
 - CI proves the patching pipeline on a synthetic fixture, not runtime behaviour inside real Gboard.
 - Loanword spelling is approximate.
+- The two V29.x sources in `extension-src/.../rambler/`, `GboardRamblerLoanSpell.java` and `GboardRamblerSentenceLang.java`, do not compile from this repository. They reference five classes that are not in it: `GboardRamblerDiag`, `GboardRamblerLoanTable`, `GboardRamblerScriptFix`, `GboardRamblerSegmentLock` and `GboardRamblerTier1`. `tests/v29.3/Golden.java` needs two of them as well. The Lite policy runtime in `extension-src/.../ramblerlite/`, which the patcher and CI use, is complete.
+- `rename/rename_apk.py` refers to a `rename_sign.sh` signing step. That script is not included; sign with your own key as described in the [user guide](docs/USER_GUIDE.md#sign-with-your-own-key).
 
 ## Tech stack and project structure
 

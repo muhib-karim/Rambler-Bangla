@@ -21,6 +21,7 @@ diagnostic logs to this repository. See [`LICENSING-AUDIT.md`](LICENSING-AUDIT.m
 - [5. Verify the output](#5-verify-the-output)
 - [6. Rename, sign and install on your own device](#6-rename-sign-and-install-on-your-own-device)
 - [Layouts and settings](#layouts-and-settings)
+- [Environment variables](#environment-variables)
 - [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
@@ -228,6 +229,25 @@ Two switches live in the keyboard settings, in the Rambler section:
   to Downloads. It records the active layout and the text before and after each
   conversion, and stays on your phone unless you share it. Read it before
   sharing.
+
+## Environment variables
+
+None of these has to be set by hand for the flow above: `source tools/tool-env.sh`
+exports `TOOLS_DIR` and `SMALI_CP`, and the rest have defaults.
+
+| Variable | Read by | Effect and default |
+| --- | --- | --- |
+| `TOOLS_DIR` | `bootstrap_tools.sh`, `tests/run_tests.sh`, `verify_apk.sh`, `fixtures/build_fixture.sh`, `clip_history_build.py` | Directory that holds the pinned toolchain. `bootstrap_tools.sh` and `clip_history_build.py` default to `<repo>/tools`; the others default to `./tools` relative to the current directory. `tool-env.sh` exports the absolute path. |
+| `SMALI_CP` | `dex_patch.py`, `rename_apk.py` (default for `--smali-cp`), `fixtures/build_fixture.sh`, `clip_history_build.py` | Classpath used to run smali and baksmali; set by `tool-env.sh`. Without it, `dex_patch.py` falls back to `java -jar` on `--baksmali-jar` / `--smali-jar`, which only works with fat jars (the pinned jars are not), `build_fixture.sh` rebuilds it from `smali.cp` in the tools directory, and `clip_history_build.py` stops. |
+| `BAKSMALI_JAR`, `SMALI_JAR` | `dex_patch.py` | Defaults for `--baksmali-jar` and `--smali-jar` (`tools/baksmali-2.5.2.jar`, `tools/smali-2.5.2.jar`). Used only when `SMALI_CP` is not set. |
+| `JAVA_HOME` | `dex_patch.py`, `rename_apk.py`, `verify_apk.sh`, `fixtures/build_fixture.sh` | The two Python tools run `$JAVA_HOME/bin/java` when it is set, otherwise `java` from `PATH`. The two shell scripts put `$JAVA_HOME/bin` first on `PATH`; when it is unset they use a `jdk-21*` directory inside the tools directory if one exists. `bootstrap_tools.sh` and `tests/run_tests.sh` use `javac` and `java` from `PATH`. |
+| `UPDATE_SHA` | `bootstrap_tools.sh` | `UPDATE_SHA=1` rewrites `tools-src/toolchain.sha256` from the downloaded files instead of checking them. For maintainers re-pinning the toolchain only. |
+| `ANDROID_HOME` / `ANDROID_SDK_ROOT` | `clip_history_build.py` | Android SDK root, searched for an API 32+ `android.jar` and for `zipalign`. |
+| `ANDROID_JAR` | `clip_history_build.py` | Explicit `android.jar` to compile against (API 32 or newer expected); skips the SDK search. |
+| `ZIPALIGN` | `clip_history_build.py` | Explicit `zipalign` binary. Otherwise `zipalign` on `PATH`, then one from the SDK's `build-tools/`. |
+| `R8_JAR` | `clip_history_build.py` | r8/d8 jar. Default: `r8-8.3.37.jar` in the tools directory. |
+| `CLIP_HISTORY_WORK_DIR` | `clip_history_build.py` | Parent directory for its temporary build directory; created if missing. Default: the system temp directory. |
+| `PACKAGE_NAME` | `scripts/clip_e2e.py` | Package id of the installed build the emulator driver controls. Default: `com.aidev2024.ramblerbangla`. |
 
 ## Troubleshooting
 
