@@ -4,14 +4,19 @@
 Needs only Python 3 (stdlib unittest): no JDK, toolchain or APK.
     python3 -m unittest discover -s tests/python -v
 """
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import unittest
+import zipfile
+from unittest import mock
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PATCHER = os.path.join(ROOT, "standalone-patcher", "dex_patch.py")
@@ -200,6 +205,101 @@ class PatchMethodTests(unittest.TestCase):
             dp.patch_method([], self.profile, {})
 
 
+class InputGuardTests(unittest.TestCase):
+    """Checks that run before the workdir is deleted or any tool starts."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = tmp.name
+
+    def file(self, name, data=None):
+        path = os.path.join(self.dir, name)
+        if data is not None:
+            with open(path, "wb") as fh:
+                fh.write(data)
+        return path
+
+    def test_extension_dex_accepts_none_and_a_dex_file(self):
+        dp.check_extension_dex(None)
+        dp.check_extension_dex(self.file("ok.dex", b"dex\n037\x00rest"))
+
+    def test_extension_dex_rejects_missing_directory_and_non_dex(self):
+        for bad in (self.file("absent.dex"), self.dir, "",
+                    self.file("zip.dex", b"PK\x03\x04"), self.file("empty.dex", b"")):
+            with self.subTest(path=bad):
+                with self.assertRaises(dp.PatchError):
+                    dp.check_extension_dex(bad)
+
+    def test_workdir_rejects_cwd_root_repo_home_and_their_ancestors(self):
+        home = os.path.join(self.dir, "home")
+        os.makedirs(home)
+        with mock.patch.dict(os.environ, {"HOME": home}):
+            # self.dir contains the fake home, so it is refused as an ancestor.
+            for bad in (".", "", "/", ROOT, os.path.join(ROOT, "tests", ".."),
+                        os.path.dirname(ROOT), home, self.dir):
+                with self.subTest(workdir=bad):
+                    with self.assertRaises(dp.PatchError):
+                        dp.check_workdir(bad)
+
+    def test_workdir_accepts_a_dedicated_scratch_directory(self):
+        dp.check_workdir(os.path.join(self.dir, "work"))
+        dp.check_workdir(os.path.join(ROOT, "build", "dex-patch-work"))
+
+
+class OutputApkTests(unittest.TestCase):
+    """write_output_apk on synthetic zips built here (no APK is committed)."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = tmp.name
+        self.apk = os.path.join(self.dir, "stock.apk")
+        with zipfile.ZipFile(self.apk, "w") as zf:
+            zf.writestr("AndroidManifest.xml", b"manifest")
+            zf.writestr("classes.dex", b"old dex")
+            zf.writestr("classes2.dex", b"other dex")
+        self.new_dex = self.file("patched-classes.dex", b"new dex")
+        self.ext = self.file("ext.dex", b"dex\n037\x00ext")
+        self.absent = os.path.join(self.dir, "absent.dex")
+        self.out = os.path.join(self.dir, "out.apk")
+
+    def file(self, name, data):
+        path = os.path.join(self.dir, name)
+        with open(path, "wb") as fh:
+            fh.write(data)
+        return path
+
+    def partials(self):
+        return [n for n in os.listdir(self.dir) if ".partial-" in n]
+
+    def test_success_swaps_the_dex_and_appends_the_extension(self):
+        dp.write_output_apk(self.apk, self.out, "classes.dex", self.new_dex,
+                            self.ext, "classes3.dex")
+        with zipfile.ZipFile(self.out) as zf:
+            entries = {n: zf.read(n) for n in zf.namelist()}
+        self.assertEqual(entries, {"AndroidManifest.xml": b"manifest",
+                                   "classes.dex": b"new dex",
+                                   "classes2.dex": b"other dex",
+                                   "classes3.dex": b"dex\n037\x00ext"})
+        self.assertEqual(self.partials(), [])
+
+    def test_failure_leaves_no_output_and_no_partial(self):
+        with self.assertRaises(OSError):
+            dp.write_output_apk(self.apk, self.out, "classes.dex", self.absent)
+        self.assertFalse(os.path.exists(self.out))
+        self.assertEqual(self.partials(), [])
+
+    def test_failure_keeps_an_existing_output_untouched(self):
+        self.file("out.apk", b"previous run")
+        with self.assertRaises(OSError):
+            dp.write_output_apk(self.apk, self.out, "classes.dex", self.new_dex,
+                                self.absent, "classes3.dex")
+        with open(self.out, "rb") as fh:
+            self.assertEqual(fh.read(), b"previous run")
+        self.assertEqual(self.partials(), [])
+
+
 class ProfileTests(unittest.TestCase):
     PROFILES = [os.path.join(ROOT, "fingerprints", "gboard-18.3.1.json"),
                 os.path.join(ROOT, "fixtures", "fixture-profile.json")]
@@ -228,9 +328,9 @@ class ProfileTests(unittest.TestCase):
 
 
 class CliTests(unittest.TestCase):
-    def run_cli(self, *args):
+    def run_cli(self, *args, env=None):
         return subprocess.run([sys.executable, PATCHER, *args],
-                              capture_output=True, text=True, timeout=60)
+                              capture_output=True, text=True, timeout=60, env=env)
 
     def test_help(self):
         proc = self.run_cli("--help")
@@ -240,6 +340,57 @@ class CliTests(unittest.TestCase):
 
     def test_missing_required_args(self):
         self.assertNotEqual(self.run_cli("analyze").returncode, 0)
+
+    def test_bad_extension_dex_aborts_before_any_work(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = os.path.join(tmp, "work")
+            os.makedirs(work)
+            sentinel = os.path.join(work, "keep")
+            open(sentinel, "w").close()
+            out = os.path.join(tmp, "out.apk")
+            proc = self.run_cli("patch", "--apk", os.path.join(tmp, "absent.apk"),
+                                "--out", out, "--profile", FIXTURE_PROFILE,
+                                "--workdir", work,
+                                "--extension-dex", os.path.join(tmp, "absent.dex"))
+            self.assertEqual(proc.returncode, 2)
+            self.assertIn("FAIL-CLOSED ABORT", proc.stderr)
+            self.assertTrue(os.path.exists(sentinel), "the workdir must not be wiped")
+            self.assertFalse(os.path.exists(out))
+
+    def test_workdir_that_is_home_is_refused_and_left_alone(self):
+        # HOME points at a temp dir, so a broken guard could only delete that.
+        with tempfile.TemporaryDirectory() as home:
+            sentinel = os.path.join(home, "keep")
+            open(sentinel, "w").close()
+            proc = self.run_cli("analyze", "--apk", os.path.join(home, "absent.apk"),
+                                "--profile", FIXTURE_PROFILE, "--workdir", home,
+                                env=dict(os.environ, HOME=home))
+            self.assertEqual(proc.returncode, 2)
+            self.assertIn("FAIL-CLOSED ABORT", proc.stderr)
+            self.assertTrue(os.path.exists(sentinel))
+
+    def test_main_patch_recreates_the_workdir_and_returns_zero(self):
+        # patch() itself needs the toolchain; here it is mocked to cover main().
+        with tempfile.TemporaryDirectory() as tmp:
+            work = os.path.join(tmp, "work")
+            os.makedirs(work)
+            stale = os.path.join(work, "stale")
+            open(stale, "w").close()
+            ext = os.path.join(tmp, "ext.dex")
+            with open(ext, "wb") as fh:
+                fh.write(b"dex\n037\x00")
+            out = os.path.join(tmp, "out.apk")
+            stdout = io.StringIO()
+            with mock.patch.object(dp, "patch", return_value={"out": out}) as fake, \
+                    contextlib.redirect_stdout(stdout):
+                rc = dp.main(["patch", "--apk", "in.apk", "--out", out,
+                              "--profile", FIXTURE_PROFILE, "--workdir", work,
+                              "--extension-dex", ext])
+            self.assertEqual(rc, 0)
+            fake.assert_called_once()
+            self.assertTrue(os.path.isdir(work))
+            self.assertFalse(os.path.exists(stale))
+            self.assertEqual(json.loads(stdout.getvalue()), {"out": out})
 
 
 class LoanspellDataTests(unittest.TestCase):

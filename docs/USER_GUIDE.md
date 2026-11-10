@@ -130,9 +130,9 @@ Options:
 
 | Option | Purpose |
 | --- | --- |
-| `--workdir DIR` | Scratch directory for the disassembly. It is **deleted and recreated** on every run, so point it at a dedicated empty directory. |
+| `--workdir DIR` | Scratch directory for the disassembly. It is **deleted and recreated** on every run, so point it at a dedicated empty directory. The patcher refuses the current directory, the repository root, your home directory and any directory that contains one of them (including `/`). |
 | `--baksmali-jar`, `--smali-jar` | Jar paths used only when `SMALI_CP` is not set. Defaults come from `BAKSMALI_JAR` / `SMALI_JAR` or `tools/`. |
-| `--extension-dex FILE` | Runtime DEX to append. Without it the hooks point at a class that is not in the APK. |
+| `--extension-dex FILE` | Runtime DEX to append. Without it the hooks point at a class that is not in the APK. It is checked before anything else runs: the path must be an existing DEX file. |
 
 ## 5. Verify the output
 
@@ -230,7 +230,7 @@ Two switches live in the keyboard settings, in the Rambler section:
 | --- | --- | --- |
 | `dex_patch.py` | `0` | `analyze` printed its report, or `patch` wrote the output APK. |
 | `dex_patch.py` | `2` | Fail-closed abort (`FAIL-CLOSED ABORT: ...` on stderr). No output APK is written. Also returned for invalid arguments, for example `patch` without `--out`. |
-| `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. Errors before the final repack write no output APK; an error during the repack (for example a mistyped `--extension-dex` path) can leave a partial `--out` file, so delete it and run again. |
+| `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. No output APK is written: the output is built in a temporary file next to `--out` and renamed into place only on success. |
 | `verify_apk.sh` | `1` | `single`: the APK failed the zip integrity check (`zip CORRUPT`). |
 | `verify_apk.sh` | `2` | Unknown subcommand; the usage line is printed. |
 | `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. |
@@ -245,6 +245,10 @@ Two switches live in the keyboard settings, in the Rambler section:
 | `method already references the extension runtime (already patched?)` | You passed an APK that was already patched. Start from the stock APK. |
 | `placeholder const-string ... not found in method` / `no String.replace using ...` | The dataflow check failed. The method body differs from what the profile expects. |
 | `stock override rule loads BEFORE the {ENABLED_LANGUAGES} substitution ...` | Control flow differs from the profiled build; the patcher refuses rather than guess. |
+| `--extension-dex ... is not a file` / `... is not a DEX file` | The runtime DEX path is wrong, or the file is not a DEX. Nothing was run. Build the runtime (step 2) and pass its `classes.dex`. |
+| `--workdir ... is or contains the ...` | Deleting that workdir would delete your current directory, the repository or your home directory. Use a dedicated scratch directory. |
+| `String.replace result register ... is also the enabled-languages register` | The method reuses the languages register for the result, so the value cannot be saved for the hooks. The method body differs from the profiled build. |
+| `malformed \u escape ...` / `malformed`, `mixed v/p` or `descending register range ...` | The disassembly contains smali the patcher cannot read with certainty. It aborts rather than guess. |
 | `command failed: ...` | smali or baksmali failed. Check that you ran `source tools/tool-env.sh` and that a JDK is on `PATH` or in `JAVA_HOME`. |
 
 ### Other problems

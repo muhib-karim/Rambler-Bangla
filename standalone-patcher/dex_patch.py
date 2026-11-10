@@ -33,6 +33,8 @@ RULE_HOOK = "selectHinglishOverrideRule"
 PROMPT_HOOK = "rewriteCleanupPromptScriptGate"
 STRING_REPLACE = ("Ljava/lang/String;->replace(Ljava/lang/CharSequence;"
                   "Ljava/lang/CharSequence;)Ljava/lang/String;")
+DEX_MAGIC = b"dex\n"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class PatchError(Exception):
@@ -430,8 +432,72 @@ def verify_prompt_owner(lines_by_class, profile):
                      % (fp, cls, name))
 
 
+def check_extension_dex(path):
+    """Abort before any work if the --extension-dex input is unusable."""
+    if path is None:
+        return
+    if not os.path.isfile(path):
+        raise PatchError("--extension-dex %s is not a file" % path)
+    try:
+        with open(path, "rb") as fh:
+            magic = fh.read(len(DEX_MAGIC))
+    except OSError as exc:
+        raise PatchError("--extension-dex %s cannot be read: %s" % (path, exc))
+    if magic != DEX_MAGIC:
+        raise PatchError("--extension-dex %s is not a DEX file" % path)
+
+
+def check_workdir(workdir):
+    """Refuse a scratch directory whose deletion would destroy something else.
+
+    The workdir is removed and recreated on every run, so it must not be the
+    current directory, the repository, the home directory, or any directory
+    that contains one of them ("/" contains all three)."""
+    wd = os.path.realpath(workdir)
+    prefix = wd.rstrip(os.sep) + os.sep
+    protected = (("current directory", os.getcwd()),
+                 ("repository root", REPO_ROOT),
+                 ("home directory", os.path.expanduser("~")))
+    for label, path in protected:
+        real = os.path.realpath(path)
+        if real == wd or real.startswith(prefix):
+            raise PatchError(
+                "--workdir %s is or contains the %s (%s). The workdir is "
+                "deleted on every run; use a dedicated scratch directory."
+                % (workdir, label, real))
+
+
+def write_output_apk(apk, out_apk, dex_name, new_dex, extension_dex=None,
+                     extension_name=None):
+    """Copy every entry of apk, swap in the patched dex and append the
+    extension dex. The result is built in a sibling temp file and renamed
+    over out_apk only on success, so a failed run never leaves a partial or
+    half-merged APK at the output path."""
+    tmp_out = "%s.partial-%d" % (out_apk, os.getpid())
+    try:
+        with zipfile.ZipFile(apk) as zin, \
+                zipfile.ZipFile(tmp_out, "w", zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                if item.filename == dex_name:
+                    with open(new_dex, "rb") as fh:
+                        zout.writestr(item.filename, fh.read())
+                else:
+                    zout.writestr(item, zin.read(item.filename))
+            if extension_dex is not None:
+                with open(extension_dex, "rb") as fh:
+                    zout.writestr(extension_name, fh.read())
+        os.replace(tmp_out, out_apk)
+    except BaseException:
+        try:
+            os.unlink(tmp_out)
+        except OSError:
+            pass
+        raise
+
+
 def patch(apk, out_apk, profile, workdir, baksmali_jar, smali_jar,
           extension_dex=None):
+    check_extension_dex(extension_dex)
     dexes = disassemble_all(apk, workdir, baksmali_jar)
 
     # 1. Fail-closed fingerprint sweep across the whole APK.
@@ -486,19 +552,8 @@ def patch(apk, out_apk, profile, workdir, baksmali_jar, smali_jar,
     run(smali_prefix("smali", smali_jar) + ["a", ddir, "-o", new_dex])
 
     # 6. Repack: copy every entry, swap the patched dex, append extension dex.
-    with zipfile.ZipFile(apk) as zin, \
-            zipfile.ZipFile(out_apk, "w", zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == dex_name:
-                with open(new_dex, "rb") as fh:
-                    zout.writestr(item.filename, fh.read())
-            else:
-                zout.writestr(item, zin.read(item.filename))
-        if extension_dex:
-            existing = [d for d, _ in dexes]
-            nxt = "classes%d.dex" % (len(existing) + 1)
-            with open(extension_dex, "rb") as fh:
-                zout.writestr(nxt, fh.read())
+    write_output_apk(apk, out_apk, dex_name, new_dex, extension_dex,
+                     "classes%d.dex" % (len(dexes) + 1))
     return {"patched_dex": dex_name, "out": out_apk,
             "extension_dex": extension_dex}
 
@@ -519,19 +574,24 @@ def main(argv=None):
     ap.add_argument("--extension-dex")
     args = ap.parse_args(argv)
 
-    profile = Profile(args.profile)
-    if os.path.isdir(args.workdir):
-        shutil.rmtree(args.workdir)
-    os.makedirs(args.workdir)
-
     try:
+        # Validate the inputs before the workdir is deleted or any tool runs.
+        if args.command == "patch":
+            if not args.out:
+                ap.error("patch requires --out")
+            check_extension_dex(args.extension_dex)
+        check_workdir(args.workdir)
+
+        profile = Profile(args.profile)
+        if os.path.isdir(args.workdir):
+            shutil.rmtree(args.workdir)
+        os.makedirs(args.workdir)
+
         if args.command == "analyze":
             report = analyze(args.apk, profile, args.workdir,
                              args.baksmali_jar)
             print(json.dumps(report, indent=2, ensure_ascii=False))
             return 0
-        if not args.out:
-            ap.error("patch requires --out")
         result = patch(args.apk, args.out, profile, args.workdir,
                        args.baksmali_jar, args.smali_jar,
                        args.extension_dex)
