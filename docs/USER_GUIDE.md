@@ -55,8 +55,9 @@ source tools/tool-env.sh
 `bootstrap_tools.sh` downloads smali, baksmali and dexlib2 2.5.2 with their
 dependencies, r8/d8 8.3.37, aapt2 8.3.0, apksig 8.3.0 and android.jar 4.1.1.4
 from Maven Central and Google's Maven repository. Every file is checked against
-[`tools-src/toolchain.sha256`](../tools-src/toolchain.sha256); a mismatch stops
-the script. It then builds the small signer/verifier from
+[`tools-src/toolchain.sha256`](../tools-src/toolchain.sha256); a mismatch
+deletes that file and stops the script, so the next run downloads it again. It
+then builds the small signer/verifier from
 [`tools-src/MiniApkSigner.java`](../tools-src/MiniApkSigner.java) and writes
 `tools/tool-env.sh`.
 
@@ -240,7 +241,7 @@ Two switches live in the keyboard settings, in the Rambler section:
 | `verify_apk.sh` | `0` | `single`: every check that ran passed. Signature verification is skipped, with a notice, when the apksig frontend has not been built. |
 | `verify_apk.sh` | `1` | `single`: the zip integrity check failed (`zip CORRUPT`), the signature did not verify (`signature: FAILED`), or the profile check found a `MISSING` fingerprint or a `NOT FOUND` method (`profile check: FAILED`). |
 | `verify_apk.sh` | `2` | Unknown subcommand, or `single` arguments other than `<apk>` or `<apk> --profile <file>`; the usage line is printed. |
-| `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. |
+| `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. Partial downloads and mismatched files are deleted, so run it again. |
 
 ### Common fail-closed messages
 

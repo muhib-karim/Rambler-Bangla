@@ -37,14 +37,38 @@ JARS=(
 cd "$TOOLS"
 for u in "${JARS[@]}"; do
   f="$(basename "$u")"
-  [ -s "$f" ] || curl -fsSL --retry 3 -o "$f" "$u"
+  [ -s "$f" ] && continue
+  # Download to a .part file so an interrupted transfer is never mistaken
+  # for a finished one on the next run.
+  if ! curl -fsSL --retry 3 -o "$f.part" "$u"; then
+    rm -f "$f.part"
+    echo "download failed: $u" >&2
+    exit 1
+  fi
+  mv "$f.part" "$f"
 done
 
 if [ "${UPDATE_SHA:-0}" = 1 ]; then
   for u in "${JARS[@]}"; do sha256sum "$(basename "$u")"; done > "$SUMS"
   echo "re-pinned $SUMS"
 else
-  sha256sum -c --quiet "$SUMS"
+  # Check every file against its pin. A mismatched file is deleted, so the
+  # next run downloads it again instead of failing on the same bytes.
+  bad=0
+  for u in "${JARS[@]}"; do
+    f="$(basename "$u")"
+    want="$(awk -v f="$f" '$2 == f { print $1 }' "$SUMS")"
+    got="$(sha256sum "$f" | cut -d' ' -f1)"
+    if [ -z "$want" ]; then
+      echo "no pinned checksum for $f in $SUMS" >&2
+      bad=1
+    elif [ "$got" != "$want" ]; then
+      rm -f "$f"
+      echo "checksum mismatch: $f (deleted; run again to download it afresh)" >&2
+      bad=1
+    fi
+  done
+  [ "$bad" -eq 0 ] || exit 1
 fi
 
 # Stable names the scripts expect.
