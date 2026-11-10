@@ -91,7 +91,7 @@ The trick is the fixture: `fixtures/` builds a **synthetic APK with zero Google 
 
 | Suite | What it covers |
 | --- | --- |
-| **49 Python unit tests** (`tests/python/`, stdlib only; the clipboard-history store test also needs a JDK) | The patcher's pure helpers: smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, the dataflow search on the fixture smali, profile validation, a `--help` smoke test, the loanword `OVERRIDE` block matching `data/loanspell/overrides.tsv`, homepage checks that keep this README and the site honest, and the clipboard-history store, privacy policy and guarded-build checks on synthetic fixtures |
+| **66 Python unit tests** (`tests/python/`, stdlib only; the clipboard-history store test also needs a JDK) | The patcher's pure helpers: smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, the dataflow search on the fixture smali, profile validation, a `--help` smoke test, the loanword `OVERRIDE` block matching `data/loanspell/overrides.tsv`, homepage checks that keep this README and the site honest, and the clipboard-history store, privacy policy and guarded-build checks on synthetic fixtures |
 | **Static suite**, 17 checks (`tests/run_tests.sh`) | 1. 51 JVM policy assertions (locale classification, override rule, SCRIPT GATE rewrite). 2. The fixture APK builds with smali, d8, aapt2 and signing. 3. End-to-end patch: anchors and fingerprints resolve, both hooks land, the enabled-languages value gets its own register, hook arguments don't clobber each other, the stock rule string is preserved, `--extension-dex` adds the runtime. 4. Fail-closed negatives: a wrong fingerprint, a one-character change to the stock rule and re-patching each exit 2 with no APK. 5. The patched, re-signed fixture passes APK Signature Scheme v2 verification and androguard parses both APKs |
 
 What CI does **not** prove: runtime behaviour inside real Gboard on a phone. That evidence is the maintainer's device testing, recorded with dates in [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/EVIDENCE.md`](docs/EVIDENCE.md). The V29.3 golden corpus in [`tests/v29.3/`](tests/v29.3/README.md) needs the maintainer build's runtime jar, so it is not part of CI. The emulator workflows (`android-smoke.yml`, `clipboard-e2e.yml`, `keyboard-onboarding-probe.yml`) are manual and pinned to a maintainer-supplied APK by SHA-256.
@@ -130,6 +130,7 @@ python3 standalone-patcher/dex_patch.py patch \
   --profile fingerprints/gboard-18.3.1.json --extension-dex build/ext-dex/classes.dex
 
 # 4. Verify the output offline, alone or against the stock APK
+#    (single exits 1 until the APK is signed: the signature check is part of it)
 scripts/verify_apk.sh single /path/to/out.apk --profile fingerprints/gboard-18.3.1.json
 scripts/verify_apk.sh compare /path/to/stock.apk /path/to/out.apk
 ```
@@ -242,11 +243,13 @@ Test builds 245 to 253 are private maintainer builds. Each claim carries its evi
 
 These are planned or in progress and **not working yet**.
 
-### Limitations
+### Known limitations
 
 - Supports exactly one target build, Gboard 18.3.1. Any other build is refused by design.
 - CI proves the patching pipeline on a synthetic fixture, not runtime behaviour inside real Gboard.
 - Loanword spelling is approximate.
+- The two V29.x sources in `extension-src/.../rambler/`, `GboardRamblerLoanSpell.java` and `GboardRamblerSentenceLang.java`, do not compile from this repository. They reference five classes that are not in it: `GboardRamblerDiag`, `GboardRamblerLoanTable`, `GboardRamblerScriptFix`, `GboardRamblerSegmentLock` and `GboardRamblerTier1`. `tests/v29.3/Golden.java` needs two of them as well. The Lite policy runtime in `extension-src/.../ramblerlite/`, which the patcher and CI use, is complete.
+- `rename/rename_apk.py` refers to a `rename_sign.sh` signing step. That script is not included; sign with your own key as described in the [user guide](docs/USER_GUIDE.md#sign-with-your-own-key).
 
 ## Tech stack and project structure
 

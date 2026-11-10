@@ -52,9 +52,17 @@ jobs:
             echo "APK URL must use https" >&2
             exit 1
           fi
+          # Match the real host only: take the authority (cut at the first
+          # "/", "?" or "#"), then drop any "userinfo@" and any ":port".
           host="${APK_URL#https://}"
-          host="${host%%/*}"
+          host="${host%%[/?#]*}"
+          host="${host##*@}"
+          host="${host%%:*}"
           host="$(printf '%s' "$host" | tr 'A-Z' 'a-z')"
+          if [[ -z "$host" ]]; then
+            echo "APK URL has no host" >&2
+            exit 1
+          fi
           case "$host" in
             litter.catbox.moe|catbox.moe|gofile.io|store*.gofile.io|tmpfiles.org)
               echo "APK host allowlisted: $host"

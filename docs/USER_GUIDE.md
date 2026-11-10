@@ -21,6 +21,7 @@ diagnostic logs to this repository. See [`LICENSING-AUDIT.md`](LICENSING-AUDIT.m
 - [5. Verify the output](#5-verify-the-output)
 - [6. Rename, sign and install on your own device](#6-rename-sign-and-install-on-your-own-device)
 - [Layouts and settings](#layouts-and-settings)
+- [Environment variables](#environment-variables)
 - [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
@@ -55,8 +56,9 @@ source tools/tool-env.sh
 `bootstrap_tools.sh` downloads smali, baksmali and dexlib2 2.5.2 with their
 dependencies, r8/d8 8.3.37, aapt2 8.3.0, apksig 8.3.0 and android.jar 4.1.1.4
 from Maven Central and Google's Maven repository. Every file is checked against
-[`tools-src/toolchain.sha256`](../tools-src/toolchain.sha256); a mismatch stops
-the script. It then builds the small signer/verifier from
+[`tools-src/toolchain.sha256`](../tools-src/toolchain.sha256); a mismatch
+deletes that file and stops the script, so the next run downloads it again. It
+then builds the small signer/verifier from
 [`tools-src/MiniApkSigner.java`](../tools-src/MiniApkSigner.java) and writes
 `tools/tool-env.sh`.
 
@@ -102,7 +104,8 @@ scripts/verify_apk.sh single /path/to/gboard-18.3.1.apk \
 
 Every `fingerprint` line should say `FOUND` and every `method` line should say
 `found in`. If anything says `MISSING` or `NOT FOUND`, this is not the profiled
-build and patching will refuse it.
+build and patching will refuse it; the script prints `profile check: FAILED`
+and exits 1.
 
 ## 4. Patch
 
@@ -130,9 +133,9 @@ Options:
 
 | Option | Purpose |
 | --- | --- |
-| `--workdir DIR` | Scratch directory for the disassembly. It is **deleted and recreated** on every run, so point it at a dedicated empty directory. |
+| `--workdir DIR` | Scratch directory for the disassembly. It is **deleted and recreated** on every run, so point it at a dedicated empty directory. The patcher refuses the current directory, the repository root, your home directory and any directory that contains one of them (including `/`). |
 | `--baksmali-jar`, `--smali-jar` | Jar paths used only when `SMALI_CP` is not set. Defaults come from `BAKSMALI_JAR` / `SMALI_JAR` or `tools/`. |
-| `--extension-dex FILE` | Runtime DEX to append. Without it the hooks point at a class that is not in the APK. |
+| `--extension-dex FILE` | Runtime DEX to append. Without it the hooks point at a class that is not in the APK. It is checked before anything else runs: the path must be an existing DEX file. |
 
 ## 5. Verify the output
 
@@ -149,6 +152,11 @@ scripts/verify_apk.sh compare /path/to/gboard-18.3.1.apk /path/to/rambler-unsign
 Expect one more DEX entry than the stock APK. After signing, `compare` reports a
 different signer; that is expected when the build is re-signed with a non-Google
 key.
+
+`single` exits 1 if the signature does not verify. The patcher output is
+unsigned, so on that file it prints `signature: FAILED` and exits 1 even when
+every other line is fine. Run it again on the signed APK from step 6 and expect
+exit 0.
 
 ## 6. Rename, sign and install on your own device
 
@@ -222,6 +230,25 @@ Two switches live in the keyboard settings, in the Rambler section:
   conversion, and stays on your phone unless you share it. Read it before
   sharing.
 
+## Environment variables
+
+None of these has to be set by hand for the flow above: `source tools/tool-env.sh`
+exports `TOOLS_DIR` and `SMALI_CP`, and the rest have defaults.
+
+| Variable | Read by | Effect and default |
+| --- | --- | --- |
+| `TOOLS_DIR` | `bootstrap_tools.sh`, `tests/run_tests.sh`, `verify_apk.sh`, `fixtures/build_fixture.sh`, `clip_history_build.py` | Directory that holds the pinned toolchain. `bootstrap_tools.sh` and `clip_history_build.py` default to `<repo>/tools`; the others default to `./tools` relative to the current directory. `tool-env.sh` exports the absolute path. |
+| `SMALI_CP` | `dex_patch.py`, `rename_apk.py` (default for `--smali-cp`), `fixtures/build_fixture.sh`, `clip_history_build.py` | Classpath used to run smali and baksmali; set by `tool-env.sh`. Without it, `dex_patch.py` falls back to `java -jar` on `--baksmali-jar` / `--smali-jar`, which only works with fat jars (the pinned jars are not), `build_fixture.sh` rebuilds it from `smali.cp` in the tools directory, and `clip_history_build.py` stops. |
+| `BAKSMALI_JAR`, `SMALI_JAR` | `dex_patch.py` | Defaults for `--baksmali-jar` and `--smali-jar` (`tools/baksmali-2.5.2.jar`, `tools/smali-2.5.2.jar`). Used only when `SMALI_CP` is not set. |
+| `JAVA_HOME` | `dex_patch.py`, `rename_apk.py`, `verify_apk.sh`, `fixtures/build_fixture.sh` | The two Python tools run `$JAVA_HOME/bin/java` when it is set, otherwise `java` from `PATH`. The two shell scripts put `$JAVA_HOME/bin` first on `PATH`; when it is unset they use a `jdk-21*` directory inside the tools directory if one exists. `bootstrap_tools.sh` and `tests/run_tests.sh` use `javac` and `java` from `PATH`. |
+| `UPDATE_SHA` | `bootstrap_tools.sh` | `UPDATE_SHA=1` rewrites `tools-src/toolchain.sha256` from the downloaded files instead of checking them. For maintainers re-pinning the toolchain only. |
+| `ANDROID_HOME` / `ANDROID_SDK_ROOT` | `clip_history_build.py` | Android SDK root, searched for an API 32+ `android.jar` and for `zipalign`. |
+| `ANDROID_JAR` | `clip_history_build.py` | Explicit `android.jar` to compile against (API 32 or newer expected); skips the SDK search. |
+| `ZIPALIGN` | `clip_history_build.py` | Explicit `zipalign` binary. Otherwise `zipalign` on `PATH`, then one from the SDK's `build-tools/`. |
+| `R8_JAR` | `clip_history_build.py` | r8/d8 jar. Default: `r8-8.3.37.jar` in the tools directory. |
+| `CLIP_HISTORY_WORK_DIR` | `clip_history_build.py` | Parent directory for its temporary build directory; created if missing. Default: the system temp directory. |
+| `PACKAGE_NAME` | `scripts/clip_e2e.py` | Package id of the installed build the emulator driver controls. Default: `com.aidev2024.ramblerbangla`. |
+
 ## Troubleshooting
 
 ### Exit codes
@@ -230,10 +257,11 @@ Two switches live in the keyboard settings, in the Rambler section:
 | --- | --- | --- |
 | `dex_patch.py` | `0` | `analyze` printed its report, or `patch` wrote the output APK. |
 | `dex_patch.py` | `2` | Fail-closed abort (`FAIL-CLOSED ABORT: ...` on stderr). No output APK is written. Also returned for invalid arguments, for example `patch` without `--out`. |
-| `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. Errors before the final repack write no output APK; an error during the repack (for example a mistyped `--extension-dex` path) can leave a partial `--out` file, so delete it and run again. |
-| `verify_apk.sh` | `1` | `single`: the APK failed the zip integrity check (`zip CORRUPT`). |
-| `verify_apk.sh` | `2` | Unknown subcommand; the usage line is printed. |
-| `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. |
+| `dex_patch.py` | `1` | Uncaught Python error with a traceback, for example a missing or malformed profile JSON, or an `--apk` path that is not a readable zip. No output APK is written: the output is built in a temporary file next to `--out` and renamed into place only on success. |
+| `verify_apk.sh` | `0` | `single`: every check that ran passed. Signature verification is skipped, with a notice, when the apksig frontend has not been built. |
+| `verify_apk.sh` | `1` | `single`: the zip integrity check failed (`zip CORRUPT`), the signature did not verify (`signature: FAILED`), or the profile check found a `MISSING` fingerprint or a `NOT FOUND` method (`profile check: FAILED`). |
+| `verify_apk.sh` | `2` | Unknown subcommand, or `single` arguments other than `<apk>` or `<apk> --profile <file>`; the usage line is printed. |
+| `bootstrap_tools.sh` | non-zero | A download failed or a file did not match `tools-src/toolchain.sha256`. Partial downloads and mismatched files are deleted, so run it again. |
 
 ### Common fail-closed messages
 
@@ -245,6 +273,10 @@ Two switches live in the keyboard settings, in the Rambler section:
 | `method already references the extension runtime (already patched?)` | You passed an APK that was already patched. Start from the stock APK. |
 | `placeholder const-string ... not found in method` / `no String.replace using ...` | The dataflow check failed. The method body differs from what the profile expects. |
 | `stock override rule loads BEFORE the {ENABLED_LANGUAGES} substitution ...` | Control flow differs from the profiled build; the patcher refuses rather than guess. |
+| `--extension-dex ... is not a file` / `... is not a DEX file` | The runtime DEX path is wrong, or the file is not a DEX. Nothing was run. Build the runtime (step 2) and pass its `classes.dex`. |
+| `--workdir ... is or contains the ...` | Deleting that workdir would delete your current directory, the repository or your home directory. Use a dedicated scratch directory. |
+| `String.replace result register ... is also the enabled-languages register` | The method reuses the languages register for the result, so the value cannot be saved for the hooks. The method body differs from the profiled build. |
+| `malformed \u escape ...` / `malformed`, `mixed v/p` or `descending register range ...` | The disassembly contains smali the patcher cannot read with certainty. It aborts rather than guess. |
 | `command failed: ...` | smali or baksmali failed. Check that you ran `source tools/tool-env.sh` and that a JDK is on `PATH` or in `JAVA_HOME`. |
 
 ### Other problems

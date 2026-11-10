@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""WP-A scorer. usage: score.py GOLDEN.tsv [--baseline golden-rc2.tsv] [--policy latin|bangla|either]
+"""WP-A scorer. usage: score.py GOLDEN.tsv [--baseline golden-baseline-rc2.tsv] [--policy latin|bangla|either]
 Row kinds (gating unless noted):
   LOCK  hard rules: k3 any pin == input (maintainer); k2 EN pin == input; Bangla-script input == input everywhere;
         k2 AUTO pure-English rows == input; typing column == baseline (dictation work must not move typing).
@@ -12,7 +12,7 @@ LANG  k2 AUTO per-sentence language vs gold-lang.tsv (maintainer 2026-09-24 10:2
 bangla = maintainer 2026-09-24 10:12 ("write it in Bangla way"); either = accept both.
 """
 import sys, re, argparse, unicodedata
-ap = argparse.ArgumentParser(); ap.add_argument('golden'); ap.add_argument('--baseline', default='golden-rc2.tsv')
+ap = argparse.ArgumentParser(); ap.add_argument('golden'); ap.add_argument('--baseline', default='golden-baseline-rc2.tsv')
 ap.add_argument('--policy', default='bangla', choices=['latin','bangla','either']); ap.add_argument('--show', type=int, default=0)
 A = ap.parse_args()
 def rd(p):

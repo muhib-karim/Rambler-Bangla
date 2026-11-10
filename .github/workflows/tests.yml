@@ -28,6 +28,7 @@ jobs:
 
       - name: Run tests
         run: |
+          set -euo pipefail
           source tools/tool-env.sh
           bash tests/run_tests.sh | tee /tmp/test.log
-          grep -q ", 0 failed" /tmp/test.log
+          grep -Eq '^TEST SUITE: [0-9]+ passed, 0 failed$' /tmp/test.log

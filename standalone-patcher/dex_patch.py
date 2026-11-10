@@ -33,6 +33,8 @@ RULE_HOOK = "selectHinglishOverrideRule"
 PROMPT_HOOK = "rewriteCleanupPromptScriptGate"
 STRING_REPLACE = ("Ljava/lang/String;->replace(Ljava/lang/CharSequence;"
                   "Ljava/lang/CharSequence;)Ljava/lang/String;")
+DEX_MAGIC = b"dex\n"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class PatchError(Exception):
@@ -70,6 +72,9 @@ def smali_class_path(class_type):
     return class_type.strip()[1:-1] + ".smali"
 
 
+UNICODE_ESC_RE = re.compile(r"[0-9a-fA-F]{4}")
+
+
 def smali_unescape(s):
     out = []
     i = 0
@@ -87,7 +92,13 @@ def smali_unescape(s):
         table = {"n": "\n", "r": "\r", "t": "\t", "b": "\b", "f": "\f",
                  "\\": "\\", '"': '"', "'": "'"}
         if e == "u":
-            out.append(chr(int(s[i:i + 4], 16)))
+            # Exactly four hex digits. int() alone would accept a short tail,
+            # a sign or underscores and decode the wrong character.
+            digits = s[i:i + 4]
+            if not UNICODE_ESC_RE.fullmatch(digits):
+                raise PatchError("malformed \\u escape in smali string: \\u%s"
+                                 % digits)
+            out.append(chr(int(digits, 16)))
             i += 4
         elif e in table:
             out.append(table[e])
@@ -111,15 +122,30 @@ INVOKE_RE = re.compile(
     r'^\s*invoke-\w+(?:/range)?\s*\{(?P<regs>[^}]*)\},\s*(?P<ref>\S+)\s*$')
 
 
+RANGE_RE = re.compile(
+    r'^\s*(?P<p0>[vp])(?P<n0>\d+)\s*\.\.\s*(?P<p1>[vp])(?P<n1>\d+)\s*$')
+
+
 def parse_invoke(line):
     m = INVOKE_RE.match(line)
     if not m:
         return None
-    regs = [r.strip() for r in m.group("regs").split(",") if r.strip()]
-    if ".." in m.group("regs"):
-        base, last = [r.strip() for r in m.group("regs").split("..")]
-        n0, n1 = int(base[1:]), int(last[1:])
-        regs = ["v%d" % n for n in range(n0, n1 + 1)]
+    body = m.group("regs")
+    if ".." in body:
+        # A range keeps its v/p prefix: {p1 .. p3} is p1,p2,p3, never v1..v3.
+        # A mixed range cannot be expanded without the method's register
+        # layout, so it aborts instead of guessing.
+        r = RANGE_RE.match(body)
+        if not r:
+            raise PatchError("malformed register range {%s}" % body.strip())
+        if r.group("p0") != r.group("p1"):
+            raise PatchError("mixed v/p register range {%s}" % body.strip())
+        n0, n1 = int(r.group("n0")), int(r.group("n1"))
+        if n1 < n0:
+            raise PatchError("descending register range {%s}" % body.strip())
+        regs = ["%s%d" % (r.group("p0"), n) for n in range(n0, n1 + 1)]
+    else:
+        regs = [x.strip() for x in body.split(",") if x.strip()]
     return regs, m.group("ref")
 
 
@@ -131,8 +157,8 @@ def method_bounds(lines, name, proto):
     start = None
     for i, line in enumerate(lines):
         if line.startswith(".method"):
-            sig = line.split(None, 1)[1].strip()
-            if sig.endswith(name + proto):
+            # Whole-token match: "d(...)V" must not match "xd(...)V".
+            if line.split()[-1] == name + proto:
                 if start is not None:
                     raise PatchError("duplicate method %s%s" % (name, proto))
                 start = i
@@ -332,7 +358,6 @@ def hook_snippet(temp0, src_reg, langs_reg, ext, hook):
 
 def patch_method(lines, profile, fingerprints_ok):
     cls, name, proto = profile.method("cleanup_builder")
-    is_static = " static " in (" " + lines[0])  # caller passes method lines only
     mstart, mend = method_bounds(lines, name, proto)
     header = lines[mstart]
     is_static = bool(re.search(r"\bstatic\b", header))
@@ -345,6 +370,14 @@ def patch_method(lines, profile, fingerprints_ok):
     placeholder = profile.anchors["enabled_languages_placeholder"]
     langs_reg, result_reg, replace_end = find_enabled_languages_site(
         lines, mstart, mend, placeholder)
+    if result_reg == langs_reg:
+        # move-result-object has already overwritten the languages value, so
+        # the save below would capture the prompt and hand it to both hooks
+        # as "enabled languages". Abort before anything is rewritten.
+        raise PatchError("String.replace result register %s is also the "
+                         "enabled-languages register; the languages value is "
+                         "overwritten before it can be saved. Aborting "
+                         "fail-closed." % result_reg)
 
     rule_fp = profile.fingerprints["hinglish_override_rule"]["sha256"]
     rule_idx = None
@@ -399,8 +432,72 @@ def verify_prompt_owner(lines_by_class, profile):
                      % (fp, cls, name))
 
 
+def check_extension_dex(path):
+    """Abort before any work if the --extension-dex input is unusable."""
+    if path is None:
+        return
+    if not os.path.isfile(path):
+        raise PatchError("--extension-dex %s is not a file" % path)
+    try:
+        with open(path, "rb") as fh:
+            magic = fh.read(len(DEX_MAGIC))
+    except OSError as exc:
+        raise PatchError("--extension-dex %s cannot be read: %s" % (path, exc))
+    if magic != DEX_MAGIC:
+        raise PatchError("--extension-dex %s is not a DEX file" % path)
+
+
+def check_workdir(workdir):
+    """Refuse a scratch directory whose deletion would destroy something else.
+
+    The workdir is removed and recreated on every run, so it must not be the
+    current directory, the repository, the home directory, or any directory
+    that contains one of them ("/" contains all three)."""
+    wd = os.path.realpath(workdir)
+    prefix = wd.rstrip(os.sep) + os.sep
+    protected = (("current directory", os.getcwd()),
+                 ("repository root", REPO_ROOT),
+                 ("home directory", os.path.expanduser("~")))
+    for label, path in protected:
+        real = os.path.realpath(path)
+        if real == wd or real.startswith(prefix):
+            raise PatchError(
+                "--workdir %s is or contains the %s (%s). The workdir is "
+                "deleted on every run; use a dedicated scratch directory."
+                % (workdir, label, real))
+
+
+def write_output_apk(apk, out_apk, dex_name, new_dex, extension_dex=None,
+                     extension_name=None):
+    """Copy every entry of apk, swap in the patched dex and append the
+    extension dex. The result is built in a sibling temp file and renamed
+    over out_apk only on success, so a failed run never leaves a partial or
+    half-merged APK at the output path."""
+    tmp_out = "%s.partial-%d" % (out_apk, os.getpid())
+    try:
+        with zipfile.ZipFile(apk) as zin, \
+                zipfile.ZipFile(tmp_out, "w", zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                if item.filename == dex_name:
+                    with open(new_dex, "rb") as fh:
+                        zout.writestr(item.filename, fh.read())
+                else:
+                    zout.writestr(item, zin.read(item.filename))
+            if extension_dex is not None:
+                with open(extension_dex, "rb") as fh:
+                    zout.writestr(extension_name, fh.read())
+        os.replace(tmp_out, out_apk)
+    except BaseException:
+        try:
+            os.unlink(tmp_out)
+        except OSError:
+            pass
+        raise
+
+
 def patch(apk, out_apk, profile, workdir, baksmali_jar, smali_jar,
           extension_dex=None):
+    check_extension_dex(extension_dex)
     dexes = disassemble_all(apk, workdir, baksmali_jar)
 
     # 1. Fail-closed fingerprint sweep across the whole APK.
@@ -455,19 +552,8 @@ def patch(apk, out_apk, profile, workdir, baksmali_jar, smali_jar,
     run(smali_prefix("smali", smali_jar) + ["a", ddir, "-o", new_dex])
 
     # 6. Repack: copy every entry, swap the patched dex, append extension dex.
-    with zipfile.ZipFile(apk) as zin, \
-            zipfile.ZipFile(out_apk, "w", zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == dex_name:
-                with open(new_dex, "rb") as fh:
-                    zout.writestr(item.filename, fh.read())
-            else:
-                zout.writestr(item, zin.read(item.filename))
-        if extension_dex:
-            existing = [d for d, _ in dexes]
-            nxt = "classes%d.dex" % (len(existing) + 1)
-            with open(extension_dex, "rb") as fh:
-                zout.writestr(nxt, fh.read())
+    write_output_apk(apk, out_apk, dex_name, new_dex, extension_dex,
+                     "classes%d.dex" % (len(dexes) + 1))
     return {"patched_dex": dex_name, "out": out_apk,
             "extension_dex": extension_dex}
 
@@ -488,19 +574,24 @@ def main(argv=None):
     ap.add_argument("--extension-dex")
     args = ap.parse_args(argv)
 
-    profile = Profile(args.profile)
-    if os.path.isdir(args.workdir):
-        shutil.rmtree(args.workdir)
-    os.makedirs(args.workdir)
-
     try:
+        # Validate the inputs before the workdir is deleted or any tool runs.
+        if args.command == "patch":
+            if not args.out:
+                ap.error("patch requires --out")
+            check_extension_dex(args.extension_dex)
+        check_workdir(args.workdir)
+
+        profile = Profile(args.profile)
+        if os.path.isdir(args.workdir):
+            shutil.rmtree(args.workdir)
+        os.makedirs(args.workdir)
+
         if args.command == "analyze":
             report = analyze(args.apk, profile, args.workdir,
                              args.baksmali_jar)
             print(json.dumps(report, indent=2, ensure_ascii=False))
             return 0
-        if not args.out:
-            ap.error("patch requires --out")
         result = patch(args.apk, args.out, profile, args.workdir,
                        args.baksmali_jar, args.smali_jar,
                        args.extension_dex)
