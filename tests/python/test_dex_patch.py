@@ -15,6 +15,7 @@ import unittest
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PATCHER = os.path.join(ROOT, "standalone-patcher", "dex_patch.py")
+FIXTURE_PROFILE = os.path.join(ROOT, "fixtures", "fixture-profile.json")
 
 _spec = importlib.util.spec_from_file_location("dex_patch", PATCHER)
 dp = importlib.util.module_from_spec(_spec)
@@ -163,6 +164,40 @@ class FixtureSmaliTests(unittest.TestCase):
         self.assertTrue(snip[2].endswith(dp.RULE_HOOK +
                         "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"))
         self.assertEqual(snip[-1].split(), ["move-object/from16", "v0,", "v3"])
+
+
+class PatchMethodTests(unittest.TestCase):
+    """patch_method on the fixture cleanup builder, in memory (no toolchain)."""
+
+    def setUp(self):
+        self.lines = read_lines(os.path.join(ROOT, "fixtures", "src", "kfd.smali"))
+        self.profile = dp.Profile(FIXTURE_PROFILE)
+
+    def test_fixture_gets_both_hooks_and_a_saved_languages_register(self):
+        out = dp.patch_method(list(self.lines), self.profile, {})
+        text = "\n".join(out)
+        # The same facts tests/run_tests.sh greps for in the reassembled dex.
+        self.assertIn("    .locals 6", out)
+        self.assertIn("    move-object/from16 v3, v2", out)
+        self.assertIn("->" + dp.PROMPT_HOOK + "(", text)
+        self.assertIn("->" + dp.RULE_HOOK + "(", text)
+        self.assertNotIn("invoke-static/range {v4 .. v4}", text)
+        self.assertLess(text.index(dp.PROMPT_HOOK), text.index(dp.RULE_HOOK))
+
+    def test_aborts_when_result_register_is_the_languages_register(self):
+        # String.replace(p1, v1, v2) followed by move-result-object v2: the
+        # languages value in v2 is gone before it can be saved.
+        idx = self.lines.index("    move-result-object v0")
+        self.lines[idx] = "    move-result-object v2"
+        before = list(self.lines)
+        with self.assertRaises(dp.PatchError) as ctx:
+            dp.patch_method(self.lines, self.profile, {})
+        self.assertIn("enabled-languages register", str(ctx.exception))
+        self.assertEqual(self.lines, before, "nothing may be rewritten before the abort")
+
+    def test_empty_input_fails_closed(self):
+        with self.assertRaises(dp.PatchError):
+            dp.patch_method([], self.profile, {})
 
 
 class ProfileTests(unittest.TestCase):

@@ -356,7 +356,6 @@ def hook_snippet(temp0, src_reg, langs_reg, ext, hook):
 
 def patch_method(lines, profile, fingerprints_ok):
     cls, name, proto = profile.method("cleanup_builder")
-    is_static = " static " in (" " + lines[0])  # caller passes method lines only
     mstart, mend = method_bounds(lines, name, proto)
     header = lines[mstart]
     is_static = bool(re.search(r"\bstatic\b", header))
@@ -369,6 +368,14 @@ def patch_method(lines, profile, fingerprints_ok):
     placeholder = profile.anchors["enabled_languages_placeholder"]
     langs_reg, result_reg, replace_end = find_enabled_languages_site(
         lines, mstart, mend, placeholder)
+    if result_reg == langs_reg:
+        # move-result-object has already overwritten the languages value, so
+        # the save below would capture the prompt and hand it to both hooks
+        # as "enabled languages". Abort before anything is rewritten.
+        raise PatchError("String.replace result register %s is also the "
+                         "enabled-languages register; the languages value is "
+                         "overwritten before it can be saved. Aborting "
+                         "fail-closed." % result_reg)
 
     rule_fp = profile.fingerprints["hinglish_override_rule"]["sha256"]
     rule_idx = None
