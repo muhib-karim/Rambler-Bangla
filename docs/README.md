@@ -21,6 +21,7 @@ change it. The project overview is in the [repository README](../README.md).
 | [EVIDENCE.md](EVIDENCE.md) | Static evidence behind each anchor and fingerprint, and status detail |
 | [VALIDATION.md](VALIDATION.md) | Dated validation record: what passed without a device and what needs one |
 | [LICENSING-AUDIT.md](LICENSING-AUDIT.md) | Licensing audit of the repository and of the private test builds |
+| [BETA-PERSONALIZATION-ANALYSIS.md](BETA-PERSONALIZATION-ANALYSIS.md) | Analysis only: where the Gboard 18.6.3 beta personalization settings live, found with `scripts/find_personalization_flags.py`. Not enabled or tested |
 
 ## Design records
 
