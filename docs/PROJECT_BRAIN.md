@@ -47,14 +47,12 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
      `tools-src/toolchain.sha256` must be re-pinned against real downloads
      (`UPDATE_SHA=1 bash scripts/bootstrap_tools.sh`) and the static suite
      re-run.
-   - **No automated test runs `verify_apk.sh`.** Add a fixture run to the
-     static suite; that changes the "17 checks" count quoted in `README.md`,
-     `CONTRIBUTING.md` and `docs/RELEASING.md`.
-   - `scripts/bootstrap_tools.sh` says in its header that it uses `$JAVA_HOME`;
-     it calls `javac` from `PATH`.
    - `CHANGELOG.md` has no entry for this pass.
 
 ## Session log
+
+- 2026-11-15: scan_fingerprints fail-closed abort, verify_apk.sh static-suite
+  gate (21 -> 22 checks), bootstrap_tools.sh header correction. Not pushed.
 
 - 2026-11-10: Fixed the CI pass gate and added its self-test (1 commit).
 - 2026-11-10: Production-grade pass, phase 2 (10 commits): patcher fail-open
