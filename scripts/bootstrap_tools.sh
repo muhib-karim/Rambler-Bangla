@@ -25,8 +25,8 @@ JARS=(
   "$M/org/antlr/stringtemplate/3.2.1/stringtemplate-3.2.1.jar"
   "$M/antlr/antlr/2.7.7/antlr-2.7.7.jar"
   "$M/com/beust/jcommander/1.64/jcommander-1.64.jar"
-  "$M/com/google/guava/guava/27.1-android/guava-27.1-android.jar"
-  "$M/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar"
+  "$M/com/google/guava/guava/33.8.0-android/guava-33.8.0-android.jar"
+  "$M/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar"
   "$M/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar"
   "$G/com/android/tools/r8/8.3.37/r8-8.3.37.jar"
   "$G/com/android/tools/build/apksig/8.3.0/apksig-8.3.0.jar"
@@ -75,7 +75,7 @@ fi
 ln -sf android-4.1.1.4.jar android.jar
 rm -rf aapt2-extract; mkdir aapt2-extract
 (cd aapt2-extract && unzip -q ../aapt2-8.3.0-10880808-linux.jar aapt2 && chmod +x aapt2)
-printf '%s' "smali-2.5.2.jar:baksmali-2.5.2.jar:dexlib2-2.5.2.jar:util-2.5.2.jar:antlr-3.5.2.jar:antlr-runtime-3.5.2.jar:stringtemplate-3.2.1.jar:antlr-2.7.7.jar:jcommander-1.64.jar:guava-27.1-android.jar:failureaccess-1.0.1.jar:jsr305-3.0.2.jar" > smali.cp
+printf '%s' "smali-2.5.2.jar:baksmali-2.5.2.jar:dexlib2-2.5.2.jar:util-2.5.2.jar:antlr-3.5.2.jar:antlr-runtime-3.5.2.jar:stringtemplate-3.2.1.jar:antlr-2.7.7.jar:jcommander-1.64.jar:guava-33.8.0-android.jar:failureaccess-1.0.3.jar:jsr305-3.0.2.jar" > smali.cp
 
 # Minimal v1+v2 signer/verifier used by the fixture build and verify_apk.sh.
 rm -rf classes; mkdir classes

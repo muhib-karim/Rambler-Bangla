@@ -43,16 +43,18 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
    reviewed PR; PR #23 carries the three `patcher:` commits with the rest, so
    split them out if the reviewer wants that.
 2. Follow-ups found during the pass, none started:
-   - **guava bump** in the pinned toolchain. Skipped because
-     `tools-src/toolchain.sha256` must be re-pinned against real downloads
-     (`UPDATE_SHA=1 bash scripts/bootstrap_tools.sh`) and the static suite
-     re-run.
    - `CHANGELOG.md` has no entry for this pass.
 
 ## Session log
 
 - 2026-11-15: scan_fingerprints fail-closed abort, verify_apk.sh static-suite
-  gate (21 -> 22 checks), bootstrap_tools.sh header correction. Not pushed.
+  gate (21 -> 22 checks), bootstrap_tools.sh header correction. Local
+  verification: 88 Python tests, static suite 22/22. Delivered as unmerged
+  PR #27, stacked on #26.
+- 2026-11-15: Bumped pinned guava 27.1-android to 33.8.0-android and
+  failureaccess 1.0.1 to 1.0.3 (version from guava-parent pom). Upstream .sha1
+  matched; re-pinned only those two sha256 lines by hand. Local verification:
+  bootstrap verify, static suite 22/22, 88 Python tests OK.
 
 - 2026-11-10: Fixed the CI pass gate and added its self-test (1 commit).
 - 2026-11-10: Production-grade pass, phase 2 (10 commits): patcher fail-open
