@@ -50,9 +50,6 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
    - **No automated test runs `verify_apk.sh`.** Add a fixture run to the
      static suite; that changes the "17 checks" count quoted in `README.md`,
      `CONTRIBUTING.md` and `docs/RELEASING.md`.
-   - `scan_fingerprints` raises `UnicodeEncodeError` (traceback, exit 1) on a
-     const-string that contains a surrogate-pair escape. It aborts, but not as
-     a `FAIL-CLOSED ABORT`.
    - `scripts/bootstrap_tools.sh` says in its header that it uses `$JAVA_HOME`;
      it calls `javac` from `PATH`.
    - `CHANGELOG.md` has no entry for this pass.

@@ -273,7 +273,13 @@ def scan_fingerprints(dexes, fingerprints):
                     if not parsed:
                         continue
                     _reg, value = parsed
-                    digest = sha256_text(value)
+                    try:
+                        digest = sha256_text(value)
+                    except UnicodeEncodeError as exc:
+                        raise PatchError(
+                            "cannot fingerprint the const-string at %s:%d: it "
+                            "contains a surrogate escape that is not valid "
+                            "Unicode text" % (path, idx + 1)) from exc
                     for key, fp in fingerprints.items():
                         if digest == fp["sha256"]:
                             hits[key].append({

@@ -369,6 +369,40 @@ class CliTests(unittest.TestCase):
             self.assertIn("FAIL-CLOSED ABORT", proc.stderr)
             self.assertTrue(os.path.exists(sentinel))
 
+    def _surrogate_dex_dir(self, tmp):
+        ddir = os.path.join(tmp, "smali")
+        os.makedirs(ddir)
+        with open(os.path.join(ddir, "A.smali"), "w", encoding="utf-8") as fh:
+            fh.write(".class public LA;\n.method m()V\n"
+                     '    const-string v0, "\\ud83d\\ude00"\n'
+                     ".end method\n")
+        return ddir
+
+    def test_surrogate_pair_const_string_aborts_fail_closed(self):
+        # The escape decodes to lone surrogates, which cannot be UTF-8 encoded.
+        with tempfile.TemporaryDirectory() as tmp:
+            ddir = self._surrogate_dex_dir(tmp)
+            work = os.path.join(tmp, "work")
+            out = os.path.join(tmp, "out.apk")
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with mock.patch.object(dp, "disassemble_all",
+                                   return_value=[("classes.dex", ddir)]), \
+                    contextlib.redirect_stdout(stdout), \
+                    contextlib.redirect_stderr(stderr):
+                rc = dp.main(["analyze", "--apk", "in.apk", "--out", out,
+                              "--profile", FIXTURE_PROFILE, "--workdir", work])
+            self.assertEqual(rc, 2)
+            self.assertIn("FAIL-CLOSED ABORT", stderr.getvalue())
+            self.assertNotIn("Traceback", stderr.getvalue())
+            self.assertEqual(stdout.getvalue(), "")
+            self.assertFalse(os.path.exists(out))
+
+    def test_surrogate_pair_scan_raises_patch_error_not_unicode_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ddir = self._surrogate_dex_dir(tmp)
+            with self.assertRaises(dp.PatchError):
+                dp.scan_fingerprints([("classes.dex", ddir)], {})
+
     def test_main_patch_recreates_the_workdir_and_returns_zero(self):
         # patch() itself needs the toolchain; here it is mocked to cover main().
         with tempfile.TemporaryDirectory() as tmp:
