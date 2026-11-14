@@ -6,7 +6,7 @@
 #   bash scripts/bootstrap_tools.sh            # fetch + verify
 #   UPDATE_SHA=1 bash scripts/bootstrap_tools.sh   # re-pin checksums (maintainers)
 #
-# JDK: uses $JAVA_HOME or java on PATH (17+ tested; CI uses Temurin 21).
+# JDK: needs `javac` on PATH (it does not read $JAVA_HOME); 17+ tested, CI uses Temurin 21.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TOOLS="${TOOLS_DIR:-$ROOT/tools}"
