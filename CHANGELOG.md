@@ -2,6 +2,13 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT. Test builds are maintainer builds, not public downloads; see the README section "Source only, no APKs".
 
+## Unreleased (in review, PR #26)
+
+Identity-rename (`rename/`) correctness fix plus its end-to-end gate. No patcher, runtime, fingerprint or signing changes, and no APKs.
+
+- Fix: `rename/axml_pool.py` `StringPool.rebuild` wrote the Python code-point count into the AXML string-pool length prefixes; the format contract is UTF-16 code units, so a replacement value with an astral character (e.g. an emoji in the app label) produced a corrupt pool entry: aapt2 logs "Bad string block" and reads an empty label, androguard raises `ResParserError`. Covered by unit tests in `tests/python/test_axml_pool.py`.
+- Static suite gains an end-to-end identity-rename round-trip gate: a label-variant fixture (`android:label="PixelBoard"`) is renamed to a label containing an astral character, and the exact label must read back through aapt2's strict string-pool parser and androguard. The fixture carries no package-identity strings, so the gate exercises the manifest label rewrite only, not package, DEX or arsc renaming. The suite is now 21 checks; README, CONTRIBUTING, RELEASING, ARCHITECTURE and the Pages site quote the new count, and a homepage check fails on any stale quoted suite count.
+
 ## V29.5 - 2026-10-24 (in review, not released)
 
 Clipboard Recent | History. Static and host-tested only: no phone or emulator has run this build yet. It is an overlay on the maintainer's V29.4 rc4 build, not a published release.
