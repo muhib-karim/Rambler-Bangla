@@ -35,7 +35,7 @@ proprietary Gboard code (see [`LICENSING-AUDIT.md`](LICENSING-AUDIT.md)).
    python3 -m unittest discover -s tests/python -v
    bash scripts/bootstrap_tools.sh
    source tools/tool-env.sh
-   bash tests/run_tests.sh      # expect "TEST SUITE: 21 passed, 0 failed"
+   bash tests/run_tests.sh      # expect "TEST SUITE: 22 passed, 0 failed"
    ```
 
    Both [`ci.yml`](../.github/workflows/ci.yml) and

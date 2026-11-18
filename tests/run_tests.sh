@@ -166,6 +166,17 @@ print("  androguard: renamed APK parses, label reads back exactly")
 PYEOF
 check $? "androguard parses renamed APK and reads the exact label"
 
+# verify_apk.sh must pass on the stock fixture (with fingerprint anchors) and on
+# the patched+resigned fixture.
+bash "$ROOT/scripts/verify_apk.sh" single "$ROOT/fixtures/out/fixture-stock.apk" \
+  --profile "$ROOT/fixtures/fixture-profile.json" >/tmp/t-verify-stock.log 2>&1
+rc1=$?
+bash "$ROOT/scripts/verify_apk.sh" single "$ROOT/fixtures/out/fixture-patched-signed.apk" \
+  >/tmp/t-verify-patched.log 2>&1
+rc2=$?
+[ $rc1 -eq 0 ] && [ $rc2 -eq 0 ]
+check $? "verify_apk.sh passes on stock and patched+resigned fixtures"
+
 echo
 echo "==================================="
 echo "TEST SUITE: $PASS passed, $FAIL failed"

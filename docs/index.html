@@ -202,7 +202,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 <h2 id="features-h">Features</h2>
 <p class="sub">What the project does today, with the evidence level stated for each.</p>
 <ul class="features">
-<li><h3>Bangla stays Bangla</h3><p>Bengali dictation stays in Bengali Unicode for bn-BD, bn-IN and bn-Beng; English stays in Latin.</p><span class="level"><b class="ok">CI + on device</b><br>21 end-to-end checks, 51 policy assertions</span></li>
+<li><h3>Bangla stays Bangla</h3><p>Bengali dictation stays in Bengali Unicode for bn-BD, bn-IN and bn-Beng; English stays in Latin.</p><span class="level"><b class="ok">CI + on device</b><br>22 end-to-end checks, 51 policy assertions</span></li>
 <li><h3>Bangla and English together</h3><p>One language per sentence on the multilingual layout (abc → <span class="bn" lang="bn">বাংলা</span>).</p><span class="level"><b class="ok">On device</b><br>292-case host corpus; a few misses in quick switches</span></li>
 <li><h3>Real Bangla spellings</h3><p>English words inside Bangla come out as <span class="bn" lang="bn">কোম্পানি, টেলিভিশন, বার্লিন</span>. Transliteration only, never translation.</p><span class="level"><b>Host-tested</b><br>Blind check 85 of 200 exact (historical)</span></li>
 <li><h3>Protected text</h3><p>#hashtags, @handles, links, emails and times stay in Latin letters.</p><span class="level"><b>Host-tested</b><br>V29.3 test corpus</span></li>
@@ -236,7 +236,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 <p>The fixture is a <b>synthetic APK with zero Google content</b> that mirrors the real anchors. On every push and pull request, GitHub Actions builds it from smali sources, patches it with the real patcher and asserts on the result.</p>
 <ul class="ticks">
 <li><b>Python unit tests</b> (stdlib only): the patcher's pure helpers, the loanword table sync, and checks that keep the README and this page honest.</li>
-<li><b>Static suite, 21 checks:</b> 51 policy assertions, fixture build, end-to-end patch, fail-closed negatives (wrong fingerprint, tampered rule, re-patch each exit 2 with no APK), APK Signature Scheme v2 verification, astral-label identity-rename round-trip.</li>
+<li><b>Static suite, 22 checks:</b> 51 policy assertions, fixture build, end-to-end patch, fail-closed negatives (wrong fingerprint, tampered rule, re-patch each exit 2 with no APK), APK Signature Scheme v2 verification, astral-label identity-rename round-trip, verify_apk.sh fixture verification.</li>
 </ul>
 <div class="callout"><p>CI does <b>not</b> prove runtime behaviour inside real Gboard. Phone evidence is dated in <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/docs/VALIDATION.md">VALIDATION.md</a>.</p></div>
 </div>
@@ -251,7 +251,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 python3 -m unittest discover -s tests/python -v
 python3 -m pip install androguard==4.1.4
 bash scripts/bootstrap_tools.sh &amp;&amp; source tools/tool-env.sh
-bash tests/run_tests.sh   <span class="c"># TEST SUITE: 21 passed, 0 failed</span>
+bash tests/run_tests.sh   <span class="c"># TEST SUITE: 22 passed, 0 failed</span>
 
 <span class="c"># 1. fingerprint guard</span>
 python3 standalone-patcher/dex_patch.py analyze \
