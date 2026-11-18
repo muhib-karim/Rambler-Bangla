@@ -132,6 +132,18 @@ class ReadmeHomepageTests(unittest.TestCase):
         quoted = {int(n) for n in re.findall(r"(\d+) Python unit tests", self.text)}
         self.assertEqual(quoted, {count})
 
+    def test_quoted_static_suite_count_matches_run_tests(self):
+        script = read(os.path.join(ROOT, "tests", "run_tests.sh"))
+        count = len(re.findall(r"check \$\?", script))
+        patterns = [r"[Ss]tatic suite\*{0,2},?\s*(\d+) checks",
+                    r"(\d+) end-to-end checks",
+                    r"TEST SUITE: (\d+) passed, 0 failed"]
+        for name, text in (("README", self.text), ("docs/index.html", read(SITE))):
+            for pat in patterns:
+                for n in re.findall(pat, text):
+                    self.assertEqual(int(n), count,
+                        f"{name} quotes stale static-suite count {n} != {count} ({pat})")
+
 
 class PagesSiteTests(unittest.TestCase):
     @classmethod

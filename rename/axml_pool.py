@@ -71,15 +71,16 @@ class StringPool:
         offsets = []
         for i, s in enumerate(self.strings):
             value = replacements.get(i, s)
+            u16_units = len(value.encode('utf-16-le')) // 2
             offsets.append(len(data))
             if self.is_utf8:
                 raw = value.encode('utf-8')
-                data = _write_u8len(data, len(value))   # utf-16 length
+                data = _write_u8len(data, u16_units)    # utf-16 length
                 data = _write_u8len(data, len(raw))     # utf-8 byte length
                 data += raw + b'\x00'
             else:
                 raw = value.encode('utf-16-le')
-                data = _write_u16len(data, len(value))
+                data = _write_u16len(data, u16_units)
                 data += raw + b'\x00\x00'
         while len(data) % 4:
             data += b'\x00'

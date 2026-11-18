@@ -122,6 +122,50 @@ print("  androguard: both APKs parse as valid, package/version read back")
 PYEOF
 check $? "androguard parses stock+patched fixture APKs"
 
+echo "== 6. identity-rename round-trip (astral label)"
+# Guard for the AXML string-pool UTF-16 length fix: renaming the fixture to a
+# label containing an astral (surrogate-pair) character must produce a manifest
+# that strict parsers read back exactly. On the pre-fix pool code, aapt2 logs
+# "Bad string block" and reads an empty label, and androguard raises
+# ResParserError ("UTF-16 String is not null terminated").
+RT=/tmp/t-rename && rm -rf "$RT" && mkdir -p "$RT"
+ASTRAL_LABEL='Rambler 🎬'
+sed 's/android:label="BengaliPatchFixture"/android:label="PixelBoard"/' \
+  "$ROOT/fixtures/AndroidManifest.xml" > "$RT/manifest-label.xml"
+( cd "$RT" && cp "$ROOT/fixtures/out/classes.dex" . \
+  && "$TOOLS_DIR/aapt2-extract/aapt2" link -I "$TOOLS_DIR/android.jar" \
+       --manifest manifest-label.xml -o label-variant.apk \
+  && zip -q label-variant.apk classes.dex )
+check $? "label-variant fixture APK links (PixelBoard label)"
+
+python3 "$ROOT/rename/rename_apk.py" \
+  --in-apk "$RT/label-variant.apk" --out-apk "$RT/renamed.apk" \
+  --new-package com.rambler.bangla.fixture --new-label "$ASTRAL_LABEL" \
+  --workdir "$RT/work" --smali-cp "$SMALI_CP" --report "$RT/report.json" \
+  >/dev/null 2>&1 \
+  && python3 -c "
+import json, sys
+r = json.load(open('$RT/report.json'))
+assert r['steps']['manifest'].get('PixelBoard') == sys.argv[1], r['steps']
+" "$ASTRAL_LABEL"
+check $? "rename_apk round-trip applies the astral label"
+
+"$TOOLS_DIR/aapt2-extract/aapt2" dump badging "$RT/renamed.apk" 2>/dev/null \
+  | grep -qF "application: label='$ASTRAL_LABEL'"
+check $? "aapt2 strict parser reads the exact astral label back"
+
+ASTRAL_LABEL="$ASTRAL_LABEL" python3 - "$RT" <<'PYEOF'
+import os, sys
+from loguru import logger
+logger.remove()
+from androguard.core.apk import APK
+a = APK(sys.argv[1] + "/renamed.apk")
+assert a.is_valid_APK(), "renamed APK not valid"
+assert a.get_app_name() == os.environ["ASTRAL_LABEL"], repr(a.get_app_name())
+print("  androguard: renamed APK parses, label reads back exactly")
+PYEOF
+check $? "androguard parses renamed APK and reads the exact label"
+
 echo
 echo "==================================="
 echo "TEST SUITE: $PASS passed, $FAIL failed"

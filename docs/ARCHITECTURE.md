@@ -185,7 +185,7 @@ hashes have one source. `build_fixture.sh` assembles `classes.dex` with smali,
 compiles the runtime with `javac` and d8 into `classes2.dex`, links the manifest
 with aapt2 and signs with a locally generated, fixture-only key.
 
-[`tests/run_tests.sh`](../tests/run_tests.sh) runs 17 checks in five stages:
+[`tests/run_tests.sh`](../tests/run_tests.sh) runs 21 checks in six stages:
 
 | Stage | What it asserts |
 | --- | --- |
@@ -194,6 +194,7 @@ with aapt2 and signs with a locally generated, fixture-only key.
 | 3. End-to-end patch | Anchors and fingerprints resolve; both hooks present; enabled-languages value saved to its own register; hook arguments do not clobber each other; stock rule preserved; register window grew by exactly three; `--extension-dex` adds the runtime DEX |
 | 4. Fail-closed negatives | Wrong fingerprint, a one-character change to the stock rule, and re-patching each exit 2 with no APK |
 | 5. APK validation | Patched and re-signed fixture passes APK Signature Scheme v2 verification; androguard parses stock and patched APKs |
+| 6. Identity-rename round-trip | A label-variant fixture renamed to a label with an astral character reads the exact label back through aapt2's strict string-pool parser and androguard; guards the AXML UTF-16 length fix in `rename/axml_pool.py`. The fixture carries no package-identity strings, so this stage exercises the manifest label rewrite only, not package, DEX or arsc renaming |
 
 [`tests/python/test_dex_patch.py`](../tests/python/test_dex_patch.py) adds 26
 standard-library unit tests for the patcher's helpers and checks that the

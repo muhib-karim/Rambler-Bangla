@@ -49,7 +49,7 @@ Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into L
 
 | Feature | What you get | Evidence |
 | --- | --- | --- |
-| **Bangla stays Bangla** | Bengali dictation stays in Bengali Unicode for `bn-BD`, `bn-IN` and `bn-Beng`; English stays in Latin | 17 end-to-end checks and 51 policy assertions in CI on a synthetic fixture. Bangla-only and English-only layouts confirmed on a real device |
+| **Bangla stays Bangla** | Bengali dictation stays in Bengali Unicode for `bn-BD`, `bn-IN` and `bn-Beng`; English stays in Latin | 21 end-to-end checks and 51 policy assertions in CI on a synthetic fixture. Bangla-only and English-only layouts confirmed on a real device |
 | **Bangla and English together** | One language per sentence on the multilingual layout (abc → বাংলা) | 292-case host corpus. Confirmed on a real device, with a few misses in quick mid-sentence switches |
 | **Real Bangla spellings for English words** | কোম্পানি, টেলিভিশন, বার্লিন instead of letter-by-letter output, from a CMU-derived table plus reviewed overrides | Blind check: 85 of 200 exact (historical), so expect misses |
 | **Protected text** | #hashtags, @handles, links, emails and times stay in Latin letters | Checked in the V29.3 test corpus |
@@ -93,8 +93,8 @@ The trick is the fixture: `fixtures/` builds a **synthetic APK with zero Google 
 
 | Suite | What it covers |
 | --- | --- |
-| **81 Python unit tests** (`tests/python/`, stdlib only; the clipboard-history store test also needs a JDK) | The patcher's pure helpers: smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, the dataflow search on the fixture smali, profile validation, a `--help` smoke test, the loanword `OVERRIDE` block matching `data/loanspell/overrides.tsv`, homepage checks that keep this README and the site honest, and the clipboard-history store, privacy policy and guarded-build checks on synthetic fixtures, and the beta-personalization analyzer ([`scripts/find_personalization_flags.py`](scripts/find_personalization_flags.py), analysis only) on synthetic DEX and APK inputs |
-| **Static suite**, 17 checks (`tests/run_tests.sh`) | 1. 51 JVM policy assertions (locale classification, override rule, SCRIPT GATE rewrite). 2. The fixture APK builds with smali, d8, aapt2 and signing. 3. End-to-end patch: anchors and fingerprints resolve, both hooks land, the enabled-languages value gets its own register, hook arguments don't clobber each other, the stock rule string is preserved, `--extension-dex` adds the runtime. 4. Fail-closed negatives: a wrong fingerprint, a one-character change to the stock rule and re-patching each exit 2 with no APK. 5. The patched, re-signed fixture passes APK Signature Scheme v2 verification and androguard parses both APKs |
+| **86 Python unit tests** (`tests/python/`, stdlib only; the clipboard-history store test also needs a JDK) | The patcher's pure helpers: smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, the dataflow search on the fixture smali, profile validation, a `--help` smoke test, the loanword `OVERRIDE` block matching `data/loanspell/overrides.tsv`, homepage checks that keep this README and the site honest, and the clipboard-history store, privacy policy and guarded-build checks on synthetic fixtures, and the beta-personalization analyzer ([`scripts/find_personalization_flags.py`](scripts/find_personalization_flags.py), analysis only) on synthetic DEX and APK inputs |
+| **Static suite**, 21 checks (`tests/run_tests.sh`) | 1. 51 JVM policy assertions (locale classification, override rule, SCRIPT GATE rewrite). 2. The fixture APK builds with smali, d8, aapt2 and signing. 3. End-to-end patch: anchors and fingerprints resolve, both hooks land, the enabled-languages value gets its own register, hook arguments don't clobber each other, the stock rule string is preserved, `--extension-dex` adds the runtime. 4. Fail-closed negatives: a wrong fingerprint, a one-character change to the stock rule and re-patching each exit 2 with no APK. 5. The patched, re-signed fixture passes APK Signature Scheme v2 verification and androguard parses both APKs. 6. Identity-rename round-trip: a label-variant fixture renamed to a label with an astral character reads the exact label back through aapt2's strict string-pool parser and androguard (guards the AXML UTF-16 length fix; the fixture carries no package-identity strings, so the gate exercises the manifest label rewrite, not package/dex/arsc renaming) |
 
 What CI does **not** prove: runtime behaviour inside real Gboard on a phone. That evidence is the maintainer's device testing, recorded with dates in [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/EVIDENCE.md`](docs/EVIDENCE.md). The V29.3 golden corpus in [`tests/v29.3/`](tests/v29.3/README.md) needs the maintainer build's runtime jar, so it is not part of CI. The emulator workflows (`android-smoke.yml`, `clipboard-e2e.yml`, `keyboard-onboarding-probe.yml`) are manual and pinned to a maintainer-supplied APK by SHA-256.
 
@@ -113,7 +113,7 @@ python3 -m unittest discover -s tests/python -v
 python3 -m pip install androguard==4.1.4
 bash scripts/bootstrap_tools.sh
 source tools/tool-env.sh
-bash tests/run_tests.sh                  # expect "TEST SUITE: 17 passed, 0 failed"
+bash tests/run_tests.sh                  # expect "TEST SUITE: 21 passed, 0 failed"
 
 # Build the policy runtime DEX (same steps as fixtures/build_fixture.sh)
 mkdir -p build/ext-classes build/ext-dex

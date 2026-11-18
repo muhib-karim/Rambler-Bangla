@@ -27,7 +27,7 @@ also read the [Code of Conduct](CODE_OF_CONDUCT.md).
    bash scripts/bootstrap_tools.sh
    pip install androguard==4.1.4
    source tools/tool-env.sh
-   bash tests/run_tests.sh      # expect "17 passed, 0 failed"
+   bash tests/run_tests.sh      # expect "21 passed, 0 failed"
    ```
 
    CI runs the same steps on every push and pull request.
