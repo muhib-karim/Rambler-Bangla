@@ -66,13 +66,18 @@ SOFTWARE.
 
 ---
 
-## 4. `nl-morphe-patches` (`johninnld/nl-morphe-patches`)
+## 4. `nl-morphe-patches` / Dutch App Patches (`johninnld/nl-morphe-patches`)
 
-The Gboard Rambler feature enhancements (Custom Instructions, Personal Dictionary via
-`UserFeatureCache` `MUSE_STATS`, Contact Names syncing, Cursor-Aware Editing, and App Context)
-were inspired by and adapted from **`nl-morphe-patches`**:
+Provides the **AMOLED Dark Keyboard** Material 3 dark-surface override design, **Rambler
+Toolbar & Revert Extras** (`enable_rambler_al_toolbar_overflow_menu`,
+`rambler_preserve_rewritten_text_on_revert`), **Hidden Flags Override** native `OVERRIDE`
+flag-store architecture, unconditional **Rambler voice typing** flag activation pattern, and
+original inspiration for Rambler Custom Instructions, `UserFeatureCache` `MUSE_STATS` Personal
+Dictionary, Contact Names syncing, Cursor-Aware Editing, and App Context:
 
 - Repository: https://gitlab.com/johninnld/nl-morphe-patches
+- Documentation: https://nl-morphe-patches-ed90fa.gitlab.io/apps/gboard/
+- Author: `@johninnld`
 - License: **GNU General Public License v3.0**
 
 ---

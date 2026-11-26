@@ -68,6 +68,8 @@ internal const val TOOLBAR_ACCESS_POINT_TYPE =
     "Ldev/abotmaker/ramblerenhancements/RamblerToolbarAccessPoint;"
 internal const val SPACEBAR_TRIGGER_TYPE =
     "Ldev/abotmaker/ramblerenhancements/RamblerSpacebarTrigger;"
+internal const val AT_MENTION_STRIP_RUNTIME_TYPE =
+    "Ldev/abotmaker/ramblerenhancements/RamblerAtMentionStripRuntime;"
 
 internal enum class RamblerFeature {
     WAVEFORM,
@@ -79,6 +81,9 @@ internal enum class RamblerFeature {
     PRODUCTIVITY_TOOLS,
     BANGLA_LITE_SCRIPT,
     BANGLA_PHONETIC,
+    RAMBLER_EXTRAS,
+    HIDDEN_FLAGS,
+    AT_MENTION_SUGGESTIONS,
 }
 
 internal class RamblerPatchRunState {
@@ -128,7 +133,12 @@ internal val ramblerSharedExtensionPatch = bytecodePatch(
                 it == RamblerFeature.PERSONAL_DICTIONARY ||
                 it == RamblerFeature.CURSOR_EDITING ||
                 it == RamblerFeature.APP_CONTEXT ||
-                it == RamblerFeature.PRODUCTIVITY_TOOLS
+                it == RamblerFeature.PRODUCTIVITY_TOOLS ||
+                it == RamblerFeature.BANGLA_LITE_SCRIPT ||
+                it == RamblerFeature.BANGLA_PHONETIC ||
+                it == RamblerFeature.RAMBLER_EXTRAS ||
+                it == RamblerFeature.HIDDEN_FLAGS ||
+                it == RamblerFeature.AT_MENTION_SUGGESTIONS
         }
 
         if (needsFlags) {
@@ -241,7 +251,142 @@ internal val ramblerSharedExtensionPatch = bytecodePatch(
             }
         }
 
+        if (RamblerFeature.AT_MENTION_SUGGESTIONS in state.selectedFeatures) {
+            installAtMentionLifecycleHooks(this)
+        }
+
         rewriteDynamicConfigClinit(state)
+    }
+}
+
+internal fun installAtMentionLifecycleHooks(context: BytecodePatchContext) {
+    val inputViewType = "Lcom/google/android/libraries/inputmethod/inputview/InputView;"
+    var imeClassType: String? = null
+    var inputViewFieldName: String? = null
+    context.classDefForEach { cls ->
+        val field = cls.instanceFields.firstOrNull { it.type == inputViewType } ?: return@classDefForEach
+        val hasStart = cls.methods.any {
+            it.name == "onStartInputView" &&
+                it.parameterTypes.map { p -> p.toString() } == listOf("Landroid/view/inputmethod/EditorInfo;", "Z") &&
+                it.returnType == "V"
+        }
+        val hasSel = cls.methods.any {
+            it.name == "onUpdateSelection" &&
+                it.parameterTypes.map { p -> p.toString() } == listOf("I", "I", "I", "I", "I", "I") &&
+                it.returnType == "V"
+        }
+        val hasHidden = cls.methods.any {
+            it.name == "onWindowHidden" && it.parameterTypes.isEmpty() && it.returnType == "V"
+        }
+        if (hasStart && hasSel && hasHidden) {
+            if (imeClassType != null) {
+                throw PatchException(
+                    "FAIL-CLOSED: Multiple InputMethodService classes own InputView field: $imeClassType and ${cls.type}",
+                )
+            }
+            imeClassType = cls.type
+            inputViewFieldName = field.name
+        }
+    }
+    val resolvedClass = imeClassType
+        ?: throw PatchException("FAIL-CLOSED: Could not find InputMethodService class with $inputViewType field")
+    val resolvedField = inputViewFieldName!!
+    installAtMentionLifecycleHooksOnClass(
+        imeClass = context.mutableClassDefBy(resolvedClass),
+        inputViewFieldRef = "$resolvedClass->$resolvedField:$inputViewType",
+    )
+}
+
+internal fun installAtMentionLifecycleHooksOnClass(
+    imeClass: MutableClass,
+    inputViewFieldRef: String,
+) {
+    val helperName = "ramblerBanglaAtMentionSelection"
+    val helperRef = "${imeClass.type}->$helperName(II)V"
+
+    // 1. Hook onStartInputView right after any leading invoke-static hooks (e.g. Manual Incognito)
+    val onStart = imeClass.methods.single {
+        it.name == "onStartInputView" &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("Landroid/view/inputmethod/EditorInfo;", "Z") &&
+            it.returnType == "V"
+    }
+    val startInsns = onStart.implementation?.instructions
+        ?: throw PatchException("onStartInputView has no implementation")
+    val alreadyHasStart = startInsns.any {
+        (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+            ?.reference?.toString()?.contains("RamblerAtMentionStripRuntime;->onInputViewStarted") == true
+    }
+    if (!alreadyHasStart) {
+        var insertAt = 0
+        while (insertAt < startInsns.size &&
+            (startInsns[insertAt].opcode == Opcode.INVOKE_STATIC ||
+                startInsns[insertAt].opcode == Opcode.INVOKE_STATIC_RANGE)
+        ) {
+            insertAt++
+        }
+        onStart.addInstructions(
+            insertAt,
+            "invoke-static/range {p0 .. p1}, $AT_MENTION_STRIP_RUNTIME_TYPE->onInputViewStarted(Ljava/lang/Object;Landroid/view/inputmethod/EditorInfo;)V",
+        )
+    }
+
+    // 2. Add private helper and hook onUpdateSelection after any leading invoke-direct helper (e.g. Calculator)
+    imeClass.addHelperMethodIfMissing(
+        name = helperName,
+        parameterTypes = listOf("I", "I"),
+        returnType = "V",
+        accessFlags = AccessFlags.PRIVATE.value or AccessFlags.FINAL.value,
+        registerCount = 4,
+        body = """
+            iget-object v0, p0, $inputViewFieldRef
+            invoke-static {p0, v0, p1, p2}, $AT_MENTION_STRIP_RUNTIME_TYPE->onSelectionUpdated(Ljava/lang/Object;Landroid/view/View;II)V
+            return-void
+        """.trimIndent(),
+    )
+    val onUpdate = imeClass.methods.single {
+        it.name == "onUpdateSelection" &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("I", "I", "I", "I", "I", "I") &&
+            it.returnType == "V"
+    }
+    val updateInsns = onUpdate.implementation?.instructions
+        ?: throw PatchException("onUpdateSelection has no implementation")
+    val alreadyHasUpdate = updateInsns.any {
+        (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+            ?.reference?.toString() == helperRef
+    }
+    if (!alreadyHasUpdate) {
+        var insertAt = 0
+        while (insertAt < updateInsns.size &&
+            (updateInsns[insertAt].opcode == Opcode.INVOKE_DIRECT ||
+                updateInsns[insertAt].opcode == Opcode.INVOKE_DIRECT_RANGE)
+        ) {
+            insertAt++
+        }
+        val useRange = (onUpdate.implementation?.registerCount ?: 8) > 16
+        if (useRange) {
+            throw PatchException("FAIL-CLOSED: Unexpected registerCount > 16 in ${imeClass.type}->onUpdateSelection")
+        }
+        onUpdate.addInstructions(
+            insertAt,
+            "invoke-direct {p0, p3, p4}, $helperRef",
+        )
+    }
+
+    // 3. Hook onWindowHidden at entry
+    val onHidden = imeClass.methods.single {
+        it.name == "onWindowHidden" && it.parameterTypes.isEmpty() && it.returnType == "V"
+    }
+    val hiddenInsns = onHidden.implementation?.instructions
+        ?: throw PatchException("onWindowHidden has no implementation")
+    val alreadyHasHidden = hiddenInsns.any {
+        (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+            ?.reference?.toString()?.contains("RamblerAtMentionStripRuntime;->onInputWindowHidden") == true
+    }
+    if (!alreadyHasHidden) {
+        onHidden.addInstructions(
+            0,
+            "invoke-static {}, $AT_MENTION_STRIP_RUNTIME_TYPE->onInputWindowHidden()V",
+        )
     }
 }
 
@@ -607,6 +752,9 @@ internal fun rewriteDynamicConfigClinitOnClass(
     putBool("FEATURE_PRODUCTIVITY_TOOLS", RamblerFeature.PRODUCTIVITY_TOOLS in state.selectedFeatures)
     putBool("FEATURE_BANGLA_LITE_SCRIPT", RamblerFeature.BANGLA_LITE_SCRIPT in state.selectedFeatures)
     putBool("FEATURE_BANGLA_PHONETIC", RamblerFeature.BANGLA_PHONETIC in state.selectedFeatures)
+    putBool("FEATURE_RAMBLER_EXTRAS", RamblerFeature.RAMBLER_EXTRAS in state.selectedFeatures)
+    putBool("FEATURE_HIDDEN_FLAGS", RamblerFeature.HIDDEN_FLAGS in state.selectedFeatures)
+    putBool("FEATURE_AT_MENTION_SUGGESTIONS", RamblerFeature.AT_MENTION_SUGGESTIONS in state.selectedFeatures)
 
     // Flag bindings (resolved or 18.5.4 defaults)
     val flags = state.flagTargets

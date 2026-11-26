@@ -156,12 +156,12 @@ android {
 
     defaultConfig {
         minSdk = 26
-        buildConfigField("String", "PATCH_AUTHOR", "\"jasonwu1994\"")
-        buildConfigField("String", "PATCH_AUTHOR_URL", "\"https://github.com/jasonwu1994\"")
+        buildConfigField("String", "PATCH_AUTHOR", "\"muhib-karim\"")
+        buildConfigField("String", "PATCH_AUTHOR_URL", "\"https://github.com/muhib-karim\"")
         buildConfigField(
             "String",
             "PATCH_REPOSITORY_URL",
-            "\"https://github.com/jasonwu1994/Gboard-patches\""
+            "\"https://github.com/muhib-karim/Rambler-Bangla\""
         )
         buildConfigField("String", "PATCH_VERSION", "\"${project.version}\"")
     }

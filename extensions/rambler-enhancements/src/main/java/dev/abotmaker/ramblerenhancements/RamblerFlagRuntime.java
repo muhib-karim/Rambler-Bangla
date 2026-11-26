@@ -24,6 +24,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class RamblerFlagRuntime {
     private static final String TAG = "RamblerEnhancements";
 
+    // Core Rambler+ / Agentic Dictation enablement flags (ensures ModuleManager always loads
+    // AgenticDictationExtension and Voice typing -> Rambler+ activates immediately)
+    public static final String ENABLE_AGENTIC_DICTATION_FLAG = "enable_agentic_dictation";
+    public static final String CONFIG_AGENTIC_DICTATION_FLAG = "config_agentic_dictation";
+    public static final String ENABLE_JETSON_IN_TOOLBAR_FLAG = "enable_jetson_in_toolbar";
+    public static final String ENABLE_RAMBLER_AL_TOOLBAR_FLAG = "enable_rambler_al_toolbar";
+    public static final String ENABLE_RAMBLER_TOOLBAR_AT_CURSOR_FLAG =
+            "enable_rambler_toolbar_at_cursor_position";
+    public static final String AD_ACTIVATION_TYPE_FLAG = "ad_activation_type";
+
+    // nl-morphe-patches Rambler toolbar, revert & quick-paste extras (verified in 18.5.4)
+    public static final String RAMBLER_OVERFLOW_MENU_FLAG =
+            "enable_rambler_al_toolbar_overflow_menu";
+    public static final String RAMBLER_PRESERVE_REWRITTEN_FLAG =
+            "rambler_preserve_rewritten_text_on_revert";
+    public static final String QUICK_PASTE_DIRECT_CHIP_FLAG =
+            "enable_system_clipboard_direct_paste_for_quick_paste";
+    public static final String EMAIL_PROVIDER_COMPLETION_FLAG =
+            "enable_email_provider_completion";
+
     // Custom instructions
     public static final String CUSTOM_INSTRUCTION_FLAG =
             "agentic_dictation_enable_custom_instruction";
@@ -109,6 +129,7 @@ public final class RamblerFlagRuntime {
         boolean newlyHydrated = CONTEXT_HYDRATED.compareAndSet(false, true);
         boolean newlyAttachedGboard = !hadGboardListener && GBOARD_LISTENER_ATTACHED.get();
         if (newlyHydrated || newlyAttachedGboard) {
+            RamblerHiddenFlagOverrideRuntime.applyAtStartupIfNeeded(resolveContext());
             refreshLiveFlags();
         }
     }
@@ -347,6 +368,55 @@ public final class RamblerFlagRuntime {
             return rawValue;
         }
         switch (flagName) {
+            case ENABLE_AGENTIC_DICTATION_FLAG:
+            case CONFIG_AGENTIC_DICTATION_FLAG:
+            case ENABLE_JETSON_IN_TOOLBAR_FLAG:
+            case ENABLE_RAMBLER_AL_TOOLBAR_FLAG:
+            case ENABLE_RAMBLER_TOOLBAR_AT_CURSOR_FLAG:
+                return (RamblerDynamicConfig.FEATURE_BANGLA_LITE_SCRIPT
+                        || RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC
+                        || RamblerDynamicConfig.FEATURE_CUSTOM_INSTRUCTIONS
+                        || RamblerDynamicConfig.FEATURE_PRODUCTIVITY_TOOLS
+                        || RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS)
+                        ? enableBoolean(rawValue)
+                        : rawValue;
+
+            case AD_ACTIVATION_TYPE_FLAG:
+                if (rawValue instanceof Long
+                        && (RamblerDynamicConfig.FEATURE_BANGLA_LITE_SCRIPT
+                                || RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC
+                                || RamblerDynamicConfig.FEATURE_CUSTOM_INSTRUCTIONS
+                                || RamblerDynamicConfig.FEATURE_PRODUCTIVITY_TOOLS
+                                || RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS)) {
+                    return Long.valueOf(2L);
+                }
+                return rawValue;
+
+            case RAMBLER_OVERFLOW_MENU_FLAG:
+            case RAMBLER_PRESERVE_REWRITTEN_FLAG:
+            case QUICK_PASTE_DIRECT_CHIP_FLAG:
+                if (!RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS
+                        && !RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS) {
+                    return rawValue;
+                }
+                rememberLiveFlag(flagInstance, flagName);
+                if (rawValue instanceof Boolean) {
+                    return Boolean.valueOf(RamblerHiddenFlagOverrideRuntime.isEnabled(
+                            resolveContext(), flagName, true));
+                }
+                return rawValue;
+
+            case EMAIL_PROVIDER_COMPLETION_FLAG:
+                if (!RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS
+                        && !RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS) {
+                    return rawValue;
+                }
+                rememberLiveFlag(flagInstance, flagName);
+                if (rawValue instanceof Boolean) {
+                    return Boolean.valueOf(RamblerAtMentionStore.isEnabled(resolveContext()));
+                }
+                return rawValue;
+
             case CUSTOM_INSTRUCTION_FLAG:
                 return RamblerDynamicConfig.FEATURE_CUSTOM_INSTRUCTIONS
                         ? enableBoolean(rawValue)

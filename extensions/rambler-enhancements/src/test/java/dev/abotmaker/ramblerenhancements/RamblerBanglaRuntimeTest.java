@@ -16,7 +16,14 @@ public class RamblerBanglaRuntimeTest {
     @After
     public void tearDown() {
         GboardRamblerScriptFix.jvmLayoutKind = 0;
+        GboardRamblerScriptFix.setActiveGboardLocale(null);
         GboardRamblerSegmentLock.resetPin();
+        RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC = false;
+        RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS = false;
+        RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS = false;
+        RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS = false;
+        RamblerAtMentionStore.resetCacheForTesting();
+        RamblerFlagRuntime.clearForTesting();
     }
 
     @Test
@@ -49,14 +56,27 @@ public class RamblerBanglaRuntimeTest {
     }
 
     @Test
-    public void phoneticVoiceEngineConvertsBanglaKeepsEnglishAndProtectsSpans() {
-        GboardRamblerScriptFix.jvmLayoutKind = 2; // multilingual AUTO
-        String bnOut = GboardRamblerScriptFix.processVoice("ami bhalo achi");
-        Assert.assertTrue("Expected Bengali Unicode output, got: " + bnOut, containsBengali(bnOut));
+    public void phoneticVoiceEngineEndToEndBanglaLoanwordsAndMultilingual() {
+        // 1. Pure Bangla phonetic voice dictation on multilingual AUTO (bn-Latn / EN+BN)
+        GboardRamblerScriptFix.jvmLayoutKind = 2;
+        String greeting = GboardRamblerScriptFix.processVoice("ami bhalo achi, tumi kemon acho?");
+        Assert.assertTrue("Expected Bengali greeting, got: " + greeting, containsBengali(greeting));
+        Assert.assertFalse("Should not remain ASCII Banglish: " + greeting, greeting.contains("bhalo"));
 
+        // 2. Mixed Bangla + English loanwords (CMUdict loanword spellings in Bangla sentence)
+        String loanwordSentence = GboardRamblerScriptFix.processVoice(
+                "ami ajke office e jabo ar company er meeting korbo");
+        Assert.assertTrue("Expected Bengali Unicode, got: " + loanwordSentence, containsBengali(loanwordSentence));
+        Assert.assertFalse("Loanword 'company' should convert in Bangla sentence: " + loanwordSentence,
+                loanwordSentence.toLowerCase().contains("company"));
+        Assert.assertFalse("Loanword 'office' should convert in Bangla sentence: " + loanwordSentence,
+                loanwordSentence.toLowerCase().contains("office"));
+
+        // 3. Pure English sentence stays 100% byte-identical
         String enOut = GboardRamblerScriptFix.processVoice("Please send the project report tomorrow.");
         Assert.assertEquals("Please send the project report tomorrow.", enOut);
 
+        // 4. Multi-sentence mixed dictation with protected spans (#tag, @handle, URL, time)
         String mixedOut = GboardRamblerScriptFix.processVoice(
                 "ami kal office jabo #RamblerBangla @muhib https://example.com 5pm. Please check it.");
         Assert.assertTrue("Expected Bangla sentence in mixed output: " + mixedOut, containsBengali(mixedOut));
@@ -65,12 +85,53 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertTrue("URL must stay Latin: " + mixedOut, mixedOut.contains("https://example.com"));
         Assert.assertTrue("English sentence must stay English: " + mixedOut, mixedOut.endsWith("Please check it."));
 
-        GboardRamblerScriptFix.jvmLayoutKind = 3; // English-only layout
+        // 5. Native bn-BD active Gboard locale converts even short phrases
+        GboardRamblerScriptFix.jvmLayoutKind = 0;
+        GboardRamblerScriptFix.setActiveGboardLocale("bn-BD");
+        String bnOnly = GboardRamblerScriptFix.processVoice("dhaka bhalo shomoy");
+        Assert.assertTrue("bn-BD active locale must convert to Bengali: " + bnOnly, containsBengali(bnOnly));
+
+        // 6. bn-Latn active Gboard locale uses multilingual AUTO (converts Bangla, preserves English)
+        GboardRamblerScriptFix.setActiveGboardLocale("bn-Latn");
+        Assert.assertTrue(containsBengali(GboardRamblerScriptFix.processVoice("ami ekhon bari jabo")));
+        Assert.assertEquals("Good morning everyone.", GboardRamblerScriptFix.processVoice("Good morning everyone."));
+
+        // 7. English-only layout (k3) stays untouched when explicitly forced
+        GboardRamblerScriptFix.setActiveGboardLocale(null);
+        GboardRamblerScriptFix.jvmLayoutKind = 3;
         Assert.assertEquals("ami bhalo achi", GboardRamblerScriptFix.processVoice("ami bhalo achi"));
     }
 
     @Test
-    public void sensitiveAndIncognitoFieldsFailClosed() {
+    public void ramblerPlusCoreFlagsAndNlExtrasAreForcedInFlagRuntime() {
+        RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC = true;
+        RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS = true;
+        RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS = true;
+
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.ENABLE_AGENTIC_DICTATION_FLAG, Boolean.FALSE));
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.CONFIG_AGENTIC_DICTATION_FLAG, Boolean.FALSE));
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.ENABLE_JETSON_IN_TOOLBAR_FLAG, Boolean.FALSE));
+        Assert.assertEquals(Long.valueOf(2L), RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.AD_ACTIVATION_TYPE_FLAG, Long.valueOf(1L)));
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.RAMBLER_OVERFLOW_MENU_FLAG, Boolean.FALSE));
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.RAMBLER_PRESERVE_REWRITTEN_FLAG, Boolean.FALSE));
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.QUICK_PASTE_DIRECT_CHIP_FLAG, Boolean.FALSE));
+    }
+
+    @Test
+    public void commitPipelineRunsBanglaPhoneticEngineAndSkipsPasswordFields() {
+        RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC = true;
+        GboardRamblerScriptFix.jvmLayoutKind = 2;
+
+        String committed = RamblerTextPipeline.processCommitText(null, "ami ajke bhalo achi");
+        Assert.assertTrue("Commit pipeline must output Bengali Unicode: " + committed, containsBengali(committed));
+
         EditorInfo normal = new EditorInfo();
         normal.inputType = InputType.TYPE_CLASS_TEXT;
         Assert.assertFalse(RamblerTextPipeline.isSensitiveOrIncognitoField(normal));
@@ -83,6 +144,75 @@ public class RamblerBanglaRuntimeTest {
         incognito.inputType = InputType.TYPE_CLASS_TEXT;
         incognito.imeOptions = EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING;
         Assert.assertTrue(RamblerTextPipeline.isSensitiveOrIncognitoField(incognito));
+    }
+
+    @Test
+    public void atMentionStoreLearnsRanksFiltersAndRespectsEmailContext() {
+        // 1. Completed token extraction (handles + email domains, ignores partial tail)
+        java.util.List<String> extracted = RamblerAtMentionStore.extractCompletedTokens(
+                "ask @grok and @claude, then email muhib@gmail.com or @partial");
+        Assert.assertEquals(
+                java.util.Arrays.asList("@grok", "@claude", "@gmail.com"),
+                extracted);
+
+        // 2. Active prefix extraction
+        RamblerAtMentionStore.ActivePrefix bare =
+                RamblerAtMentionStore.extractActivePrefix("hey @");
+        Assert.assertNotNull(bare);
+        Assert.assertEquals("@", bare.prefix);
+        Assert.assertEquals(1, bare.deleteCount);
+        Assert.assertFalse(bare.emailDomainContext);
+
+        RamblerAtMentionStore.ActivePrefix handlePrefix =
+                RamblerAtMentionStore.extractActivePrefix("ask @gr");
+        Assert.assertNotNull(handlePrefix);
+        Assert.assertEquals("@gr", handlePrefix.prefix);
+        Assert.assertEquals(3, handlePrefix.deleteCount);
+        Assert.assertFalse(handlePrefix.emailDomainContext);
+
+        RamblerAtMentionStore.ActivePrefix emailPrefix =
+                RamblerAtMentionStore.extractActivePrefix("muhib@g");
+        Assert.assertNotNull(emailPrefix);
+        Assert.assertEquals("@g", emailPrefix.prefix);
+        Assert.assertEquals(2, emailPrefix.deleteCount);
+        Assert.assertTrue(emailPrefix.emailDomainContext);
+
+        Assert.assertNull(RamblerAtMentionStore.extractActivePrefix("hello world"));
+
+        // 3. Frequency + recency ranking & email domain filtering
+        java.util.List<RamblerAtMentionStore.Entry> learned = java.util.Arrays.asList(
+                new RamblerAtMentionStore.Entry("@claude", 5, 2000L),
+                new RamblerAtMentionStore.Entry("@grok", 9, 1000L),
+                new RamblerAtMentionStore.Entry("@anthropic.com", 4, 1500L));
+
+        java.util.List<String> onBareAt = RamblerAtMentionStore.suggest(learned, bare, 8);
+        Assert.assertEquals("@grok", onBareAt.get(0));
+        Assert.assertEquals("@claude", onBareAt.get(1));
+        Assert.assertTrue(onBareAt.contains("@gmail.com"));
+
+        java.util.List<String> onGr = RamblerAtMentionStore.suggest(learned, handlePrefix, 5);
+        Assert.assertEquals(java.util.Collections.singletonList("@grok"), onGr);
+
+        java.util.List<String> onEmailG = RamblerAtMentionStore.suggest(learned, emailPrefix, 5);
+        Assert.assertEquals(java.util.Collections.singletonList("@gmail.com"), onEmailG);
+
+        // 4. In-memory record + forget + JSON round-trip
+        RamblerAtMentionStore.recordToken(null, "@grok", 100L);
+        RamblerAtMentionStore.recordToken(null, "@claude", 200L);
+        RamblerAtMentionStore.recordToken(null, "@grok", 300L);
+        java.util.List<RamblerAtMentionStore.Entry> stored = RamblerAtMentionStore.readEntries(null);
+        Assert.assertEquals(2, stored.size());
+        String serialized = RamblerAtMentionStore.serializeEntries(stored);
+        java.util.List<RamblerAtMentionStore.Entry> roundTrip =
+                RamblerAtMentionStore.deserializeEntries(serialized);
+        Assert.assertEquals(2, roundTrip.size());
+        Assert.assertTrue(RamblerAtMentionStore.forgetToken(null, "@grok"));
+        Assert.assertEquals(1, RamblerAtMentionStore.countLearned(null));
+
+        // 5. Native Gboard enable_email_provider_completion flag is enabled when feature active
+        RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS = true;
+        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.EMAIL_PROVIDER_COMPLETION_FLAG, Boolean.FALSE));
     }
 
     private static boolean containsBengali(String s) {

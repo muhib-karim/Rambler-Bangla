@@ -32,11 +32,10 @@ public final class GboardRamblerStockPolicy {
 
     public static Object maybeForceStockRouteValue(String flagName, Object originalResult) {
         if (ENABLE_AGENTIC_DICTATION_FLAG.equals(flagName)) {
-            return originalResult instanceof Boolean
-                            && GboardRamblerOfficialSelectionRuntime
-                                    .shouldEnableAgenticDictation()
-                    ? Boolean.TRUE
-                    : originalResult;
+            // Keep enable_agentic_dictation unconditionally enabled (matching stock Pixel
+            // rollout & nl-morphe-patches) so ModuleManager always loads AgenticDictationExtension
+            // and tapping Rambler+ in Voice typing activates immediately without restart.
+            return originalResult instanceof Boolean ? Boolean.TRUE : originalResult;
         }
         if (BOOLEAN_FLAGS.contains(flagName)) {
             return originalResult instanceof Boolean ? Boolean.TRUE : originalResult;

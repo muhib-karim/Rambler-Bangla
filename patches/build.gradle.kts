@@ -197,9 +197,9 @@ val generateGboardVersionBindings = tasks.register<GenerateTargetBindingsTask>(
 patches {
     about {
         name = "Rambler Bangla"
-        description = "Unified Morphe patch suite for Gboard 18.5.4: Bengali-first Rambler Lite script policy, phonetic Bangla & multilingual dictation engine, all Rambler Enhancements (Hex waveforms, custom instructions, per-app rules, MUSE_STATS dictionary, contacts, cursor editing, app context, productivity tools), and all Gboard Patches (GboardWu) keyboard features."
+        description = "Unified 58-patch Morphe suite for Gboard 18.5.4: Bengali-first Rambler Lite script policy, phonetic Bangla & multilingual dictation engine, AMOLED Dark Keyboard + Rambler Extras + Hidden Flags (nl-morphe-patches), all Rambler Enhancements, and all Gboard Patches."
         source = "https://github.com/muhib-karim/Rambler-Bangla"
-        author = "muhib-karim (with Gboard-patches by Jason Wu & gboard-rambler-enhancements by abotmaker)"
+        author = "muhib-karim (with credits to Gboard-patches by Jason Wu, gboard-rambler-enhancements by abotmaker, and nl-morphe-patches by johninnld)"
         contact = "https://github.com/muhib-karim/Rambler-Bangla/issues"
         website = "https://muhib-karim.github.io/Rambler-Bangla/"
         license = "GPLv3"

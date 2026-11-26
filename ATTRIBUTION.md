@@ -1,7 +1,8 @@
 # Attribution and licensing
 
-Rambler Bangla v30.0.0 is a unified **GNU GPL v3.0** Morphe patch suite for Gboard 18.5.4+.
-It builds on and credits the following open-source projects:
+Rambler Bangla v31.0.0 is a unified **GNU GPL v3.0** Morphe patch suite for Gboard 18.5.4+.
+It builds on, integrates, and credits the following open-source projects in full compliance
+with their respective source licenses (GPL-3.0, MIT, MPL-2.0, BSD, and Morphe Section 7c):
 
 ## Core Upstream Patch Suites
 
@@ -18,15 +19,18 @@ It builds on and credits the following open-source projects:
   Long-Press Rambler, Toolbar button, Fix & Learn, On-Device Dictation Stats, Voice
   Send/Search, Snippets, Find & Replace, Dictation History, Auto Parallel Retry, and JSON
   Backup/Restore) and the dynamic bytecode resolver.
+- **`nl-morphe-patches` (Dutch App Patches)** by `@johninnld` —
+  https://gitlab.com/johninnld/nl-morphe-patches (docs: https://nl-morphe-patches-ed90fa.gitlab.io/apps/gboard/) — **GNU GPL v3.0**.
+  AMOLED Dark Keyboard (`#000000` Material 3 dark palette override), Rambler Toolbar & Revert
+  Extras (`enable_rambler_al_toolbar_overflow_menu`, `rambler_preserve_rewritten_text_on_revert`),
+  unconditional Rambler cloud flag activation pattern (`GboardRamblerCloudRuntime`), native
+  `OVERRIDE`-layer Hidden Flags architecture, and original inspiration for Rambler Custom
+  Instructions, `MUSE_STATS` Personal Dictionary, Contact Names syncing, Cursor-Aware Editing,
+  and App Context.
 - **Hex by Anomaly** by Christopher Langton —
   https://github.com/anomalyco/hex — **MIT License**.
   Hex Dot Scope, Hex Android Wave, and Processing (`Flow`, `Pulse`, `Sweep`) waveform
   animations ported to Android Canvas. Full MIT notice in [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
-- **`nl-morphe-patches`** by `@johninnld` —
-  https://gitlab.com/johninnld/nl-morphe-patches — **GNU GPL v3.0**.
-  Original inspiration and techniques for Rambler Custom Instructions, `UserFeatureCache`
-  `MUSE_STATS` Personal Dictionary, Contact Names syncing, Cursor-Aware Editing, and App
-  Context.
 - **PixelBoard** by Akshay Kadam (`@Akshayykadam`) —
   https://github.com/Akshayykadam/PixelBoard — **GNU GPL v3.0**.
   Original extension-carrier architecture, runtime-ABI conventions, and early 18.3.1 Rambler

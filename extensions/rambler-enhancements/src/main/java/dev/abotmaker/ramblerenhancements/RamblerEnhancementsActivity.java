@@ -527,14 +527,10 @@ public final class RamblerEnhancementsActivity extends Activity {
                 true,
                 () -> openSection(SECTION_BACKUP));
 
-        // Credits footer
+        // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
         TextView creditView = new TextView(this);
-        creditView.setText(
-                "Rambler Bangla (muhib-karim/Rambler-Bangla, GPLv3) · "
-                        + "Gboard Patches / GboardWu (jasonwu1994/Gboard-patches, GPLv3) · "
-                        + "Rambler Enhancements (abotmaker/gboard-rambler-enhancements, GPLv3) · "
-                        + "Hex waveforms (anomalyco/hex, MIT) · nl-morphe-patches (GPLv3).");
+        creditView.setText("Rambler Bangla v31.0.0 — by muhib-karim (GPLv3)");
         creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         creditView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(
@@ -584,6 +580,47 @@ public final class RamblerEnhancementsActivity extends Activity {
                 ? "Phonetic + Loanword + SentenceLang engine: ACTIVE\n" : "Phonetic engine: not patched\n")
                 + "Converted voice commits: " + converted;
         addRow("Active Bangla layers", activeLayers, enabled ? "Active" : "Paused", false, null);
+
+        if (RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS) {
+            addSectionHeader("@Mention & email strip (SwiftKey-style)");
+            boolean atOn = RamblerAtMentionStore.isEnabled(this);
+            int learnedCount = RamblerAtMentionStore.countLearned(this);
+            addToggleRow(
+                    "@Mention & email strip suggestions",
+                    "Shows previously typed @handles (@grok, @claude) and email domains (@gmail.com) as tap-to-insert chips on the suggestion strip. Long-press any chip to forget it. Always off in password/incognito fields.",
+                    atOn,
+                    checked -> {
+                        RamblerAtMentionStore.setEnabled(this, checked);
+                        RamblerFlagRuntime.refreshLiveFlags();
+                        refreshUi();
+                    });
+            addRow(
+                    "Learned @mentions & domains",
+                    learnedCount == 0
+                            ? "No custom @handles learned yet (built-in email domains active). Type @grok or @claude once and it will appear automatically."
+                            : (learnedCount + " learned entries saved on-device. Tap to clear all learned @mentions."),
+                    learnedCount + " saved",
+                    learnedCount > 0,
+                    () -> {
+                        RamblerAtMentionStore.clearAll(this);
+                        showToast("Cleared learned @mentions.");
+                        refreshUi();
+                    });
+        }
+
+        if (RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS || RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS) {
+            addSectionHeader("Rambler extras & hidden flags (live override)");
+            for (RamblerHiddenFlagOverrideRuntime.Entry entry : RamblerHiddenFlagOverrideRuntime.entries()) {
+                boolean on = RamblerHiddenFlagOverrideRuntime.isEnabled(
+                        this, entry.flagName, entry.defaultEnabled);
+                final String flagName = entry.flagName;
+                addToggleRow(entry.title, entry.summary, on, checked -> {
+                    RamblerHiddenFlagOverrideRuntime.setEnabled(this, flagName, checked);
+                    RamblerFlagRuntime.refreshLiveFlags();
+                    refreshUi();
+                });
+            }
+        }
     }
 
     private void buildWaveformSection() {

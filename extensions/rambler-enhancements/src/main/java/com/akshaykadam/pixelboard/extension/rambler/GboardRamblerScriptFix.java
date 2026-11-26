@@ -19,7 +19,14 @@ public final class GboardRamblerScriptFix {
     private static java.util.ArrayList diagBuffer;
     private static java.text.SimpleDateFormat diagSdf;
     public static int jvmLayoutKind;
+    private static volatile java.lang.String activeGboardLocale;
     private static volatile java.lang.String lastVoiceEngine;
+
+    public static void setActiveGboardLocale(java.lang.String localeTag) {
+        activeGboardLocale = (localeTag == null || localeTag.trim().isEmpty())
+                ? null
+                : localeTag.trim();
+    }
 
     static void addDiag(java.lang.String str) {
         if (com.akshaykadam.pixelboard.extension.rambler.GboardRamblerScriptFixSettings.isDiagArmed()) {
@@ -742,6 +749,19 @@ public final class GboardRamblerScriptFix {
             int i2 = jvmLayoutKind;
             if (i2 != 0) {
                 return i2;
+            }
+            java.lang.String gboardTag = activeGboardLocale;
+            if (gboardTag != null && !gboardTag.isEmpty()) {
+                java.lang.String lower = gboardTag.toLowerCase(java.util.Locale.US).replace('_', '-');
+                if (lower.startsWith("bn")) {
+                    if (lower.contains("-latn")) {
+                        return 2;
+                    }
+                    return 1;
+                }
+                if (lower.startsWith("en")) {
+                    return com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLayoutPair.adjust(3, lower, lower);
+                }
             }
             android.content.Context currentApplication = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerScriptFixSettings.currentApplication();
             if (currentApplication == null || (inputMethodManager = (android.view.inputmethod.InputMethodManager) currentApplication.getSystemService("input_method")) == null || (currentInputMethodSubtype = inputMethodManager.getCurrentInputMethodSubtype()) == null) {

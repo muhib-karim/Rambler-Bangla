@@ -29,7 +29,7 @@
     <string name="gboard_patches_frosted_glass_faq_not_working_title">Why isn\'t Frosted Glass working?</string>
     <string name="gboard_patches_frosted_glass_faq_flickering_title">Why do I see flickering while typing on Pixel phones?</string>
     <string name="gboard_patches_activity_title">Patches</string>
-    <string name="gboard_patches_header_badge">Gboard</string>
+    <string name="gboard_patches_header_badge">Rambler Bangla</string>
     <string name="gboard_patches_header_summary"></string>
     <string name="gboard_patches_preview_label">Preview</string>
     <string name="gboard_patches_confirm_action">Confirm</string>
@@ -37,7 +37,7 @@
     <string name="gboard_patches_dialog_save">Save</string>
     <string name="gboard_patches_dialog_close">Close</string>
     <string name="gboard_patches_keyboard_preview_action">Open keyboard</string>
-    <string name="gboard_patches_keyboard_preview_title">Gboard Patches</string>
+    <string name="gboard_patches_keyboard_preview_title">Rambler Bangla</string>
     <string name="gboard_patches_keyboard_preview_input_accessibility">Keyboard test field</string>
     <string name="gboard_patches_dialog_error_positive">Enter a positive number.</string>
     <string name="gboard_patches_dialog_error_save_failed">Failed to save setting.</string>

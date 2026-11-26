@@ -85,4 +85,132 @@ class RamblerBanglaPatchTest {
             assertTrue(expected.message.orEmpty().contains("FAIL-CLOSED"))
         }
     }
+
+    @Test
+    fun amoledDarkKeyboardPatchesPaletteConstructorAndIsIdempotent() {
+        val ctor = ImmutableMethod(
+            "Lrmt;",
+            "<init>",
+            listOf(
+                ImmutableMethodParameter("Landroid/content/Context;", emptySet(), null),
+                ImmutableMethodParameter("Z", emptySet(), null),
+            ),
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.CONSTRUCTOR.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(5),
+        ).toMutable().apply {
+            addInstructions(
+                0,
+                """
+                invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+                iput-boolean p2, p0, Lrmt;->a:Z
+                const/4 v0, 0x1
+                iput v0, p0, Lrmt;->P:I
+                iput v0, p0, Lrmt;->Q:I
+                iput v0, p0, Lrmt;->R:I
+                iput v0, p0, Lrmt;->S:I
+                return-void
+                """.trimIndent(),
+            )
+        }
+        val fields = listOf("Lrmt;->P:I", "Lrmt;->Q:I", "Lrmt;->R:I", "Lrmt;->S:I")
+        ctor.applyAmoledDarkPalette("Lrmt;->a:Z", fields)
+        val countAfterFirst = ctor.implementation!!.instructions.size
+        assertTrue(countAfterFirst > 8)
+        // Second call must be idempotent
+        ctor.applyAmoledDarkPalette("Lrmt;->a:Z", fields)
+        assertEquals(countAfterFirst, ctor.implementation!!.instructions.size)
+    }
+
+    @Test
+    fun atMentionLifecycleHooksPreserveCalculatorInstructionZeroAndAreIdempotent() {
+        val onStart = ImmutableMethod(
+            "Lphr;",
+            "onStartInputView",
+            listOf(
+                ImmutableMethodParameter("Landroid/view/inputmethod/EditorInfo;", emptySet(), null),
+                ImmutableMethodParameter("Z", emptySet(), null),
+            ),
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(5),
+        ).toMutable().apply {
+            addInstructions(
+                0,
+                """
+                invoke-static {p0, p1}, Ldev/jason/gboardpatches/extension/incognito/GboardManualIncognitoRuntime;->onInputViewStarting(Ljava/lang/Object;Landroid/view/inputmethod/EditorInfo;)V
+                return-void
+                """.trimIndent(),
+            )
+        }
+        val onUpdate = ImmutableMethod(
+            "Lphr;",
+            "onUpdateSelection",
+            listOf("I", "I", "I", "I", "I", "I").map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(8),
+        ).toMutable().apply {
+            addInstructions(
+                0,
+                """
+                invoke-direct {p0, p3, p4}, Lphr;->gboardPatchesCalculatorSelection(II)V
+                return-void
+                """.trimIndent(),
+            )
+        }
+        val onHidden = ImmutableMethod(
+            "Lphr;",
+            "onWindowHidden",
+            emptyList(),
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(2),
+        ).toMutable().apply {
+            addInstructions(0, "return-void")
+        }
+
+        val imeClass = app.morphe.patcher.util.proxy.mutableTypes.MutableClass(
+            com.android.tools.smali.dexlib2.immutable.ImmutableClassDef(
+                "Lphr;",
+                AccessFlags.PUBLIC.value,
+                "Landroid/inputmethodservice/InputMethodService;",
+                emptyList(),
+                null,
+                emptySet(),
+                emptyList(),
+                listOf(onStart, onUpdate, onHidden),
+            ),
+        )
+        val fieldRef = "Lphr;->i:Lcom/google/android/libraries/inputmethod/inputview/InputView;"
+        installAtMentionLifecycleHooksOnClass(imeClass, fieldRef)
+
+        val updatedStart = imeClass.methods.single { it.name == "onStartInputView" }
+        val startRefs = updatedStart.implementation!!.instructions
+            .mapNotNull { (it as? ReferenceInstruction)?.reference?.toString() }
+        // Must run AFTER Manual Incognito hook so incognito flag is already set
+        assertTrue(startRefs[0].contains("GboardManualIncognitoRuntime"))
+        assertTrue(startRefs[1].contains("RamblerAtMentionStripRuntime;->onInputViewStarted"))
+
+        val updatedSel = imeClass.methods.single { it.name == "onUpdateSelection" }
+        assertEquals(8, updatedSel.implementation!!.registerCount)
+        val selRefs = updatedSel.implementation!!.instructions
+            .mapNotNull { (it as? ReferenceInstruction)?.reference?.toString() }
+        // Instruction 0 MUST stay gboardPatchesCalculatorSelection for conflict-free coexistence
+        assertTrue(selRefs[0].contains("gboardPatchesCalculatorSelection"))
+        assertTrue(selRefs[1].contains("ramblerBanglaAtMentionSelection"))
+
+        // Idempotent second invocation
+        val selCount = updatedSel.implementation!!.instructions.size
+        installAtMentionLifecycleHooksOnClass(imeClass, fieldRef)
+        assertEquals(selCount, updatedSel.implementation!!.instructions.size)
+    }
 }
