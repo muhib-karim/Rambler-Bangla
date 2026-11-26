@@ -156,7 +156,7 @@ are:
   [`data/loanspell/`](../data/loanspell/README.md).
 
 Hooks for these helpers in the patch layer's own classes are recorded in
-[`patches/v29.3-smali-hooks.diff`](../patches/v29.3-smali-hooks.diff). Design
+[`docs/historical/v29.3-smali-hooks.diff`](historical/v29.3-smali-hooks.diff). Design
 background: [`V28-SEGMENT-LOCK.md`](V28-SEGMENT-LOCK.md),
 [`V29-DESIGN.md`](V29-DESIGN.md) and
 [`V29.3-RELEASE-NOTES.md`](V29.3-RELEASE-NOTES.md). The V29.3 golden corpus and

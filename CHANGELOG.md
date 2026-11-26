@@ -1,6 +1,17 @@
 # Changelog
 
-All notable changes to Rambler Bangla. Dates are AEST/AEDT. Test builds are maintainer builds, not public downloads; see the README section "Source only, no APKs".
+All notable changes to Rambler Bangla. Dates are AEST/AEDT.
+
+## [30.0.0] - 2026-11-27
+
+Unified **Morphe Patcher 2.1.0** patch suite targeting Gboard `18.5.4.993608717-release-arm64-v8a` with **55 selectable Morphe patches** in a single `patches-30.0.0.mpp` bundle, combining Rambler Bangla's Bengali-first phonetic/voice engine with all upstream features from `abotmaker/gboard-rambler-enhancements` (v1.3.4) and `jasonwu1994/Gboard-patches` (v4.5.0).
+
+- **Rambler Bangla Lite Script Policy (Morphe patch):** Dynamically resolves Gboard 18.5.4's JetsonLite cleanup builder (`fja.d`) and prompt owner (`ezn.b`) using fail-closed SHA-256 fingerprint verification, supporting both 18.5.4 and 18.3.1 anchor orderings. Preserves Bengali Unicode for `bn-BD`, `bn-IN`, and `bn-Beng` while respecting explicit `bn-Latn` Romanization.
+- **Rambler Bangla Phonetic & Multilingual Engine (Morphe patch):** Ports the complete V29.3+/V29.5 Bengali phonetic transliteration engine (`GboardRamblerScriptFix`, `GboardRamblerSegmentLock`, `GboardRamblerSentenceLang`, `GboardRamblerLoanSpell`, `GboardRamblerLoanTable`, `GboardRamblerTier1`, `GboardRamblerEnglishWords`, `GboardRamblerDiag`, `GboardRamblerLayoutPair`) into the Morphe extension, wired ahead of `RamblerTextPipeline` with fail-closed password/sensitive/incognito field bypass and a native Material You **Rambler Bangla (phonetic & script)** Settings page.
+- **Gboard Rambler Enhancements (`abotmaker/gboard-rambler-enhancements` v1.3.4, GPL v3.0):** All 7 patches integrated — Hex by Anomaly Waveform Animation (MIT), Custom Instructions & Per-App Rules, Personal Dictionary (`MUSE_STATS`), Contact Names Sync, Cursor-Aware & Append-Only Editing, App Context, and Rambler Productivity Tools (Smart Search Bars, Spacebar Long-Press Rambler, Toolbar quick-access button, Fix & Learn, On-Device Dictation Stats, Hands-Free Voice Send & Search, Voice Snippets, Find & Replace, Dictation History, Auto Parallel Retry, Longer Dictation Sessions, and JSON Backup & Restore).
+- **Gboard Patches / GboardWu (`jasonwu1994/Gboard-patches` v4.5.0, GPL v3.0):** All 46 patches integrated — Advanced Voice Typing, AI Writing Tools, Backup & Restore, Clipboard Enhancements & Custom Character Limit, Custom Theme (Rboard/ZIP), Frosted Glass, Web Clipboard, LAN FTP Server, Floating Web Search, Simple Calculator, OCR / Scan Text, Toolbar Editing Buttons, Long-Press Editing Shortcuts, Swipeable Custom Top Row, Swipe Down to Dismiss, Shift + Backspace Forward Delete, Incognito Mode Toggle, Custom Symbols, G Logo on Spacebar, Rounded Keyboard Panel, Keypress Vibration Intensity Control, Dictionaries & Predictions, Package Rename (defaulting to `Rambler Bangla` / `com.aidev2024.ramblerbangla`), Signature Bypass, and all Gboard feature unlocks.
+- **Attribution & Notices:** Full third-party credits and licenses documented in `ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `NOTICE` (Morphe Section 7c), `NOTICE-cmudict.txt`, and `README.md`.
+- **Legacy 18.3.1 standalone patcher & CI preserved:** All 88 Python unit tests and 22 static-suite checks remain intact; historical `v29.3-smali-hooks.diff` moved to `docs/historical/v29.3-smali-hooks.diff`.
 
 ## Unreleased (in review, PR #26)
 
