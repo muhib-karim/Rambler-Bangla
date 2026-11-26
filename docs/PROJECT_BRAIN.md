@@ -7,46 +7,47 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Status
 
-- Branch `tab/production-grade` holds a production-grade pass and is open as
-  PR #23. The maintainer reported CI green on its first 11 commits
-  (2026-11-10). The APK URL allowlist fix made after review is committed
-  locally and **not pushed**.
-- What the pass changed:
-  - CI pass gate for the static suite (`set -euo pipefail` plus the exact
-    `TEST SUITE: N passed, 0 failed` line), with
-    `.github/scripts/ci_gate_selftest.sh` now run by the `unit` job.
-  - Patcher (`standalone-patcher/dex_patch.py`): strict smali parsing, abort
-    when `String.replace` overwrites the languages register, `--extension-dex`
-    and `--workdir` checked before any work, output APK written atomically.
-  - `scripts/verify_apk.sh single` exits 1 on a failed signature, a `MISSING`
-    fingerprint or a `NOT FOUND` method, and accepts only `--profile <file>`.
-  - `scripts/bootstrap_tools.sh` deletes partial or mismatched downloads.
-  - `ci.yml` actions pinned by commit SHA.
-  - `android-smoke.yml`, `clipboard-e2e.yml` and
-    `keyboard-onboarding-probe.yml` share one APK URL check: https only, and
-    the allowlist is matched against the real host (authority without
-    userinfo or port). `.github/scripts/url_allowlist_selftest.sh` runs that
-    block from the workflows and fails if the three copies differ; the `unit`
-    job runs it.
-- Checked locally: 66 Python unit tests and both self-tests pass.
-  `verify_apk.sh` and `bootstrap_tools.sh` were exercised with stubs only.
-- The static suite (`tests/run_tests.sh`) is never run locally; `AGENTS.md`
-  reserves it for CI.
+- Branch `feat/morphe-unified-v30` upgrades Rambler Bangla into a unified
+  **Morphe Patcher 2.1.0** patch suite (`v30.0.0`) targeting Gboard
+  `18.5.4.993608717-release-arm64-v8a` with **55 selectable Morphe patches**:
+  - **2 Rambler Bangla patches**: `Rambler Bangla Lite Script Policy`
+    (fail-closed SHA-256 fingerprint-guarded JetsonLite `fja.d` / `ezn.b` hooks,
+    supporting both Gboard 18.5.4 `adcb7fd5...` and 18.3.1 `347a9484...` cleanup
+    prompts plus Hinglish override `a0245134...` in both anchor orderings) and
+    `Rambler Bangla Phonetic & Multilingual Engine` (complete V29.3+/V29.5
+    `GboardRamblerScriptFix`, `GboardRamblerSegmentLock`,
+    `GboardRamblerSentenceLang`, `GboardRamblerLoanSpell`, `GboardRamblerLoanTable`,
+    `GboardRamblerTier1`, `GboardRamblerEnglishWords`, `GboardRamblerDiag`,
+    `GboardRamblerLayoutPair`, wired into `RamblerTextPipeline` with fail-closed
+    sensitive/password/incognito field bypass and native Settings toggles).
+  - **7 Gboard Rambler Enhancements patches** merged from
+    `abotmaker/gboard-rambler-enhancements` v1.3.4 (with full credits).
+  - **46 Gboard Patches (GboardWu) patches** merged from
+    `jasonwu1994/Gboard-patches` v4.5.0 (with `Package Rename` defaulting to
+    `Rambler Bangla` / `com.aidev2024.ramblerbangla` and full credits).
+- All legacy 18.3.1 standalone patcher files, 88 Python unit tests, and 22
+  static-suite checks remain intact and green.
 - `README.md` quotes the number of Python unit tests, and
   `tests/python/test_docs_homepage.py` fails if it is wrong. Update the number
   whenever a test is added or removed.
 
 ## Next step
 
-1. Push the allowlist fix to PR #23 and confirm CI is green again, including
-   the new self-test step. `AGENTS.md` asks for patcher changes in their own
-   reviewed PR; PR #23 carries the three `patcher:` commits with the rest, so
-   split them out if the reviewer wants that.
-2. Follow-ups found during the pass, none started:
-   - `CHANGELOG.md` has no entry for this pass.
+1. Maintain Gboard version bindings as newer Gboard 18.5.4+ releases ship.
+2. Keep upstream syncs from `jasonwu1994/Gboard-patches` and
+   `abotmaker/gboard-rambler-enhancements` attributed in `ATTRIBUTION.md` and
+   `THIRD-PARTY-NOTICES.md`.
 
 ## Session log
 
+- 2026-11-27: Unified Morphe patch suite v30.0.0 (`feat/morphe-unified-v30`):
+  merged all 46 `jasonwu1994/Gboard-patches` v4.5.0 patches + all 7
+  `abotmaker/gboard-rambler-enhancements` v1.3.4 patches + 2 new Rambler Bangla
+  18.5.4 Morphe patches with full V29.5 phonetic/multilingual/loanword runtime
+  and native Settings UI. Built & verified `patches-30.0.0.mpp` and patched
+  Gboard 18.5.4 APK via Morphe CLI on Colab, ran all Gradle/Python/emulator tests,
+  updated credits (`ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `NOTICE`),
+  `SKILLS_USED.md`, and cut release `v30.0.0`.
 - 2026-11-15: scan_fingerprints fail-closed abort, verify_apk.sh static-suite
   gate (21 -> 22 checks), bootstrap_tools.sh header correction. Local
   verification: 88 Python tests, static suite 22/22. Delivered as unmerged

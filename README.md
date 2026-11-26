@@ -1,19 +1,22 @@
-<p align="center"><img src="docs/banner.svg" alt="Rambler Bangla: Bengali-first voice typing patch for Gboard 18.3.1" width="100%"></p>
+<p align="center"><img src="docs/banner.svg" alt="Rambler Bangla: Bengali-first voice typing & unified Morphe patch suite for Gboard 18.5.4" width="100%"></p>
 
-<h3 align="center">Dictate in Bangla. Get Bangla.</h3>
+<h3 align="center">Dictate in Bangla. Get Bangla. Now a unified 55-patch Morphe suite for Gboard 18.5.4.</h3>
 
-<p align="center">A fail-closed, fingerprint-guarded patch layer that keeps Gboard 18.3.1 voice typing in Bengali script.</p>
+<p align="center">A fail-closed, fingerprint-guarded Morphe patch suite combining Bengali-first Rambler voice typing &amp; phonetic Bangla normalization with all features from <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a> and <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches (GboardWu)</a>.</p>
 
 <p align="center">
+<a href="https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard"><img src="https://img.shields.io/badge/Morphe-Add%20Patch%20Source-4285F4?style=for-the-badge" alt="Add Source to Morphe"></a>
 <a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/ci.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg" alt="Static test suite"></a>
 <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest"><img src="https://img.shields.io/github/v/release/muhib-karim/Rambler-Bangla" alt="Latest release"></a>
 <a href="LICENSE"><img src="https://img.shields.io/github/license/muhib-karim/Rambler-Bangla" alt="Licence: GPL-3.0"></a>
-<img src="https://img.shields.io/badge/Gboard-18.3.1-0B1F3B" alt="Targets Gboard 18.3.1 only">
-<img src="https://img.shields.io/badge/distribution-source%20only-F6B13E" alt="Source only, no APKs">
+<img src="https://img.shields.io/badge/Gboard-18.5.4-0B1F3B" alt="Targets Gboard 18.5.4 (Morphe) and 18.3.1 (legacy standalone)">
+<img src="https://img.shields.io/badge/patches-55%20Morphe%20patches-F6B13E" alt="55 Morphe patches">
 </p>
 
 <p align="center">
+<a href="#included-patches"><b>Included Patches (55)</b></a> ·
+<a href="#install"><b>Install in Morphe</b></a> ·
 <a href="#build-from-source"><b>Build from source</b></a> ·
 <a href="#how-it-works"><b>How it works</b></a> ·
 <a href="#faq"><b>FAQ</b></a> ·
@@ -44,6 +47,235 @@ Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into L
 - [Tech stack and project structure](#tech-stack-and-project-structure)
 - [Links](#links)
 - [Credits and licence](#credits-and-licence)
+
+## Included Patches
+
+Rambler Bangla v30.0.0 ships **55 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
+
+### Rambler Bangla (Bengali-First Voice & Phonetic Engine)
+
+<details>
+  <summary><code>Rambler Bangla Lite Script Policy</code></summary>
+
+  Fail-closed, SHA-256 fingerprint-guarded Bengali Unicode script policy for Gboard Rambler / Jetson Lite cleanup (`bn-BD`, `bn-IN`, `bn-Beng` stay in Bengali Unicode; explicit `bn-Latn` keeps Romanization).
+</details>
+
+<details>
+  <summary><code>Rambler Bangla Phonetic &amp; Multilingual Engine</code></summary>
+
+  Full V29.3+/V29.5 post-ASR Bengali phonetic transliteration, one-language-per-sentence multilingual AUTO routing, Avro-derived 2,265-pair Tier-1 normalization, CMUdict-derived English loanword transliteration in Bangla (e.g. `company` → কোম্পানি), protected spans (`#hashtags`, `@handles`, URLs, emails, times), Unicode NFC normalization, fail-closed sensitive/password/incognito field bypass, and native Settings toggles.
+</details>
+
+### Rambler Enhancements *(credit: [abotmaker/gboard-rambler-enhancements](https://github.com/abotmaker/gboard-rambler-enhancements), [Hex by Anomaly](https://github.com/anomalyco/hex) MIT, [nl-morphe-patches](https://gitlab.com/johninnld/nl-morphe-patches))*
+
+<details>
+  <summary><code>Rambler Waveform Animation</code></summary>
+
+  Replaces Gboard Rambler's light bar with Hex by Anomaly's Listening (`Hex Dot Scope`, `Hex Android Wave`) and Processing (`Flow`, `Pulse`, `Sweep`) animations, independent colors, and Hex tuning.
+</details>
+
+<details>
+  <summary><code>Rambler Custom Instructions</code></summary>
+
+  Enables persistent custom style/formatting rules plus Per-app custom instructions (named presets, searchable zero-permission app picker, per-app Append-only / App context / Strip trailing period overrides, and disabled apps).
+</details>
+
+<details>
+  <summary><code>Rambler Personal Dictionary</code></summary>
+
+  Enables Gboard's `UserFeatureCache` `MUSE_STATS` personal voice biasing dictionary with live toggle, add, `.txt` import/export, remove, and clear controls.
+</details>
+
+<details>
+  <summary><code>Rambler Contact Names</code></summary>
+
+  Seeds up to 1,000 phone contact names into Rambler's `MUSE_STATS` voice dictionary when Contacts permission is granted, with manual sync and reset controls.
+</details>
+
+<details>
+  <summary><code>Rambler Cursor-Aware Editing</code></summary>
+
+  Enables cursor-aware editing, selected-text-only spoken edits, optional post-edit reselection (off by default), and Append-only dictation with clean cursor-boundary spacing.
+</details>
+
+<details>
+  <summary><code>Rambler App Context</code></summary>
+
+  Enables sharing active app name, input type, and field hint with Rambler, with a live toggle.
+</details>
+
+<details>
+  <summary><code>Rambler Productivity Tools</code></summary>
+
+  Adds Smart Search Bars (auto-strip trailing period + per-app Auto-Search on commit), Long-press Spacebar for Rambler (Smart Hybrid / Hold-to-Talk / Toggle), draggable Rambler toolbar quick-access button, 1-Tap Fix &amp; Learn from Dictation History, private On-Device Dictation Stats (WPM, latency, time saved), opt-in Voice Send &amp; Search suffixes, Voice Snippets, Find &amp; Replace (plain/regex, global/per-app), local 50-entry Dictation History, Auto Parallel Retry, configurable Max Dictation Duration, and JSON Settings Backup &amp; Restore.
+</details>
+
+### Gboard Patches / GboardWu *(credit: [jasonwu1994/Gboard-patches](https://github.com/jasonwu1994/Gboard-patches))*
+
+<details>
+  <summary><code>Dictionaries &amp; Predictions</code></summary>
+
+  Choose resource versions for dictionaries, predictions, and input correction.
+</details>
+
+<details>
+  <summary><code>Clipboard Enhancements</code></summary>
+
+  Enhance clipboard retention time, item count limits, preview lines, countdown and creation-time labels, order index, grid columns, and optional 1,000-character preview truncation.
+</details>
+
+<details>
+  <summary><code>Web Clipboard</code></summary>
+
+  Phone-hosted LAN Web Clipboard portal with browser sync, image transfer, pairing code gate, and Quick Settings Tile.
+</details>
+
+<details>
+  <summary><code>Floating Web Search</code></summary>
+
+  Open a floating web page directly from Gboard to quickly search.
+</details>
+
+<details>
+  <summary><code>Custom Theme</code></summary>
+
+  Import custom ZIP themes and themes from the official Rboard repository.
+</details>
+
+<details>
+  <summary><code>Frosted Glass</code></summary>
+
+  Adds live background blur and custom-theme transparency to the keyboard on supported Android 12+ devices.
+</details>
+
+<details>
+  <summary><code>FTP Server</code></summary>
+
+  Hosts a LAN FTP server on your phone with file browsing, uploads, downloads, resume, and Quick Settings Tile.
+</details>
+
+<details>
+  <summary><code>Long-Press Editing Shortcuts</code></summary>
+
+  Add Select all, Undo, Copy, Cut, Paste, and Redo long-press shortcuts to English QWERTY and Zhuyin.
+</details>
+
+<details>
+  <summary><code>Toolbar Editing Buttons</code></summary>
+
+  Add Select All, Copy, Cut, Paste, Forward Delete, Home/End, Tab, and arrow buttons to the toolbar menu.
+</details>
+
+<details>
+  <summary><code>Swipeable Custom Top Row</code></summary>
+
+  Swipe the top row horizontally to open customizable text and JavaScript slots.
+</details>
+
+<details>
+  <summary><code>Incognito Mode Toggle</code></summary>
+
+  Add an Incognito toggle to the Access Point toolbar and configure clipboard and voice availability in Incognito mode.
+</details>
+
+<details>
+  <summary><code>Custom Symbols</code></summary>
+
+  Adds a dedicated symbols tab and a quick access entry from the comma long-press popup.
+</details>
+
+<details>
+  <summary><code>Simple Calculator</code></summary>
+
+  Inline arithmetic calculator in Gboard's suggestion row; tap to replace or long-press to copy.
+</details>
+
+<details>
+  <summary><code>Swipe Down to Dismiss Keyboard</code></summary>
+
+  Swipe down from suggestions or toolbar to close the keyboard.
+</details>
+
+<details>
+  <summary><code>Shift + Backspace Forward Delete</code></summary>
+
+  Hold Shift and press Backspace to forward-delete the character after the cursor.
+</details>
+
+<details>
+  <summary><code>G Logo on Spacebar</code></summary>
+
+  Show a built-in icon or custom PNG/WebP/JPEG on the spacebar with configurable color and size.
+</details>
+
+<details>
+  <summary><code>Rounded Keyboard Panel</code></summary>
+
+  Customize which corners of the keyboard panel are rounded and set top/bottom radii separately.
+</details>
+
+<details>
+  <summary><code>Latin Globe Key Ignore Interval</code></summary>
+
+  Add an independent English globe key ignore interval override for post-typing language-switch delay.
+</details>
+
+<details>
+  <summary><code>Emojis, stickers &amp; GIFs Tab Order</code></summary>
+
+  Customize the bottom tab order in Gboard's Emojis, stickers &amp; GIFs panel with drag-and-drop reordering.
+</details>
+
+<details>
+  <summary><code>Backup &amp; Restore</code></summary>
+
+  Export/restore Gboard Patches settings (JSON), Gboard personal data (ZIP), and raw PB/XML flag stores.
+</details>
+
+<details>
+  <summary><code>Keypress Vibration Intensity Control</code></summary>
+
+  Control keypress vibration intensity instead of duration.
+</details>
+
+<details>
+  <summary><code>AI Writing Tools</code></summary>
+
+  Enables the <code>Text correction &gt; Writing tools</code> setting with support for all languages.
+</details>
+
+<details>
+  <summary><code>Advanced Voice Typing</code></summary>
+
+  Enable Advanced Voice Typing (Rambler) with automatic punctuation, plus Traditional Chinese automatic punctuation.
+</details>
+
+<details>
+  <summary><code>Enable OCR / Scan Text</code></summary>
+
+  Enable the OCR / Scan Text feature with Latin, Chinese, Japanese, Korean, and Devanagari recognition backends.
+</details>
+
+<details>
+  <summary><code>Use Bluetooth Microphone</code></summary>
+
+  Enables the <code>Voice typing &gt; Use Bluetooth microphone</code> setting and its related rollout gate.
+</details>
+
+<details>
+  <summary><code>Package Rename</code> &amp; <code>Add Gboard Signature Bypass</code></summary>
+
+  Renames package &amp; app label (defaults to <code>Rambler Bangla</code> / <code>com.aidev2024.ramblerbangla</code>, configurable to <code>GboardWu</code> or stock) so it installs side-by-side with stock Gboard, and bypasses signature whitelist checks.
+</details>
+
+Plus all Gboard feature unlocks from `jasonwu1994/Gboard-patches`: `English QWERTY Up-Flick Uppercase`, `Enable Inline Autofill Suggestions`, `Grammar Checker`, `Inline Suggestions`, `Key Shape Selection`, `Change emoji size`, `Enable cursor trackpad mode`, `Enable split keyboard`, `Enable accessibility layout`, `Quick Insert`, `Close Proactive Suggestions`, `Clipboard Custom Character Limit`, `Access Points menu style`, `Top Toolbar Item Count`, `Settings Homepage Override`, `Developer options`, `Zhuyin Slide Input`, `Zhuyin Quick Traditional/Simplified Toggle`, and `Zhuyin Bottom Row Key Sizes`.
+
+## Install
+
+Add this repository as a **Morphe** patch source to patch stock Gboard `18.5.4.993608717-release-arm64-v8a` directly on your phone:
+
+- [Open in Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)
+- Or manually add bundle URL: `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json`
 
 ## Features
 
@@ -218,7 +450,8 @@ Turn off **Bangla script correction** and try again. If the result is the same, 
 
 ### Released
 
-- **V29.4.1 (2026-10-21, docs only, untagged):** this README and the website refresh. No code changes.
+- **v30.0.0 (2026-11-27)**, tag [v30.0.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v30.0.0): unified 55-patch Morphe suite targeting Gboard `18.5.4.993608717-release-arm64-v8a`, combining Rambler Bangla (Lite Script Policy + full V29.3+/V29.5 Phonetic & Multilingual Engine), all 7 patches from `abotmaker/gboard-rambler-enhancements` v1.3.4, and all 46 patches from `jasonwu1994/Gboard-patches` v4.5.0.
+- **V29.4.1 (2026-10-21, docs only, untagged):** README and website refresh. No code changes.
 - **V29.4 (2026-10-18)**, tag [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4): source release and new maintainer signing key; no conversion changes. Builds signed with the new key cannot install over a V29.3 build: uninstall once first. Notes: [`docs/V29.4-RELEASE-NOTES.md`](docs/V29.4-RELEASE-NOTES.md). Build record: [`ledger/v29.4-provenance.md`](ledger/v29.4-provenance.md).
 - **V29.3 (2026-09-24)**, tag [v29.3](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3): one language per sentence in multilingual dictation, English loanword spelling in Bangla voice output. Notes: [`docs/V29.3-RELEASE-NOTES.md`](docs/V29.3-RELEASE-NOTES.md). Build record: [`ledger/v29.3-provenance.md`](ledger/v29.3-provenance.md).
 - **V29 (2026-09-23):** field iteration. Design: [`docs/V29-DESIGN.md`](docs/V29-DESIGN.md), fixtures: [`docs/V29-FIXTURES.md`](docs/V29-FIXTURES.md).
@@ -273,7 +506,9 @@ tests/                run_tests.sh static suite, python/ unit tests, Java policy
 scripts/              bootstrap_tools.sh, verify_apk.sh, clip_e2e.py (emulator driver)
 rename/               side-by-side package rename tooling
 morphe-patch/         Morphe bytecode patch + RuntimeAbi snippet for the upstream tree
-patches/              V29.3 smali hook diff for the patch layer's own classes
+patches/              Unified Morphe Patcher 2.1.0 Gradle module (55 patches -> patches-30.0.0.mpp)
+extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve + Rambler Bangla runtime)
+docs/historical/      Historical V29.3 smali hook diff for the 18.3.1 patch layer's own classes
 data/loanspell/       loanword table, overrides and Java generator
 integration/          upstream patch-list entry
 tools-src/            MiniApkSigner.java and pinned toolchain checksums
@@ -301,6 +536,16 @@ Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for
 
 ## Credits and licence
 
-Derivative of **PixelBoard** by Akshay Kadam (GPL v3.0). Built with the Morphe patch engine and smali/baksmali (JesusFreke, BSD). V29 normalization data derives from the Avro Keyboard phonetic dictionary (MPL 2.0). Loanword spellings derive from the CMU Pronouncing Dictionary (BSD, see `NOTICE-cmudict.txt`). Full notices: [`ATTRIBUTION.md`](ATTRIBUTION.md).
+Rambler Bangla combines and explicitly credits:
 
-Licensed under the GNU GPL v3.0 (see [`LICENSE`](LICENSE)). Not affiliated with Google.
+- **[Gboard Patches / GboardWu](https://github.com/jasonwu1994/Gboard-patches)** by Jason Wu (`@jasonwu1994`, GNU GPL v3.0) — all 46 Gboard keyboard, clipboard, theme, Frosted Glass, Web Clipboard, LAN FTP, Calculator, Advanced Voice Typing, OCR, Backup & Restore, Package Rename, and Signature Bypass patches.
+- **[Gboard Rambler Enhancements](https://github.com/abotmaker/gboard-rambler-enhancements)** by `@abotmaker` (GNU GPL v3.0) — all 7 Rambler enhancement patches (Hex waveforms, custom instructions, per-app rules, `MUSE_STATS` dictionary, contacts sync, cursor-aware & append-only editing, app context, and productivity tools).
+- **[Hex by Anomaly](https://github.com/anomalyco/hex)** by Christopher Langton (MIT License) — Hex Dot Scope, Hex Android Wave, and Processing waveform animations.
+- **[`nl-morphe-patches`](https://gitlab.com/johninnld/nl-morphe-patches)** by `@johninnld` (GNU GPL v3.0) — original Rambler Custom Instructions, `MUSE_STATS`, Contacts, Cursor-Aware Editing, and App Context concepts.
+- **[PixelBoard](https://github.com/Akshayykadam/PixelBoard)** by Akshay Kadam (GNU GPL v3.0) — original 18.3.1 Rambler foundation.
+- **[Morphe](https://morphe.software)** (`MorpheApp/morphe-patcher`, GNU GPL v3.0 + Section 7c notice in [`NOTICE`](NOTICE)) and **smali/baksmali** (JesusFreke, BSD).
+- **Avro Keyboard phonetic dictionary** (MPL 2.0) and **CMU Pronouncing Dictionary** (BSD, see [`NOTICE-cmudict.txt`](NOTICE-cmudict.txt)).
+
+Full third-party notices: [`ATTRIBUTION.md`](ATTRIBUTION.md) and [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+
+Licensed under the GNU GPL v3.0 (see [`LICENSE`](LICENSE)). Not affiliated with Google or the Morphe project.

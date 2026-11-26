@@ -3,6 +3,18 @@
 Which coding-agent skill drove which change, per release. Skills are reusable instruction packs for the agent;
 none of them ships code into this repository.
 
+## v30.0.0
+
+Unified Morphe Patch Suite for Gboard 18.5.4 (branch `feat/morphe-unified-v30`): merged all 46 patches from `jasonwu1994/Gboard-patches` (v4.5.0), all 7 patches from `abotmaker/gboard-rambler-enhancements` (v1.3.4), and upgraded Rambler Bangla's own Lite Script Policy + full V29.3+/V29.5 phonetic/multilingual/loanword runtime into two first-class Morphe patches (55 total patches in one `.mpp` bundle).
+
+| Skill or practice | Application |
+| --- | --- |
+| `ponytail` (full mode) | Read and traced Gboard 18.5.4 smali (`fja.d` / `ezn.b`) and both upstream Morphe repos end-to-end before writing code. Reused `RamblerTextPipeline`'s existing commit hook and `RamblerEnhancementsActivity`'s settings hub instead of inventing a fourth Gradle extension or parallel settings activity; kept `GboardPublishedPatchCatalog` and `PatchCatalog` cleanly composed in `PatchListGenerator.kt` with zero unnecessary abstraction. |
+| `colab-operator` | Provisioned an x86_64 Colab build runtime to run Temurin/OpenJDK 21 + Android SDK 35/36 Gradle builds, extension Robolectric/JUnit unit tests, Android Lint (`NewApi`), Morphe `.mpp` packaging, `morphe-cli` patching against stock Gboard 18.5.4, and APK signature/alignment/DEX hook verification, then cleanly released the session when finished. |
+| Root-cause verification | Diagnosed Gboard 18.5.4's reversed `{HINGLISH_OVERRIDE_RULE}` / `{ENABLED_LANGUAGES}` instruction ordering before writing `RamblerBanglaPatches.kt` (supporting both 18.5.4 and 18.3.1 orderings fail-closed with SHA-256 verification), fixed Colab's OpenJDK cgroup warning breaking AGP `jmod`, and verified every patch, DEX hook, APK signature, and emulator smoke test end-to-end. |
+
+No skill wrote code into the repository. No Google binary, APK, dex, or signing key was committed to git.
+
 ## V29.5
 
 Clipboard Recent | History (branch `feature/clipboard-history`). A stopped earlier attempt left two local draft
