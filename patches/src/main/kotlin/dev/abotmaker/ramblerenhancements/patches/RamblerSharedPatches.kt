@@ -2,6 +2,7 @@ package dev.abotmaker.ramblerenhancements.patches
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.AppTarget
@@ -18,6 +19,9 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
+import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 import org.w3c.dom.Document
@@ -101,8 +105,20 @@ internal class RamblerPatchRunState {
     var voiceLifecycleTargets: VoiceLifecycleTargets? = null
     var accessPointTargets: AccessPointTargets? = null
     var spacebarTriggerTargets: SpacebarTriggerTargets? = null
+    var nativeAtMentionTargets: NativeAtMentionTargets? = null
     var agenticCtorHooked: Boolean = false
 }
+
+internal data class NativeAtMentionTargets(
+    val imeActiveBundleMethod: String,
+    val textCandidatesUpdatedMethod: String,
+    val bundleWrapperField: String,
+    val wrapperControllerField: String,
+    val wrapperActiveMethod: String,
+    val controllerAppendMethod: String,
+    val candidateClass: String,
+    val candidateBuilderClass: String,
+)
 
 internal object RamblerPatchStateStore {
     private val byContext = WeakHashMap<BytecodePatchContext, RamblerPatchRunState>()
@@ -252,48 +268,291 @@ internal val ramblerSharedExtensionPatch = bytecodePatch(
         }
 
         if (RamblerFeature.AT_MENTION_SUGGESTIONS in state.selectedFeatures) {
-            installAtMentionLifecycleHooks(this)
+            state.nativeAtMentionTargets = installAtMentionLifecycleHooks(this)
         }
 
         rewriteDynamicConfigClinit(state)
     }
 }
 
-internal fun installAtMentionLifecycleHooks(context: BytecodePatchContext) {
+internal fun installAtMentionLifecycleHooks(context: BytecodePatchContext): NativeAtMentionTargets {
     val inputViewType = "Lcom/google/android/libraries/inputmethod/inputview/InputView;"
     var imeClassType: String? = null
     var inputViewFieldName: String? = null
+    val classByType = hashMapOf<String, ClassDef>()
+    var inputBundleClass: ClassDef? = null
+
     context.classDefForEach { cls ->
-        val field = cls.instanceFields.firstOrNull { it.type == inputViewType } ?: return@classDefForEach
-        val hasStart = cls.methods.any {
-            it.name == "onStartInputView" &&
-                it.parameterTypes.map { p -> p.toString() } == listOf("Landroid/view/inputmethod/EditorInfo;", "Z") &&
-                it.returnType == "V"
+        classByType[cls.type] = cls
+        val field = cls.instanceFields.firstOrNull { it.type == inputViewType }
+        if (field != null) {
+            val hasStart = cls.methods.any {
+                it.name == "onStartInputView" &&
+                    it.parameterTypes.map { p -> p.toString() } == listOf("Landroid/view/inputmethod/EditorInfo;", "Z") &&
+                    it.returnType == "V"
+            }
+            val hasSel = cls.methods.any {
+                it.name == "onUpdateSelection" &&
+                    it.parameterTypes.map { p -> p.toString() } == listOf("I", "I", "I", "I", "I", "I") &&
+                    it.returnType == "V"
+            }
+            val hasHidden = cls.methods.any {
+                it.name == "onWindowHidden" && it.parameterTypes.isEmpty() && it.returnType == "V"
+            }
+            if (hasStart && hasSel && hasHidden) {
+                if (imeClassType != null) {
+                    throw PatchException(
+                        "FAIL-CLOSED: Multiple InputMethodService classes own InputView field: $imeClassType and ${cls.type}",
+                    )
+                }
+                imeClassType = cls.type
+                inputViewFieldName = field.name
+            }
         }
-        val hasSel = cls.methods.any {
-            it.name == "onUpdateSelection" &&
-                it.parameterTypes.map { p -> p.toString() } == listOf("I", "I", "I", "I", "I", "I") &&
-                it.returnType == "V"
+        val hasInputBundleTag = cls.methods.any { m ->
+            m.implementation?.instructions?.any { insn ->
+                ((insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                    ?.reference as? StringReference)?.string == "InputBundle.activate"
+            } == true
         }
-        val hasHidden = cls.methods.any {
-            it.name == "onWindowHidden" && it.parameterTypes.isEmpty() && it.returnType == "V"
-        }
-        if (hasStart && hasSel && hasHidden) {
-            if (imeClassType != null) {
+        if (hasInputBundleTag) {
+            if (inputBundleClass != null && inputBundleClass!!.type != cls.type) {
                 throw PatchException(
-                    "FAIL-CLOSED: Multiple InputMethodService classes own InputView field: $imeClassType and ${cls.type}",
+                    "FAIL-CLOSED: Multiple InputBundle classes found: ${inputBundleClass!!.type} and ${cls.type}",
                 )
             }
-            imeClassType = cls.type
-            inputViewFieldName = field.name
+            inputBundleClass = cls
         }
     }
     val resolvedClass = imeClassType
         ?: throw PatchException("FAIL-CLOSED: Could not find InputMethodService class with $inputViewType field")
     val resolvedField = inputViewFieldName!!
+    val imeClass = context.mutableClassDefBy(resolvedClass)
     installAtMentionLifecycleHooksOnClass(
-        imeClass = context.mutableClassDefBy(resolvedClass),
+        imeClass = imeClass,
         inputViewFieldRef = "$resolvedClass->$resolvedField:$inputViewType",
+    )
+
+    val bundleDef = inputBundleClass
+        ?: throw PatchException("FAIL-CLOSED: Could not locate Gboard InputBundle class for native @mention strip")
+    val bundleType = bundleDef.type
+
+    // 1. Resolve InputBundle.textCandidatesUpdated(Z)V (K) + wrapper/controller/candidate types
+    // Uniquely identified on InputBundle as the (Z)V method that calls wrapper.p()Z and controller.l(Z)V.
+    val textCandidatesMethod = bundleDef.methods.singleOrNull { m ->
+        m.parameterTypes.map { it.toString() } == listOf("Z") &&
+            m.returnType == "V" &&
+            m.implementation?.instructions?.any { insn ->
+                insn.opcode == Opcode.INVOKE_VIRTUAL && run {
+                    val mr = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                        ?.reference as? com.android.tools.smali.dexlib2.iface.reference.MethodReference
+                    mr != null && mr.parameterTypes.isEmpty() && mr.returnType == "Z"
+                }
+            } == true
+    } ?: throw PatchException(
+        "FAIL-CLOSED: Could not find InputBundle.textCandidatesUpdated(Z)V on $bundleType",
+    )
+
+    val tcInsns = textCandidatesMethod.implementation!!.instructions.toList()
+    val bundleWrapperFieldRef = tcInsns.mapNotNull { insn ->
+        if (insn.opcode == Opcode.IGET_OBJECT) {
+            val f = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                ?.reference as? FieldReference
+            if (f != null && f.definingClass == bundleType) f else null
+        } else {
+            null
+        }
+    }.firstOrNull() ?: throw PatchException(
+        "FAIL-CLOSED: Could not resolve KeyboardWrapper field in $bundleType->${textCandidatesMethod.name}",
+    )
+    val wrapperType = bundleWrapperFieldRef.type
+    val wrapperControllerFieldRef = tcInsns.mapNotNull { insn ->
+        if (insn.opcode == Opcode.IGET_OBJECT) {
+            val f = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                ?.reference as? FieldReference
+            if (f != null && f.definingClass == wrapperType) f else null
+        } else {
+            null
+        }
+    }.firstOrNull() ?: throw PatchException(
+        "FAIL-CLOSED: Could not resolve candidate controller field on $wrapperType",
+    )
+    val wrapperActiveMethodRef = tcInsns.mapNotNull { insn ->
+        if (insn.opcode == Opcode.INVOKE_VIRTUAL) {
+            val m = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                ?.reference as? com.android.tools.smali.dexlib2.iface.reference.MethodReference
+            if (m != null && m.definingClass == wrapperType && m.parameterTypes.isEmpty() && m.returnType == "Z") {
+                m
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+    }.firstOrNull()
+
+    val controllerType = wrapperControllerFieldRef.type
+    val controllerDef = classByType[controllerType]
+        ?: throw PatchException("FAIL-CLOSED: Missing candidate controller class $controllerType")
+    val appendMethod = controllerDef.methods.singleOrNull { m ->
+        m.returnType == "V" &&
+            m.parameterTypes.size == 3 &&
+            m.parameterTypes[0].toString() == "Ljava/util/List;" &&
+            m.parameterTypes[1].toString().startsWith("L") &&
+            m.parameterTypes[2].toString() == "Z"
+    } ?: throw PatchException(
+        "FAIL-CLOSED: Could not find appendTextCandidates(List, Candidate, Z)V on $controllerType",
+    )
+    val candidateType = appendMethod.parameterTypes[1].toString()
+    val candidateDef = classByType[candidateType]
+        ?: throw PatchException("FAIL-CLOSED: Missing Candidate class $candidateType")
+    val builderType = candidateDef.methods.singleOrNull { m ->
+        m.name == "<init>" && m.parameterTypes.size == 1 && m.parameterTypes[0].toString().startsWith("L")
+    }?.parameterTypes?.single()?.toString()
+        ?: throw PatchException("FAIL-CLOSED: Could not find Candidate(Builder) constructor on $candidateType")
+
+    // 2. Resolve IKeyboardDelegate.requestCandidates(IZ)V (pbo.aa)
+    fun hasBundleField(cls: ClassDef): Boolean {
+        var cur: ClassDef? = cls
+        var hops = 0
+        while (cur != null && hops < 5) {
+            if (cur.instanceFields.any { it.type == bundleType }) return true
+            cur = classByType[cur.superclass]
+            hops++
+        }
+        return false
+    }
+    val delegateMatches = mutableListOf<Pair<ClassDef, com.android.tools.smali.dexlib2.iface.Method>>()
+    for (cls in classByType.values) {
+        if (!hasBundleField(cls)) continue
+        for (m in cls.methods) {
+            if (m.parameterTypes.map { it.toString() } == listOf("I", "Z") && m.returnType == "V") {
+                val callsImeReq = m.implementation?.instructions?.any { insn ->
+                    insn.opcode == Opcode.INVOKE_INTERFACE && run {
+                        val mr = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                            ?.reference as? com.android.tools.smali.dexlib2.iface.reference.MethodReference
+                        mr != null &&
+                            mr.parameterTypes.map { it.toString() } == listOf("I", "Z") &&
+                            mr.returnType == "V"
+                    }
+                } == true
+                if (callsImeReq) {
+                    delegateMatches.add(cls to m)
+                }
+            }
+        }
+    }
+    val (delegateClassDef, requestCandidatesMethod) = delegateMatches.singleOrNull()
+        ?: throw PatchException(
+            "FAIL-CLOSED: Expected 1 IKeyboardDelegate.requestCandidates(IZ)V referencing $bundleType, found ${delegateMatches.size}",
+        )
+
+    // 3. Resolve GoogleInputMethodService.getActiveInputBundle()Lpbh; and handleEvent(Lohe;)Z
+    val activeBundleMethod = imeClass.methods.singleOrNull { m ->
+        m.parameterTypes.isEmpty() && m.returnType == bundleType
+    } ?: throw PatchException(
+        "FAIL-CLOSED: Could not find getActiveInputBundle()$bundleType on ${imeClass.type}",
+    )
+
+    val handleEventMethod = imeClass.methods.singleOrNull { m ->
+        m.returnType == "Z" &&
+            m.parameterTypes.size == 1 &&
+            m.parameterTypes[0].toString().startsWith("L") &&
+            (m.implementation?.instructions?.size ?: 0) > 100 &&
+            run {
+                val eventCls = classByType[m.parameterTypes[0].toString()]
+                eventCls?.instanceFields?.any { it.name == "b" && it.type.startsWith("[L") } == true
+            }
+    } ?: throw PatchException(
+        "FAIL-CLOSED: Could not find handleEvent(Event)Z on ${imeClass.type}",
+    )
+
+    // 4. Install the 3 native suggestion-strip hooks (all idempotent)
+    val mutableBundle = context.mutableClassDefBy(bundleType)
+    val mutableTcMethod = mutableBundle.methods.single {
+        it.name == textCandidatesMethod.name &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("Z") &&
+            it.returnType == "V"
+    }
+    installNativeTextCandidatesUpdatedHook(mutableTcMethod)
+
+    val mutableDelegate = context.mutableClassDefBy(delegateClassDef.type)
+    val mutableReqMethod = mutableDelegate.methods.single {
+        it.name == requestCandidatesMethod.name &&
+            it.parameterTypes.map { p -> p.toString() } == listOf("I", "Z") &&
+            it.returnType == "V"
+    }
+    installNativeRequestCandidatesHook(mutableReqMethod)
+
+    installNativeHandleEventHook(handleEventMethod)
+
+    return NativeAtMentionTargets(
+        imeActiveBundleMethod = activeBundleMethod.name,
+        textCandidatesUpdatedMethod = textCandidatesMethod.name,
+        bundleWrapperField = bundleWrapperFieldRef.name,
+        wrapperControllerField = wrapperControllerFieldRef.name,
+        wrapperActiveMethod = wrapperActiveMethodRef?.name ?: "p",
+        controllerAppendMethod = appendMethod.name,
+        candidateClass = candidateType.removePrefix("L").removeSuffix(";").replace('/', '.'),
+        candidateBuilderClass = builderType.removePrefix("L").removeSuffix(";").replace('/', '.'),
+    )
+}
+
+internal fun installNativeTextCandidatesUpdatedHook(method: MutableMethod) {
+    val insns = method.implementation?.instructions
+        ?: throw PatchException("textCandidatesUpdated has no implementation")
+    val alreadyHooked = insns.any {
+        (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+            ?.reference?.toString()?.contains("RamblerAtMentionStripRuntime;->onTextCandidatesUpdated") == true
+    }
+    if (alreadyHooked) return
+    method.addInstructions(
+        0,
+        """
+        invoke-static {p0, p1}, $AT_MENTION_STRIP_RUNTIME_TYPE->onTextCandidatesUpdated(Ljava/lang/Object;Z)Z
+        move-result p1
+        """.trimIndent(),
+    )
+}
+
+internal fun installNativeRequestCandidatesHook(method: MutableMethod) {
+    val insns = method.implementation?.instructions
+        ?: throw PatchException("requestCandidates has no implementation")
+    val alreadyHooked = insns.any {
+        (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+            ?.reference?.toString()?.contains("RamblerAtMentionStripRuntime;->trySupplyNativeCandidatesFromDelegate") == true
+    }
+    if (alreadyHooked) return
+    method.addInstructionsWithLabels(
+        0,
+        """
+        invoke-static {p0, p1}, $AT_MENTION_STRIP_RUNTIME_TYPE->trySupplyNativeCandidatesFromDelegate(Ljava/lang/Object;I)Z
+        move-result v0
+        if-eqz v0, :rambler_stock_request_candidates
+        return-void
+        """.trimIndent(),
+        ExternalLabel("rambler_stock_request_candidates", method.getInstruction(0)),
+    )
+}
+
+internal fun installNativeHandleEventHook(method: MutableMethod) {
+    val insns = method.implementation?.instructions
+        ?: throw PatchException("handleEvent has no implementation")
+    val alreadyHooked = insns.any {
+        (it as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+            ?.reference?.toString()?.contains("RamblerAtMentionStripRuntime;->tryHandleNativeCandidateEvent") == true
+    }
+    if (alreadyHooked) return
+    method.addInstructionsWithLabels(
+        0,
+        """
+        invoke-static/range {p0 .. p1}, $AT_MENTION_STRIP_RUNTIME_TYPE->tryHandleNativeCandidateEvent(Ljava/lang/Object;Ljava/lang/Object;)Z
+        move-result v0
+        if-eqz v0, :rambler_stock_handle_event
+        const/4 v0, 0x1
+        return v0
+        """.trimIndent(),
+        ExternalLabel("rambler_stock_handle_event", method.getInstruction(0)),
     )
 }
 
@@ -853,6 +1112,17 @@ internal fun rewriteDynamicConfigClinitOnClass(
     putStr("SPACEBAR_LP_AGENTIC_CLASS", sp?.agenticClassName ?: "fhv")
     putStr("SPACEBAR_LP_AGENTIC_UI_MANAGER_FIELD", sp?.agenticUiManagerField ?: "c")
     putStr("SPACEBAR_LP_UI_MANAGER_GET_STATE_METHOD", sp?.uiManagerGetStateMethod ?: "h")
+
+    // Native Gboard suggestion-strip @mention bindings (resolved or 18.5.4 defaults)
+    val am = state.nativeAtMentionTargets
+    putStr("AT_MENTION_IME_ACTIVE_BUNDLE_METHOD", am?.imeActiveBundleMethod ?: "ah")
+    putStr("AT_MENTION_TEXT_CANDIDATES_UPDATED_METHOD", am?.textCandidatesUpdatedMethod ?: "K")
+    putStr("AT_MENTION_BUNDLE_WRAPPER_FIELD", am?.bundleWrapperField ?: "k")
+    putStr("AT_MENTION_WRAPPER_CONTROLLER_FIELD", am?.wrapperControllerField ?: "s")
+    putStr("AT_MENTION_WRAPPER_ACTIVE_METHOD", am?.wrapperActiveMethod ?: "p")
+    putStr("AT_MENTION_CONTROLLER_APPEND_METHOD", am?.controllerAppendMethod ?: "c")
+    putStr("AT_MENTION_CANDIDATE_CLASS", am?.candidateClass ?: "owu")
+    putStr("AT_MENTION_CANDIDATE_BUILDER_CLASS", am?.candidateBuilderClass ?: "owr")
 
     sb.appendLine("return-void")
     clinit.addInstructions(0, sb.toString().trimIndent())

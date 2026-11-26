@@ -110,6 +110,16 @@ public final class RamblerDynamicConfig {
     public static String SPACEBAR_LP_AGENTIC_UI_MANAGER_FIELD = "c";
     public static String SPACEBAR_LP_UI_MANAGER_GET_STATE_METHOD = "h";
 
+    // Native Gboard suggestion-strip @mention integration bindings (18.5.4 defaults)
+    public static String AT_MENTION_IME_ACTIVE_BUNDLE_METHOD = "ah";
+    public static String AT_MENTION_TEXT_CANDIDATES_UPDATED_METHOD = "K";
+    public static String AT_MENTION_BUNDLE_WRAPPER_FIELD = "k";
+    public static String AT_MENTION_WRAPPER_CONTROLLER_FIELD = "s";
+    public static String AT_MENTION_WRAPPER_ACTIVE_METHOD = "p";
+    public static String AT_MENTION_CONTROLLER_APPEND_METHOD = "c";
+    public static String AT_MENTION_CANDIDATE_CLASS = "owu";
+    public static String AT_MENTION_CANDIDATE_BUILDER_CLASS = "owr";
+
     private RamblerDynamicConfig() {
     }
 }
