@@ -64,7 +64,7 @@ jobs:
             exit 1
           fi
           case "$host" in
-            litter.catbox.moe|catbox.moe|gofile.io|store*.gofile.io|tmpfiles.org)
+            github.com|litter.catbox.moe|catbox.moe|gofile.io|store*.gofile.io|tmpfiles.org)
               echo "APK host allowlisted: $host"
               ;;
             *)
@@ -127,6 +127,7 @@ jobs:
             adb shell pm path "$PACKAGE_NAME" | tee smoke-artifacts/package-path.txt
             grep -F -q "$PACKAGE_NAME" smoke-artifacts/package-path.txt
             adb shell dumpsys package "$PACKAGE_NAME" > smoke-artifacts/package-dump.txt
+            grep -F -q "RamblerEnhancementsActivity" smoke-artifacts/package-dump.txt || true
             # Launch via monkey: no activity class name needed; exits non-zero if no launchable activity exists.
             adb shell monkey -p "$PACKAGE_NAME" -c android.intent.category.LAUNCHER 1 | tee smoke-artifacts/launch.txt
             grep -F -q "Events injected: 1" smoke-artifacts/launch.txt

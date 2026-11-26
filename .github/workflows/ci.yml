@@ -49,3 +49,34 @@ jobs:
           source tools/tool-env.sh
           bash tests/run_tests.sh | tee /tmp/test.log
           grep -Eq '^TEST SUITE: [0-9]+ passed, 0 failed$' /tmp/test.log
+
+  morphe-patches:
+    name: Morphe patches & Android extensions
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Build extensions, run unit/lint/patch tests, and package .mpp
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon \
+            :extensions:extension:syncExtension \
+            :extensions:calculator:syncExtension \
+            :extensions:rambler-enhancements:testDebugUnitTest \
+            :extensions:rambler-enhancements:lintDebug \
+            :extensions:rambler-enhancements:syncExtension \
+            :patches:verifyGboardCapabilityWiring \
+            :patches:test \
+            :patches:buildAndroid \
+            generatePatchesList
+          ls -lh patches/build/libs/*.mpp patches-list.json

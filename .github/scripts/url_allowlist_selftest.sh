@@ -36,6 +36,7 @@ reject() {  # reject <url> <why>
 }
 
 echo "allowlisted hosts"
+allow 'https://github.com/muhib-karim/Rambler-Bangla/releases/download/v30.0.0/app.apk' github.com
 allow 'https://catbox.moe/a.apk'               catbox.moe
 allow 'https://litter.catbox.moe/a.apk'        litter.catbox.moe
 allow 'https://gofile.io/d/abc'                gofile.io
