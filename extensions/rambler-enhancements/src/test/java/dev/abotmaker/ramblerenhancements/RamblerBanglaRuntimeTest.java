@@ -179,24 +179,39 @@ public class RamblerBanglaRuntimeTest {
 
         Assert.assertNull(RamblerAtMentionStore.extractActivePrefix("hello world"));
 
-        // 3. Frequency + recency ranking & email domain filtering
+        // 3. Frequency + recency ranking & personalized-only standalone '@' behavior
         java.util.List<RamblerAtMentionStore.Entry> learned = java.util.Arrays.asList(
                 new RamblerAtMentionStore.Entry("@claude", 5, 2000L),
                 new RamblerAtMentionStore.Entry("@grok", 9, 1000L),
                 new RamblerAtMentionStore.Entry("@anthropic.com", 4, 1500L));
 
+        // Standalone '@' must show ONLY learned entries (never fixed hardcoded email domains)
         java.util.List<String> onBareAt = RamblerAtMentionStore.suggest(learned, bare, 8);
-        Assert.assertEquals("@grok", onBareAt.get(0));
-        Assert.assertEquals("@claude", onBareAt.get(1));
-        Assert.assertTrue(onBareAt.contains("@gmail.com"));
+        Assert.assertEquals(
+                java.util.Arrays.asList("@grok", "@claude", "@anthropic.com"),
+                onBareAt);
+        Assert.assertFalse(onBareAt.contains("@gmail.com"));
+        Assert.assertTrue(RamblerAtMentionStore.suggest(
+                java.util.Collections.emptyList(), bare, 8).isEmpty());
 
         java.util.List<String> onGr = RamblerAtMentionStore.suggest(learned, handlePrefix, 5);
         Assert.assertEquals(java.util.Collections.singletonList("@grok"), onGr);
 
+        // Explicit email-domain context ("muhib@g") still suggests matching email domains
         java.util.List<String> onEmailG = RamblerAtMentionStore.suggest(learned, emailPrefix, 5);
         Assert.assertEquals(java.util.Collections.singletonList("@gmail.com"), onEmailG);
 
-        // 4. In-memory record + forget + JSON round-trip
+        // 4. Pending-token commit validation (Send/Enter/Hide) & full-text extraction
+        Assert.assertTrue(RamblerAtMentionStore.isValidPendingTokenForCommit("@grok", false));
+        Assert.assertFalse(RamblerAtMentionStore.isValidPendingTokenForCommit("@g", false));
+        Assert.assertFalse(RamblerAtMentionStore.isValidPendingTokenForCommit("@", false));
+        Assert.assertTrue(RamblerAtMentionStore.isValidPendingTokenForCommit("@gmail.com", true));
+        Assert.assertFalse(RamblerAtMentionStore.isValidPendingTokenForCommit("@grok", true));
+        Assert.assertEquals(
+                java.util.Arrays.asList("@grok", "@claude"),
+                RamblerAtMentionStore.extractAllTokens("ask @grok and @claude"));
+
+        // 5. In-memory record + forget + serialization round-trip
         RamblerAtMentionStore.recordToken(null, "@grok", 100L);
         RamblerAtMentionStore.recordToken(null, "@claude", 200L);
         RamblerAtMentionStore.recordToken(null, "@grok", 300L);
@@ -209,10 +224,12 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertTrue(RamblerAtMentionStore.forgetToken(null, "@grok"));
         Assert.assertEquals(1, RamblerAtMentionStore.countLearned(null));
 
-        // 5. Native Gboard enable_email_provider_completion flag is enabled when feature active
+        // 6. Native Gboard fixed email_provider_completion stays OFF by default so fixed domains
+        // do not override personalized @mentions
         RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS = true;
-        Assert.assertEquals(Boolean.TRUE, RamblerFlagRuntime.applyFlagByName(
-                null, RamblerFlagRuntime.EMAIL_PROVIDER_COMPLETION_FLAG, Boolean.FALSE));
+        RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS = true;
+        Assert.assertEquals(Boolean.FALSE, RamblerFlagRuntime.applyFlagByName(
+                null, RamblerFlagRuntime.EMAIL_PROVIDER_COMPLETION_FLAG, Boolean.TRUE));
     }
 
     private static boolean containsBengali(String s) {

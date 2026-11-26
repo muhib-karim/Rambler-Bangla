@@ -96,11 +96,11 @@ val gboardHiddenFlagsOverridePatch = bytecodePatch(
 @Suppress("unused")
 val ramblerAtMentionSuggestionsPatch = bytecodePatch(
     name = "At-Mention & Email Strip Suggestions",
-    description = "SwiftKey-style @handle and email domain suggestions on the keyboard suggestion " +
-        "strip: automatically learns typed @mentions (e.g. @grok, @claude) and @domains (e.g. " +
-        "@gmail.com), ranks by frequency & recency, supports long-press to forget, enables " +
-        "native email provider completion, and stays fail-closed in password/incognito fields " +
-        "for Gboard 18.5.4.",
+    description = "SwiftKey-style personalized @handle and email domain suggestions on the keyboard " +
+        "suggestion strip: automatically learns typed/sent/dictated @mentions (e.g. @grok, @claude) " +
+        "and @domains without fixed standalone defaults, ranks by frequency & recency, supports " +
+        "long-press to forget and manual add in Settings, and stays fail-closed in password/incognito " +
+        "fields for Gboard 18.5.4.",
     default = true,
 ) {
     compatibleWith(COMPATIBILITY_GBOARD)

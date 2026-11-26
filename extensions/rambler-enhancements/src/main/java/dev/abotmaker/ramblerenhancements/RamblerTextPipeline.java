@@ -258,6 +258,15 @@ public final class RamblerTextPipeline {
 
             RamblerDictationStats.onDictationCommitted(ctx, result.text);
 
+            // Also learn any @handles / @domains dictated via Rambler voice typing
+            // (fail-closed: skipped in password/incognito fields).
+            if (RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS
+                    && ctx != null
+                    && !isSensitiveOrIncognitoField(editorInfo)
+                    && RamblerAtMentionStore.isEnabled(ctx)) {
+                RamblerAtMentionStore.recordTokensFromText(ctx, result.text);
+            }
+
             if (RamblerEnhancementsSettings.readHistoryEnabled(ctx)) {
                 String trimmed = result.text.trim();
                 if (!trimmed.isEmpty()) {

@@ -190,7 +190,55 @@ public final class RamblerAtMentionStore {
     }
 
     /**
-     * Ranks learned entries + seed email domains matching {@code active.prefix}.
+     * Extracts all valid {@code @handle} and {@code @domain.tld} tokens from finished text
+     * (such as a committed dictation sentence, pasted text, or manual Settings input),
+     * including a valid token at the very end of the text.
+     */
+    public static List<String> extractAllTokens(CharSequence text) {
+        if (text == null || text.length() < 2) {
+            return Collections.emptyList();
+        }
+        return extractCompletedTokens(text.toString() + " ");
+    }
+
+    /**
+     * Records every valid {@code @handle} / {@code @domain} found in {@code text}.
+     */
+    public static int recordTokensFromText(Context context, CharSequence text) {
+        List<String> tokens = extractAllTokens(text);
+        int recorded = 0;
+        for (String token : tokens) {
+            recordToken(context, token);
+            recorded++;
+        }
+        return recorded;
+    }
+
+    /**
+     * Returns whether {@code candidate} is a valid standalone {@code @handle} (or email domain)
+     * suitable for learning when a field is submitted or dismissed without a trailing space.
+     */
+    public static boolean isValidPendingTokenForCommit(String candidate, boolean emailDomainContext) {
+        if (candidate == null) {
+            return false;
+        }
+        String trimmed = candidate.trim();
+        while (trimmed.length() > 1 && isTrailingStripChar(trimmed.charAt(trimmed.length() - 1))) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        if (emailDomainContext) {
+            return isValidLearnedToken(trimmed, true);
+        }
+        // Require at least 2 characters after '@' (e.g. "@ai", "@grok") so accidental "@a" isn't saved.
+        return trimmed.length() >= 3 && isValidLearnedToken(trimmed, false);
+    }
+
+    /**
+     * Ranks personalized learned entries matching {@code active.prefix}.
+     *
+     * <p>Standalone {@code @} mentions NEVER backfill hardcoded email providers—only the user's
+     * own learned {@code @handles} / {@code @domains} appear. Built-in email domains are only
+     * offered as a secondary fallback in explicit email-domain context (e.g. {@code user@g}).</p>
      */
     public static List<String> suggest(
             List<Entry> learnedEntries, ActivePrefix active, int maxResults) {
@@ -261,20 +309,23 @@ public final class RamblerAtMentionStore {
             results.add(entry.token);
         }
 
-        // Fill remaining slots with built-in common email domains (e.g. @gmail.com)
-        for (String domain : DEFAULT_EMAIL_DOMAINS) {
-            if (results.size() >= maxResults) {
-                break;
-            }
-            String lowerDomain = domain.toLowerCase(Locale.US);
-            if (!lowerDomain.startsWith(lowerPrefix)) {
-                continue;
-            }
-            if (!isBareAt && lowerDomain.equals(lowerPrefix)) {
-                continue;
-            }
-            if (seenLower.put(lowerDomain, Boolean.TRUE) == null) {
-                results.add(domain);
+        // Only offer common email-domain fallback when typing an email address (e.g. "name@g"),
+        // NEVER for standalone "@" mentions where suggestions must stay 100% personalized.
+        if (active.emailDomainContext) {
+            for (String domain : DEFAULT_EMAIL_DOMAINS) {
+                if (results.size() >= maxResults) {
+                    break;
+                }
+                String lowerDomain = domain.toLowerCase(Locale.US);
+                if (!lowerDomain.startsWith(lowerPrefix)) {
+                    continue;
+                }
+                if (!isBareAt && lowerDomain.equals(lowerPrefix)) {
+                    continue;
+                }
+                if (seenLower.put(lowerDomain, Boolean.TRUE) == null) {
+                    results.add(domain);
+                }
             }
         }
         return results;

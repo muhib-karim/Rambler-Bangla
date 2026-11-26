@@ -530,7 +530,7 @@ public final class RamblerEnhancementsActivity extends Activity {
         // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
         TextView creditView = new TextView(this);
-        creditView.setText("Rambler Bangla v31.0.0 — by muhib-karim (GPLv3)");
+        creditView.setText("Rambler Bangla v31.1.0 — by muhib-karim (GPLv3)");
         creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         creditView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(
@@ -584,10 +584,12 @@ public final class RamblerEnhancementsActivity extends Activity {
         if (RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS) {
             addSectionHeader("@Mention & email strip (SwiftKey-style)");
             boolean atOn = RamblerAtMentionStore.isEnabled(this);
-            int learnedCount = RamblerAtMentionStore.countLearned(this);
+            java.util.List<RamblerAtMentionStore.Entry> learnedEntries =
+                    RamblerAtMentionStore.readEntries(this);
+            int learnedCount = learnedEntries.size();
             addToggleRow(
                     "@Mention & email strip suggestions",
-                    "Shows previously typed @handles (@grok, @claude) and email domains (@gmail.com) as tap-to-insert chips on the suggestion strip. Long-press any chip to forget it. Always off in password/incognito fields.",
+                    "Shows YOUR learned @handles (@grok, @claude) on the suggestion strip when typing @, and learned email domains when typing name@. Learns automatically on space, Send/Enter, keyboard close, and voice dictation. Long-press any chip to forget. Always off in password/incognito fields.",
                     atOn,
                     checked -> {
                         RamblerAtMentionStore.setEnabled(this, checked);
@@ -595,10 +597,36 @@ public final class RamblerEnhancementsActivity extends Activity {
                         refreshUi();
                     });
             addRow(
+                    "Add custom @mentions or domains",
+                    "Seed your favorite @handles or email domains right away (e.g. @grok @claude @gmail.com) so they appear immediately after @.",
+                    "Add",
+                    true,
+                    () -> showTextInputDialog(
+                            "Add @mentions",
+                            "@grok @claude @chatgpt @gmail.com",
+                            "",
+                            raw -> {
+                                int added = RamblerAtMentionStore.recordTokensFromText(this, raw);
+                                showToast(added > 0
+                                        ? ("Saved " + added + " @mention" + (added == 1 ? "" : "s"))
+                                        : "Include @ before each handle (e.g. @grok @claude)");
+                                refreshUi();
+                            }));
+            StringBuilder preview = new StringBuilder();
+            for (int i = 0; i < Math.min(learnedEntries.size(), 6); i++) {
+                if (i > 0) {
+                    preview.append(", ");
+                }
+                preview.append(learnedEntries.get(i).token);
+            }
+            if (learnedEntries.size() > 6) {
+                preview.append(", …");
+            }
+            addRow(
                     "Learned @mentions & domains",
                     learnedCount == 0
-                            ? "No custom @handles learned yet (built-in email domains active). Type @grok or @claude once and it will appear automatically."
-                            : (learnedCount + " learned entries saved on-device. Tap to clear all learned @mentions."),
+                            ? "Nothing learned yet. Type any @handle (e.g. @grok) or tap Add above — standalone @ never shows fixed canned suggestions."
+                            : (preview + " — tap to clear all learned @mentions."),
                     learnedCount + " saved",
                     learnedCount > 0,
                     () -> {
