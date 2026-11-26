@@ -7,24 +7,29 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Status
 
-- Branch `feat/morphe-unified-v30` upgrades Rambler Bangla into a unified
-  **Morphe Patcher 2.1.0** patch suite (`v30.0.0`) targeting Gboard
-  `18.5.4.993608717-release-arm64-v8a` with **55 selectable Morphe patches**:
-  - **2 Rambler Bangla patches**: `Rambler Bangla Lite Script Policy`
+- Branch `feat/v31-rambler-plus-nl-patches` upgrades Rambler Bangla to `v31.0.0`
+  (Morphe Patcher 2.1.0 targeting Gboard `18.5.4.993608717-release-arm64-v8a`)
+  with **59 selectable Morphe patches**:
+  - **3 Rambler Bangla patches**: `Rambler Bangla Lite Script Policy`
     (fail-closed SHA-256 fingerprint-guarded JetsonLite `fja.d` / `ezn.b` hooks,
     supporting both Gboard 18.5.4 `adcb7fd5...` and 18.3.1 `347a9484...` cleanup
-    prompts plus Hinglish override `a0245134...` in both anchor orderings) and
+    prompts plus Hinglish override `a0245134...`),
     `Rambler Bangla Phonetic & Multilingual Engine` (complete V29.3+/V29.5
-    `GboardRamblerScriptFix`, `GboardRamblerSegmentLock`,
-    `GboardRamblerSentenceLang`, `GboardRamblerLoanSpell`, `GboardRamblerLoanTable`,
-    `GboardRamblerTier1`, `GboardRamblerEnglishWords`, `GboardRamblerDiag`,
-    `GboardRamblerLayoutPair`, wired into `RamblerTextPipeline` with fail-closed
-    sensitive/password/incognito field bypass and native Settings toggles).
+    runtime + active Gboard locale handoff via `fhv.w()` + EN/BN pairing default
+    ON + fail-closed sensitive/password/incognito bypass), and
+    `At-Mention & Email Strip Suggestions` (SwiftKey-style `@grok` / `@claude` /
+    `@gmail.com` suggestion strip + `enable_email_provider_completion`).
+  - **3 `nl-morphe-patches` Gboard 18.5.4 ports**: `AMOLED Dark Keyboard`
+    (dynamic `Lrmt;` `#000000` dark surfaces), `Rambler Toolbar & Revert Extras`,
+    and `Hidden Flags Override` (`okf.g(olk.OVERRIDE)` -> `okq.e()`).
   - **7 Gboard Rambler Enhancements patches** merged from
-    `abotmaker/gboard-rambler-enhancements` v1.3.4 (with full credits).
+    `abotmaker/gboard-rambler-enhancements` v1.3.4 (GPL-3.0).
   - **46 Gboard Patches (GboardWu) patches** merged from
-    `jasonwu1994/Gboard-patches` v4.5.0 (with `Package Rename` defaulting to
-    `Rambler Bangla` / `com.aidev2024.ramblerbangla` and full credits).
+    `jasonwu1994/Gboard-patches` v4.5.0 (GPL-3.0), with unconditional
+    `enable_agentic_dictation` activation fixing Rambler+ toggle under Voice
+    typing, `Package Rename` defaulting to `Rambler Bangla` /
+    `com.aidev2024.ramblerbangla`, and in-app author set to `muhib-karim`
+    (full upstream license credits in repo docs).
 - All legacy 18.3.1 standalone patcher files, 88 Python unit tests, and 22
   static-suite checks remain intact and green.
 - `README.md` quotes the number of Python unit tests, and
@@ -40,6 +45,15 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Session log
 
+- 2026-11-27 (v31.0.0): Fixed Rambler+ activation root cause (`enable_agentic_dictation`
+  unconditionally true in `GboardRamblerStockPolicy` + `RamblerFlagRuntime`), wired live
+  active Gboard locale (`fhv.w()`) into `GboardRamblerScriptFix` with EN/BN pairing
+  default ON, integrated `johninnld/nl-morphe-patches` Gboard 18.5.4 features (`AMOLED
+  Dark Keyboard`, `Rambler Toolbar & Revert Extras`, `Hidden Flags Override`), added
+  SwiftKey-style `At-Mention & Email Strip Suggestions` (-> 59 Morphe patches total),
+  updated in-app author to `muhib-karim`, preserved full license-compliant
+  upstream attribution across repo docs, refreshed homepage (`README.md` + `docs/index.html`),
+  verified on Colab + GitHub Actions CI + Android 15 KVM emulator, and cut `v31.0.0`.
 - 2026-11-27: Unified Morphe patch suite v30.0.0 (`feat/morphe-unified-v30`):
   merged all 46 `jasonwu1994/Gboard-patches` v4.5.0 patches + all 7
   `abotmaker/gboard-rambler-enhancements` v1.3.4 patches + 2 new Rambler Bangla

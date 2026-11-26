@@ -64,12 +64,12 @@ public final class GboardRamblerLayoutPair {
 
     public static boolean isToggleOn(SharedPreferences sharedPreferences) {
         if (sharedPreferences == null) {
-            return false;
+            return true;
         }
         try {
-            return sharedPreferences.getBoolean(PREF, false);
+            return sharedPreferences.getBoolean(PREF, true);
         } catch (Throwable ignored) {
-            return false;
+            return true;
         }
     }
 
@@ -94,11 +94,9 @@ public final class GboardRamblerLayoutPair {
     }
 
     static boolean isBnLatn(String locale, String languageTag) {
-        String loc = locale == null ? "" : locale;
-        String tag = languageTag == null ? "" : languageTag;
-        return (loc.startsWith("bn") && loc.contains("Latn"))
-                || tag.equals("bn-Latn")
-                || tag.startsWith("bn-Latn-");
+        String loc = locale == null ? "" : locale.toLowerCase(java.util.Locale.US);
+        String tag = languageTag == null ? "" : languageTag.toLowerCase(java.util.Locale.US);
+        return loc.startsWith("bn") || tag.equals("bn") || tag.startsWith("bn-") || tag.startsWith("bn_");
     }
 
     static boolean bnLatnEnabled() {

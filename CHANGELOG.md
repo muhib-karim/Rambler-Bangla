@@ -2,6 +2,19 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.0.0] - 2026-11-27
+
+**Rambler+ Activation Fix, `nl-morphe-patches` Integration, SwiftKey-Style `@Mention` Strip Suggestions (59 Morphe Patches), Phonetic Bangla Voice Handoff & In-App Branding.**
+
+- **Fixed Rambler+ activation under Voice typing:** Forced `enable_agentic_dictation`, `config_agentic_dictation`, `enable_jetson_in_toolbar`, `enable_rambler_al_toolbar`, `enable_rambler_toolbar_at_cursor_position`, and `ad_activation_type = 2L` unconditionally in both `GboardRamblerStockPolicy` (`oki.g()`) and `RamblerFlagRuntime` (`oki.x()`), matching stock Pixel rollout and `johninnld/nl-morphe-patches` so `ModuleManager` always loads `AgenticDictationExtension` and selecting **Rambler+** activates immediately without restart.
+- **Phonetic Bangla voice dictation reliability:** Wired Gboard's live active language tag (`fhv.w()`) into `GboardRamblerScriptFix` on extension activation, defaulted EN/BN multilingual pairing (`GboardRamblerLayoutPair`) ON for any enabled `bn*` keyboard, and added comprehensive E2E phonetic Bangla + CMUdict loanword + multilingual + protected-span unit tests.
+- **SwiftKey-style `@Mention & Email Strip Suggestions` (new Morphe patch + live toggle):** Automatically learns typed `@handles` (e.g. `@grok`, `@claude`) and email domains (e.g. `@gmail.com`) on-device, displays tap-to-insert Material You pill chips on the suggestion strip when typing `@` / `@prefix`, supports long-press to forget and Settings clear/toggle, enables Gboard's native `enable_email_provider_completion` flag, coexists cleanly with Calculator & Manual Incognito, and stays strictly fail-closed in password/incognito fields.
+- **Integrated `johninnld/nl-morphe-patches` Gboard features for Gboard 18.5.4 (3 new Morphe patches, 55 → 59 total with `@Mention` strip):**
+  - `AMOLED Dark Keyboard` — dynamic Material 3 `rmt` pure `#000000` dark surface override.
+  - `Rambler Toolbar & Revert Extras` — floating Rambler toolbar overflow menu, keep rewritten text on revert, and one-tap direct clipboard quick-paste chip.
+  - `Hidden Flags Override` — native Gboard 18.5.4 `okf.g(olk.OVERRIDE)` → `okq.e()` live flag override store with toggles inside Settings.
+- **In-app author & branding:** Updated in-app author/repo fields (`Patches`, `About`, and `Rambler Bangla` settings) to `muhib-karim` / `Rambler Bangla` while preserving complete, source-license-compliant upstream credits in `ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `NOTICE`, `README.md`, and `docs/index.html`.
+
 ## [30.0.0] - 2026-11-27
 
 Unified **Morphe Patcher 2.1.0** patch suite targeting Gboard `18.5.4.993608717-release-arm64-v8a` with **55 selectable Morphe patches** in a single `patches-30.0.0.mpp` bundle, combining Rambler Bangla's Bengali-first phonetic/voice engine with all upstream features from `abotmaker/gboard-rambler-enhancements` (v1.3.4) and `jasonwu1994/Gboard-patches` (v4.5.0).

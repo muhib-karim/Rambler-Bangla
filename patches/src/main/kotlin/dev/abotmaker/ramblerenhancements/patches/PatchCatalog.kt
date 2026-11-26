@@ -7,6 +7,10 @@ object PatchCatalog {
     val morpheRegistrations: List<Patch<*>> = listOf(
         ramblerBanglaLiteScriptPatch,
         ramblerBanglaPhoneticEnginePatch,
+        gboardAmoledDarkKeyboardPatch,
+        ramblerToolbarExtrasPatch,
+        gboardHiddenFlagsOverridePatch,
+        ramblerAtMentionSuggestionsPatch,
         ramblerWaveformAnimationPatch,
         ramblerCustomInstructionsPatch,
         ramblerPersonalDictionaryPatch,

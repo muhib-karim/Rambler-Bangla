@@ -188,9 +188,31 @@ public final class RamblerTextPipeline {
             }
             String pkg = editorInfo == null ? null : editorInfo.packageName;
             RamblerFlagRuntime.onActivePackageChanged(ctx, pkg);
+            if (RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC) {
+                GboardRamblerScriptFix.setActiveGboardLocale(extractActiveGboardLocale(agenticExtension));
+            }
         } catch (Throwable throwable) {
             logWarningSafely("onExtensionActivate hook failed", throwable);
         }
+    }
+
+    private static String extractActiveGboardLocale(Object agenticExtension) {
+        if (agenticExtension == null) {
+            return null;
+        }
+        try {
+            Method method = agenticExtension.getClass().getMethod("w");
+            Object tagObj = method.invoke(agenticExtension);
+            if (tagObj != null) {
+                String tag = tagObj.toString();
+                if (tag != null && !tag.trim().isEmpty()) {
+                    return tag.trim();
+                }
+            }
+        } catch (Throwable ignored) {
+            // Fall back to InputMethodSubtype detection.
+        }
+        return null;
     }
 
     /**

@@ -153,7 +153,10 @@ class GboardDeveloperOnlyPatchLoaderIntegrationTest {
                         Object name = patch.getClass().getMethod("getName").invoke(patch);
                         if (name != null) {
                             String n = (String) name;
-                            if (!n.startsWith("Rambler ")) {
+                            if (!n.startsWith("Rambler ")
+                                    && !"AMOLED Dark Keyboard".equals(n)
+                                    && !"Hidden Flags Override".equals(n)
+                                    && !"At-Mention & Email Strip Suggestions".equals(n)) {
                                 names.add(n);
                             }
                             if ("Developer options".equals(n)) developerOptions = patch;

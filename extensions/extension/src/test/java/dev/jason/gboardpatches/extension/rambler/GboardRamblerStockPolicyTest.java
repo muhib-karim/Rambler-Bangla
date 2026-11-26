@@ -28,9 +28,9 @@ public final class GboardRamblerStockPolicyTest {
     }
 
     @Test
-    public void agenticCapabilityFollowsOfficialSelectionAndScopes() {
+    public void agenticCapabilityStaysEnabledForImmediateRamblerActivation() {
         GboardRamblerOfficialSelectionRuntime.updateOfficialSelection(false);
-        Assert.assertSame(Boolean.FALSE,
+        Assert.assertSame(Boolean.TRUE,
                 GboardRamblerStockPolicy.maybeForceStockRouteValue(
                         GboardRamblerStockPolicy.ENABLE_AGENTIC_DICTATION_FLAG,
                         Boolean.FALSE));
@@ -48,7 +48,7 @@ public final class GboardRamblerStockPolicyTest {
                         GboardRamblerStockPolicy.ENABLE_AGENTIC_DICTATION_FLAG,
                         Boolean.FALSE));
         GboardRamblerOfficialSelectionRuntime.enterDefaultSelectionSuppression();
-        Assert.assertSame(Boolean.FALSE,
+        Assert.assertSame(Boolean.TRUE,
                 GboardRamblerStockPolicy.maybeForceStockRouteValue(
                         GboardRamblerStockPolicy.ENABLE_AGENTIC_DICTATION_FLAG,
                         Boolean.FALSE));

@@ -1,5 +1,5 @@
 {
-  "version": "30.0.0",
+  "version": "31.0.0",
   "patches": [
     {
       "name": "AI Writing Tools",
@@ -9,6 +9,19 @@
       "compatiblePackages": {
         "com.google.android.inputmethod.latin": [
           "18.5.4.993608717-release-arm64-v8a"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "AMOLED Dark Keyboard",
+      "description": "Turns Gboard's Material You dark keyboard surfaces pure AMOLED black (#000000) instead of grey while leaving the light theme, accent colors, and key faces unchanged. Ported from nl-morphe-patches for Gboard 18.5.4.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.google.android.inputmethod.latin": [
+          "18.5.4.993608717-release-arm64-v8a",
+          "18.8.0.1022711984-beta-arm64-v8a"
         ]
       },
       "options": []
@@ -45,6 +58,19 @@
       "compatiblePackages": {
         "com.google.android.inputmethod.latin": [
           "18.5.4.993608717-release-arm64-v8a"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "At-Mention & Email Strip Suggestions",
+      "description": "SwiftKey-style @handle and email domain suggestions on the keyboard suggestion strip: automatically learns typed @mentions (e.g. @grok, @claude) and @domains (e.g. @gmail.com), ranks by frequency & recency, supports long-press to forget, enables native email provider completion, and stays fail-closed in password/incognito fields for Gboard 18.5.4.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.google.android.inputmethod.latin": [
+          "18.5.4.993608717-release-arm64-v8a",
+          "18.8.0.1022711984-beta-arm64-v8a"
         ]
       },
       "options": []
@@ -302,6 +328,19 @@
       "options": []
     },
     {
+      "name": "Hidden Flags Override",
+      "description": "Applies curated Gboard 18.5.4 hidden/beta flags (direct quick-paste chip, Rambler toolbar overflow, preserve rewritten on revert, auto parallel retry, toolbar entry, UI persistence, emoji skin-tone replacement, email provider completion) through Gboard's own OVERRIDE flag store with live toggles inside Settings. Ported from nl-morphe-patches for Gboard 18.5.4.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.google.android.inputmethod.latin": [
+          "18.5.4.993608717-release-arm64-v8a",
+          "18.8.0.1022711984-beta-arm64-v8a"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Incognito Mode Toggle",
       "description": "在 Access Point 工具列新增無痕模式切換按鈕，並可設定無痕模式下是否啟用剪貼簿與語音輸入\nAdd an Incognito toggle to the Access Point toolbar and configure clipboard and voice typing availability while Incognito mode is active.",
       "use": true,
@@ -523,6 +562,19 @@
     {
       "name": "Rambler Productivity Tools",
       "description": "Adds Smart Search Bars (auto-strip trailing period + opt-in per-app Auto-Search on commit for Search & browser address bars), Long-press Spacebar for Rambler (Smart Hybrid / Hold-to-Talk / Toggle modes), a draggable Rambler toolbar quick-access button, 1-Tap Fix & Learn from Dictation History, private On-Device Dictation Stats (words, sessions, avg WPM, cloud latency, time saved vs typing), opt-in hands-free Voice Send & Search suffixes, deterministic Voice Snippets, post-dictation Find & Replace (plain or regex, global or per-app), Strip Trailing Period, private Local Dictation History (last 50 entries), Auto Parallel Retry on flaky networks, configurable Longer Dictation Sessions, and one-tap JSON Settings Backup & Restore. Verified on Gboard 18.5.4 (current GboardWu target); newer versions are best-effort and unverified.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.google.android.inputmethod.latin": [
+          "18.5.4.993608717-release-arm64-v8a",
+          "18.8.0.1022711984-beta-arm64-v8a"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Rambler Toolbar & Revert Extras",
+      "description": "Enables Gboard 18.5.4's floating Rambler toolbar overflow menu, keeps rewritten text when reverting from the full transcript, and activates one-tap direct clipboard quick-paste. Ported from nl-morphe-patches for Gboard 18.5.4.",
       "use": true,
       "dependencies": [],
       "compatiblePackages": {
