@@ -81,9 +81,9 @@ public final class RamblerHiddenFlagOverrideRuntime {
                     true),
             new Entry(
                     "enable_email_provider_completion",
-                    "Native email provider completion",
-                    "Enables Gboard's built-in email provider auto-completion alongside the @mention strip.",
-                    true)));
+                    "Native email provider completion (fixed list)",
+                    "Optional: enables Gboard's built-in fixed email provider strip. Off by default so personalized @mention suggestions stay clean.",
+                    false)));
 
     private static final AtomicBoolean BOOTSTRAPPED = new AtomicBoolean(false);
 

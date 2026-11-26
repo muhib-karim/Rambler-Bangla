@@ -407,13 +407,15 @@ public final class RamblerFlagRuntime {
                 return rawValue;
 
             case EMAIL_PROVIDER_COMPLETION_FLAG:
-                if (!RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS
-                        && !RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS) {
+                if (!RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS) {
                     return rawValue;
                 }
                 rememberLiveFlag(flagInstance, flagName);
                 if (rawValue instanceof Boolean) {
-                    return Boolean.valueOf(RamblerAtMentionStore.isEnabled(resolveContext()));
+                    // Default OFF so Gboard's fixed canned email provider strip does not override
+                    // our personalized @mention strip; opt-in via Hidden Flags Override if wanted.
+                    return Boolean.valueOf(RamblerHiddenFlagOverrideRuntime.isEnabled(
+                            resolveContext(), flagName, false));
                 }
                 return rawValue;
 

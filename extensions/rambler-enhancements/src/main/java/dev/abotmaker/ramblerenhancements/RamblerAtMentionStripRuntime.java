@@ -28,11 +28,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Displays SwiftKey-style {@code @} handle &amp; email domain chips on Gboard's suggestion
- * strip while keeping password and incognito fields strictly fail-closed.
+ * Displays SwiftKey-style personalized {@code @} handle &amp; email domain chips on Gboard's
+ * suggestion strip while keeping password and incognito fields strictly fail-closed.
  */
 public final class RamblerAtMentionStripRuntime {
     static final String STRIP_TAG = "rambler-bangla-at-mention-strip";
@@ -47,7 +49,10 @@ public final class RamblerAtMentionStripRuntime {
     private static WeakReference<View> activeStripView = new WeakReference<>(null);
     private static boolean sensitiveSession;
     private static String lastRenderedKey;
-    private static String lastLearnedTail;
+    private static final Set<String> sessionLearnedKeys = new HashSet<String>();
+    private static String pendingToken;
+    private static boolean pendingEmailContext;
+    private static int pendingBeforeLen = -1;
 
     private RamblerAtMentionStripRuntime() {
     }
@@ -60,13 +65,15 @@ public final class RamblerAtMentionStripRuntime {
             if (!(receiver instanceof InputMethodService service)) {
                 return;
             }
+            flushPendingToken(service);
             boolean sensitive = RamblerTextPipeline.isSensitiveOrIncognitoField(info);
             synchronized (LOCK) {
                 activeService = new WeakReference<>(service);
                 activeInputView.clear();
                 sensitiveSession = sensitive;
                 lastRenderedKey = null;
-                lastLearnedTail = null;
+                sessionLearnedKeys.clear();
+                clearPendingLocked();
             }
             hideStrip();
         } catch (Throwable ignored) {
@@ -105,16 +112,47 @@ public final class RamblerAtMentionStripRuntime {
 
     public static void onInputWindowHidden() {
         try {
+            InputMethodService prevService;
+            synchronized (LOCK) {
+                prevService = activeService.get();
+            }
+            flushPendingToken(prevService);
             hideStrip();
             synchronized (LOCK) {
                 activeService.clear();
                 activeInputView.clear();
                 sensitiveSession = false;
                 lastRenderedKey = null;
-                lastLearnedTail = null;
+                sessionLearnedKeys.clear();
+                clearPendingLocked();
             }
         } catch (Throwable ignored) {
             // Never disrupt Gboard.
+        }
+    }
+
+    private static void clearPendingLocked() {
+        pendingToken = null;
+        pendingEmailContext = false;
+        pendingBeforeLen = -1;
+    }
+
+    private static void flushPendingToken(Context context) {
+        String toLearn;
+        boolean emailCtx;
+        synchronized (LOCK) {
+            if (sensitiveSession) {
+                clearPendingLocked();
+                return;
+            }
+            toLearn = pendingToken;
+            emailCtx = pendingEmailContext;
+            clearPendingLocked();
+        }
+        if (context != null && toLearn != null
+                && RamblerAtMentionStore.isEnabled(context)
+                && RamblerAtMentionStore.isValidPendingTokenForCommit(toLearn, emailCtx)) {
+            RamblerAtMentionStore.recordToken(context, toLearn);
         }
     }
 
@@ -138,22 +176,45 @@ public final class RamblerAtMentionStripRuntime {
                 return;
             }
             CharSequence beforeCursor = ic.getTextBeforeCursor(TEXT_LOOKBACK, 0);
-            if (beforeCursor == null || beforeCursor.length() == 0) {
+            String beforeStr = beforeCursor == null ? "" : beforeCursor.toString();
+
+            // If field suddenly cleared (e.g. user pressed Send/Enter right after typing "@grok"),
+            // flush the pending token unless the user merely backspaced a 1-char token down to empty.
+            if (beforeStr.isEmpty()) {
+                boolean shouldFlush;
+                synchronized (LOCK) {
+                    shouldFlush = pendingToken != null && pendingBeforeLen > 1;
+                }
+                if (shouldFlush) {
+                    flushPendingToken(service);
+                } else {
+                    synchronized (LOCK) {
+                        clearPendingLocked();
+                    }
+                }
+                synchronized (LOCK) {
+                    sessionLearnedKeys.clear();
+                }
                 hideStripNow();
                 return;
             }
 
-            // 1. Learn any newly completed @handles / @domains (skip duplicate tails).
-            String beforeStr = beforeCursor.toString();
-            if (!beforeStr.equals(lastLearnedTail)) {
-                List<String> completed = RamblerAtMentionStore.extractCompletedTokens(beforeStr);
-                if (!completed.isEmpty()) {
-                    // Record the most recent completed token(s) seen in the lookback window.
-                    String newest = completed.get(completed.size() - 1);
-                    String learnedKey = newest + "#" + beforeStr.lastIndexOf(newest);
-                    if (!learnedKey.equals(lastLearnedTail)) {
-                        lastLearnedTail = learnedKey;
-                        RamblerAtMentionStore.recordToken(service, newest);
+            // 1. Learn all newly completed @handles / @domains in the lookback window.
+            List<String> completed = RamblerAtMentionStore.extractCompletedTokens(beforeStr);
+            if (!completed.isEmpty()) {
+                int searchFrom = 0;
+                for (String token : completed) {
+                    int pos = beforeStr.indexOf(token, searchFrom);
+                    if (pos >= 0) {
+                        searchFrom = pos + token.length();
+                    }
+                    String learnedKey = token.toLowerCase(java.util.Locale.US) + "#" + pos;
+                    boolean isNew;
+                    synchronized (LOCK) {
+                        isNew = sessionLearnedKeys.add(learnedKey);
+                    }
+                    if (isNew) {
+                        RamblerAtMentionStore.recordToken(service, token);
                     }
                 }
             }
@@ -162,8 +223,20 @@ public final class RamblerAtMentionStripRuntime {
             RamblerAtMentionStore.ActivePrefix active =
                     RamblerAtMentionStore.extractActivePrefix(beforeStr);
             if (active == null) {
+                // User finished typing (space/newline/punctuation) or moved cursor away.
+                // Any space-terminated token was already recorded above; clear pending.
+                synchronized (LOCK) {
+                    clearPendingLocked();
+                }
                 hideStripNow();
                 return;
+            }
+
+            // Track the active @token so pressing Send/Enter/Hide learns it even without a space.
+            synchronized (LOCK) {
+                pendingToken = active.prefix;
+                pendingEmailContext = active.emailDomainContext;
+                pendingBeforeLen = beforeStr.length();
             }
 
             List<String> suggestions =
@@ -306,6 +379,9 @@ public final class RamblerAtMentionStripRuntime {
                 ic.endBatchEdit();
             }
             RamblerAtMentionStore.recordToken(service, token);
+            synchronized (LOCK) {
+                clearPendingLocked();
+            }
             hideStripNow();
         } catch (Throwable ignored) {
             hideStripNow();

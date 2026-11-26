@@ -2,6 +2,15 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.1.0] - 2026-11-27
+
+**100% Personalized `@Mention` Strip Suggestions & Persistent Maintainer-Key APK Signing.**
+
+- **Personalized `@` suggestions (zero fixed standalone defaults):** Removed hardcoded `DEFAULT_EMAIL_DOMAINS` backfill from standalone `@` mentions and defaulted Gboard's fixed `enable_email_provider_completion` override OFF so typing `@` / `@g` surfaces only your own learned `@handles` (`@grok`, `@claude`, etc.), ranked by frequency and recency. Common email-domain fallback now applies only in explicit email-address context (`name@g`).
+- **Reliable learning across every input flow:** Captures all newly completed `@handles`/`@domains` in the buffer, flushes pending `@tokens` on Send/Enter/field-clear, field-switch (`onStartInputView`), and keyboard close (`onInputWindowHidden`) without false-learning backspaced typos, and learns dictated `@handles` in `RamblerTextPipeline` (strictly fail-closed in password/incognito fields).
+- **In-app `@Mention` management:** Added an **Add custom @mentions or domains** dialog and top-learned preview inside Rambler Bangla Settings alongside live toggle and Clear All.
+- **Persistent maintainer signing key:** Signed the `v31.1.0` Release APK with the repository's persistent maintainer certificate (`679cfdec...`) via GitHub Actions (`private-test-build.yml`), enabling seamless in-place APK upgrades on Android without uninstalling.
+
 ## [31.0.0] - 2026-11-27
 
 **Rambler+ Activation Fix, `nl-morphe-patches` Integration, SwiftKey-Style `@Mention` Strip Suggestions (59 Morphe Patches), Phonetic Bangla Voice Handoff & In-App Branding.**
