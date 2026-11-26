@@ -213,4 +213,83 @@ class RamblerBanglaPatchTest {
         installAtMentionLifecycleHooksOnClass(imeClass, fieldRef)
         assertEquals(selCount, updatedSel.implementation!!.instructions.size)
     }
+
+    @Test
+    fun nativeSuggestionStripHooksAreInstalledCleanlyAndIdempotently() {
+        val tcMethod = ImmutableMethod(
+            "Lpbh;",
+            "K",
+            listOf(ImmutableMethodParameter("Z", emptySet(), null)),
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(5),
+        ).toMutable().apply { addInstructions(0, "return-void") }
+
+        val reqMethod = ImmutableMethod(
+            "Lpbo;",
+            "aa",
+            listOf(
+                ImmutableMethodParameter("I", emptySet(), null),
+                ImmutableMethodParameter("Z", emptySet(), null),
+            ),
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(5),
+        ).toMutable().apply { addInstructions(0, "return-void") }
+
+        val evMethod = ImmutableMethod(
+            "Lphr;",
+            "aw",
+            listOf(ImmutableMethodParameter("Lohe;", emptySet(), null)),
+            "Z",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(28),
+        ).toMutable().apply {
+            addInstructions(
+                0,
+                """
+                const/4 v0, 0x0
+                return v0
+                """.trimIndent(),
+            )
+        }
+
+        installNativeTextCandidatesUpdatedHook(tcMethod)
+        installNativeRequestCandidatesHook(reqMethod)
+        installNativeHandleEventHook(evMethod)
+
+        val tcSize = tcMethod.implementation!!.instructions.size
+        val reqSize = reqMethod.implementation!!.instructions.size
+        val evSize = evMethod.implementation!!.instructions.size
+
+        assertTrue(
+            tcMethod.implementation!!.instructions
+                .mapNotNull { (it as? ReferenceInstruction)?.reference?.toString() }
+                .any { it.contains("RamblerAtMentionStripRuntime;->onTextCandidatesUpdated") },
+        )
+        assertTrue(
+            reqMethod.implementation!!.instructions
+                .mapNotNull { (it as? ReferenceInstruction)?.reference?.toString() }
+                .any { it.contains("RamblerAtMentionStripRuntime;->trySupplyNativeCandidatesFromDelegate") },
+        )
+        assertTrue(
+            evMethod.implementation!!.instructions
+                .mapNotNull { (it as? ReferenceInstruction)?.reference?.toString() }
+                .any { it.contains("RamblerAtMentionStripRuntime;->tryHandleNativeCandidateEvent") },
+        )
+
+        // Idempotent second pass
+        installNativeTextCandidatesUpdatedHook(tcMethod)
+        installNativeRequestCandidatesHook(reqMethod)
+        installNativeHandleEventHook(evMethod)
+        assertEquals(tcSize, tcMethod.implementation!!.instructions.size)
+        assertEquals(reqSize, reqMethod.implementation!!.instructions.size)
+        assertEquals(evSize, evMethod.implementation!!.instructions.size)
+    }
 }

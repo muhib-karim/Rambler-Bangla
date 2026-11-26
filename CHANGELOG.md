@@ -2,6 +2,13 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.2.0] - 2026-11-27
+
+**True Native Gboard Suggestion-Strip Integration for `@Mention` Suggestions (Zero Floating Overlay / Zero White Background).**
+
+- **Native Gboard suggestion strip (`InputBundle` / `IKeyboardDelegate` / `CandidateViewBuilder`):** Replaced the floating custom `HorizontalScrollView` pill bar with direct native `Candidate` (`owu`) injection into Gboard's own suggestion strip (`pbh.K`, `pbo.aa`, `phr.aw`). Personalized `@handles` (`@grok`, `@claude`, etc.) now render natively inside Gboard's suggestion bar with exact theme matching (AMOLED `#000000`, Material You Dark/Light, Frosted Glass blur, and Custom Themes), native typography/dividers, tap-to-insert (`-10002`), and native long-press/drag-up "Remove suggestion" (`-10031`).
+- **Maintainer-signed APK:** Signed via `.github/workflows/private-test-build.yml` (`679cfdec...`) so upgrading from `v31.1.0` installs seamlessly in-place with zero uninstall and zero data loss.
+
 ## [31.1.0] - 2026-11-27
 
 **100% Personalized `@Mention` Strip Suggestions & Persistent Maintainer-Key APK Signing.**
