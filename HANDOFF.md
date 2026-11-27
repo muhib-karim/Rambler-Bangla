@@ -1,13 +1,12 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.8.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.9.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.8.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **Foolproof Pure Bangla & Mixed Orthography Engine (`GboardRamblerBanglaNormalizer`):** Post-LLM and post-ASR Bengali orthography normalizer running on 100% of Bengali output (including zero-Latin LLM commits), fixing `-আই` → `-ই` enclitics (`সবকিছুই`), `শব*` → `সব*` (`সবকিছু`, preserving `শবদেহ`/`শব্দ`), `বুযে`/`বুজে` → `বুঝে`, `ভালে` → `ভালো`, `সুন্দর ভাবে` → `সুন্দরভাবে`, `ওয়টেভার` → `হোয়াটেভার`, `ফনেটিকস` → `ফোনেটিকস`, `রাইট নাউ` → `রাইট নাও`, double-nukta cleanup, and Pure Bangla Bengali dari (`।`).
-   - **Original Rambler Bangla `Patches` UI (Zero Upstream Repo Icons):** Branded Deep Navy / Ocean / Amber palette, gradient hero card (`RAMBLER BANGLA · v31.8.0`), `16dp` bordered cards, amber-bar uppercase section headers, and zero upstream circular icon badges.
-   - **Complete Keyboard & Clipboard Migration into `Patches` & Hardened `About → App auto-updates`:** Ready for 1-tap in-app OTA upgrade from `v31.7.0` → `v31.8.0`.
+1. **Completed:** Shipped **`Rambler Bangla v31.9.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **Full-Language 190,405-Word Offline Bengali Orthography & Phonetic-Skeleton Engine (`GboardRamblerBanglaLexicon`):** Combines OpenBangla Keyboard (GPL-3.0), LibreOffice `bn_BD` Hunspell (GPL-2.0+/LGPL/MPL), and HermitDave FrequencyWords (MIT/CC-BY-SA) with Level-1 homophone snap, Level-2 aspiration/`ব্য`↔`বে`/geminate snap, and agglutinative suffix stripping.
+   - **Android 14–16 In-App Auto-Updater Fix:** Async off-UI-thread `PackageInstaller` staging + explicit package-scoped `PendingIntent.getBroadcast` foreground `BroadcastReceiver` (BAL-safe on `targetSdk 35` / Samsung One UI) + 10s watchdog + 1-tap **"Save to Downloads"** fallback.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

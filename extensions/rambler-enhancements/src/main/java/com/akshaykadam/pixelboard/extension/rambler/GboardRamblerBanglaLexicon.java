@@ -1,0 +1,510 @@
+package com.akshaykadam.pixelboard.extension.rambler;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
+
+/**
+ * Full-language offline Bengali orthography &amp; phonetic-skeleton spell-correction engine.
+ *
+ * <p>Backed by 190,405 authoritative Bengali words from OpenBangla Keyboard (GPL-3.0) and
+ * LibreOffice {@code bn_BD} Hunspell (GPL-2.0+/LGPL/MPL), ranked by spoken Bengali usage
+ * frequency from HermitDave FrequencyWords (MIT / CC-BY-SA).</p>
+ *
+ * <p>Design invariants:
+ * <ul>
+ *   <li><b>Zero false positives on valid Bengali words:</b> All 190,405 valid words are stored in
+ *       a compact sorted UTF-8 byte blob (~4.5 MB, zero per-word String GC overhead) and checked
+ *       via binary search in ~5 microseconds.</li>
+ *   <li><b>Level-1 Strict Homophone Skeleton:</b> Collapses Bengali characters pronounced
+ *       identically in spoken Bangla ({@code শ/স/ষ}, {@code ণ/ন}, {@code ি/ী}, {@code ু/ূ},
+ *       {@code য/জ}, {@code ড়/ঢ়/র}, {@code ৎ/ত}, {@code ং/ঙ}, {@code ঁ}) and snaps any OOV
+ *       word to the highest-frequency valid Bengali word with the exact same sound skeleton.</li>
+ *   <li><b>Level-2 Aspiration, Jofola &amp; Geminate Skeleton:</b> Over the top 20,000 spoken
+ *       words (guarded by edit distance &le; 2), repairs common ASR/LLM mistakes such as
+ *       {@code বুযে} &rarr; {@code বুঝে}, {@code খাছি} &rarr; {@code খাচ্ছি},
+ *       {@code বেবহার} &rarr; {@code ব্যবহার}, and {@code উপস্তিত} &rarr; {@code উপস্থিত}.</li>
+ *   <li><b>Agglutinative Suffix Fallback:</b> Strips common Bengali suffixes ({@code গুলো},
+ *       {@code দের}, {@code টা}, {@code টি}, {@code কে}, {@code তে}, {@code এর}, {@code ই},
+ *       {@code ও}, etc.), repairs the stem, and re-attaches the suffix.</li>
+ * </ul>
+ */
+public final class GboardRamblerBanglaLexicon {
+
+    private static final String[] SUFFIXES = {
+        "গুলোতে", "গুলোই", "গুলোর", "গুলোকে", "গুলাতে", "গুলাই", "গুলার",
+        "গুলো", "গুলা", "দেরকে", "দেরই", "দের", "টাকে", "টাতে", "টার", "টাও", "টাই",
+        "টিকে", "টিতে", "টির", "টিও", "টিই", "টা", "টি", "কেও", "কেই", "তেও", "তেই",
+        "কে", "তে", "এর", "ই", "ও"
+    };
+
+    private static final class Snapshot {
+        final byte[] validBlob;
+        final int[] validOffsets; // length = count + 1
+        final int validCount;
+        final HashMap<String, String> l1Index;
+        final HashMap<String, String> l2Index;
+
+        Snapshot(byte[] validBlob, int[] validOffsets, int validCount,
+                HashMap<String, String> l1Index, HashMap<String, String> l2Index) {
+            this.validBlob = validBlob;
+            this.validOffsets = validOffsets;
+            this.validCount = validCount;
+            this.l1Index = l1Index;
+            this.l2Index = l2Index;
+        }
+    }
+
+    private static volatile Snapshot snapshot;
+    private static volatile boolean loading;
+    private static final CountDownLatch READY = new CountDownLatch(1);
+    private static volatile long loadMs = -1L;
+
+    private GboardRamblerBanglaLexicon() {
+    }
+
+    /** Starts one-time background decompression &amp; indexing; never throws. */
+    public static void preload() {
+        if (snapshot != null || loading) {
+            return;
+        }
+        synchronized (GboardRamblerBanglaLexicon.class) {
+            if (snapshot != null || loading) {
+                return;
+            }
+            loading = true;
+        }
+        try {
+            Thread t = new Thread(GboardRamblerBanglaLexicon::loadNow, "rambler-bn-lexicon");
+            t.setDaemon(true);
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+        } catch (Throwable ignored) {
+            synchronized (GboardRamblerBanglaLexicon.class) {
+                loading = false;
+            }
+            READY.countDown();
+        }
+    }
+
+    static Snapshot ensureSnapshot() {
+        Snapshot s = snapshot;
+        if (s != null) {
+            return s;
+        }
+        preload();
+        try {
+            READY.await(600L, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
+        s = snapshot;
+        if (s == null) {
+            // Synchronous fallback if background thread hasn't completed yet (e.g. cold JVM test)
+            loadNow();
+            s = snapshot;
+        }
+        return s;
+    }
+
+    public static int validWordCount() {
+        Snapshot s = ensureSnapshot();
+        return s == null ? 0 : s.validCount;
+    }
+
+    public static long getLoadMs() {
+        return loadMs;
+    }
+
+    public static boolean isValid(String word) {
+        if (word == null || word.length() < 2) {
+            return false;
+        }
+        Snapshot s = ensureSnapshot();
+        if (s == null || s.validCount == 0) {
+            return false;
+        }
+        return containsUtf8(s, word.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Repairs an out-of-vocabulary Bengali word using the 190,405-word lexicon, phonetic-skeleton
+     * snap (Level 1 + Level 2), and agglutinative suffix stripping. Valid Bengali words are always
+     * returned unchanged.
+     */
+    public static String correctWord(String word) {
+        if (word == null || word.length() < 2) {
+            return word;
+        }
+        Snapshot s = ensureSnapshot();
+        if (s == null || s.validCount == 0) {
+            return word;
+        }
+        String direct = correctNoSuffix(s, word);
+        if (!direct.equals(word)) {
+            return direct;
+        }
+        if (containsUtf8(s, word.getBytes(StandardCharsets.UTF_8))) {
+            return word;
+        }
+        // Agglutinative suffix stripping fallback (e.g. শবকিছুই -> সবকিছু + ই, অবস্যই -> অবশ্য + ই)
+        for (String suf : SUFFIXES) {
+            if (word.length() > suf.length() + 1 && word.endsWith(suf)) {
+                String stem = word.substring(0, word.length() - suf.length());
+                String fixedStem = correctNoSuffix(s, stem);
+                if (!fixedStem.equals(stem)) {
+                    return fixedStem + suf;
+                }
+            }
+        }
+        return word;
+    }
+
+    private static String correctNoSuffix(Snapshot s, String word) {
+        if (word.length() < 2) {
+            return word;
+        }
+        if (containsUtf8(s, word.getBytes(StandardCharsets.UTF_8))) {
+            return word;
+        }
+        // Level 1: strict homophone skeleton (শ/স/ষ, ন/ণ, ি/ী, ু/ূ, য/জ, ড়/ঢ়/র, ৎ/ত, ং/ঙ, ঁ)
+        String k1 = skeleton1(word);
+        String cand1 = s.l1Index.get(k1);
+        if (cand1 != null) {
+            return cand1;
+        }
+        // Level 2: aspiration + ব্য/বে jofola + geminate skeleton (top 20K spoken words, dist <= 2)
+        if (word.length() >= 3) {
+            String k2 = skeleton2(word);
+            String cand2 = s.l2Index.get(k2);
+            if (cand2 != null
+                    && Math.abs(cand2.length() - word.length()) <= 2
+                    && editDistanceAtMost2(word, cand2)) {
+                return cand2;
+            }
+        }
+        return word;
+    }
+
+    static void loadNow() {
+        if (snapshot != null) {
+            READY.countDown();
+            return;
+        }
+        synchronized (GboardRamblerBanglaLexicon.class) {
+            if (snapshot != null) {
+                READY.countDown();
+                return;
+            }
+            long t0 = System.nanoTime();
+            try {
+                HashMap<String, String> l1 = new HashMap<String, String>(65536);
+                HashMap<String, String> l2 = new HashMap<String, String>(24576);
+
+                // 1. Load frequency-ranked spoken authoritative Bengali words first so the highest-
+                //    frequency everyday spoken word ALWAYS wins every phonetic-skeleton collision.
+                byte[] spokenGz = decodeBase64Chunks(GboardRamblerBanglaLexiconData.spokenGzipBase64Chunks());
+                int spokenIdx = 0;
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(spokenGz)), StandardCharsets.UTF_8))) {
+                    String w;
+                    while ((w = br.readLine()) != null) {
+                        if (w.length() < 2) {
+                            continue;
+                        }
+                        String k1 = skeleton1(w);
+                        if (!l1.containsKey(k1)) {
+                            l1.put(k1, w);
+                        }
+                        if (spokenIdx < 22000) {
+                            String k2 = skeleton2(w);
+                            if (!l2.containsKey(k2)) {
+                                l2.put(k2, w);
+                            }
+                        }
+                        spokenIdx++;
+                    }
+                }
+
+                // 2. Load ALL 190,405 sorted authoritative Bengali words into a flat UTF-8 byte blob
+                //    + int[] offset table (zero 190K String heap bloat) and backfill formal L1 entries.
+                byte[] validGz = decodeBase64Chunks(GboardRamblerBanglaLexiconData.validDeltaGzipBase64Chunks());
+                ByteArrayOutputStream blobOut = new ByteArrayOutputStream(4_500_000);
+                int maxCount = GboardRamblerBanglaLexiconData.VALID_COUNT + 16;
+                int[] offsets = new int[maxCount + 1];
+                int count = 0;
+                String prev = "";
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(validGz)), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (line.isEmpty()) {
+                            continue;
+                        }
+                        int lcp = line.charAt(0) - 33;
+                        if (lcp < 0 || lcp > prev.length()) {
+                            lcp = 0;
+                        }
+                        String w = (lcp == 0 ? "" : prev.substring(0, lcp)) + line.substring(1);
+                        prev = w;
+                        if (count >= maxCount) {
+                            int[] bigger = new int[offsets.length * 2];
+                            System.arraycopy(offsets, 0, bigger, 0, offsets.length);
+                            offsets = bigger;
+                            maxCount = offsets.length - 1;
+                        }
+                        offsets[count] = blobOut.size();
+                        byte[] utf8 = w.getBytes(StandardCharsets.UTF_8);
+                        blobOut.write(utf8, 0, utf8.length);
+                        count++;
+
+                        // Backfill Level-1 homophone index for non-spoken formal words (length 3..15)
+                        if (w.length() >= 3 && w.length() <= 15) {
+                            String k1 = skeleton1(w);
+                            if (!l1.containsKey(k1)) {
+                                l1.put(k1, w);
+                            }
+                        }
+                    }
+                }
+                offsets[count] = blobOut.size();
+
+                snapshot = new Snapshot(blobOut.toByteArray(), offsets, count, l1, l2);
+                loadMs = (System.nanoTime() - t0) / 1_000_000L;
+            } catch (Throwable err) {
+                snapshot = new Snapshot(new byte[0], new int[] { 0 }, 0,
+                        new HashMap<String, String>(), new HashMap<String, String>());
+            } finally {
+                READY.countDown();
+            }
+        }
+    }
+
+    /** Binary search on UTF-8 sorted byte blob (UTF-8 preserves BMP Unicode code-point order). */
+    private static boolean containsUtf8(Snapshot s, byte[] key) {
+        int lo = 0;
+        int hi = s.validCount - 1;
+        byte[] blob = s.validBlob;
+        int[] offsets = s.validOffsets;
+        while (lo <= hi) {
+            int mid = (lo + hi) >>> 1;
+            int start = offsets[mid];
+            int len = offsets[mid + 1] - start;
+            int cmp = compareUnsigned(blob, start, len, key);
+            if (cmp < 0) {
+                lo = mid + 1;
+            } else if (cmp > 0) {
+                hi = mid - 1;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static int compareUnsigned(byte[] a, int aOff, int aLen, byte[] b) {
+        int min = Math.min(aLen, b.length);
+        for (int i = 0; i < min; i++) {
+            int va = a[aOff + i] & 0xFF;
+            int vb = b[i] & 0xFF;
+            if (va != vb) {
+                return va - vb;
+            }
+        }
+        return aLen - b.length;
+    }
+
+    /**
+     * Level-1 Strict Homophone Skeleton: collapses Bengali characters that sound identical in
+     * modern spoken Bangla (শ/স/ষ, ন/ণ, ি/ী, ু/ূ, য/জ, ড়/ঢ়/র, ৎ/ত, ং/ঙ, ঁ).
+     */
+    static String skeleton1(String w) {
+        int n = w.length();
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            char c = w.charAt(i);
+            // Handle decomposed nukta sequences (ড+়, ঢ+় -> র; য+় -> য়)
+            if (i + 1 < n && w.charAt(i + 1) == '\u09bc') {
+                if (c == '\u09a1' || c == '\u09a2') {
+                    sb.append('\u09b0'); // র
+                    i++;
+                    continue;
+                }
+                if (c == '\u09af') {
+                    sb.append('\u09df'); // য়
+                    i++;
+                    continue;
+                }
+            }
+            switch (c) {
+                case '\u09b6': // শ
+                case '\u09b7': // ষ
+                    sb.append('\u09b8'); // স
+                    break;
+                case '\u09a3': // ণ
+                    sb.append('\u09a8'); // ন
+                    break;
+                case '\u09c0': // ী
+                    sb.append('\u09bf'); // ি
+                    break;
+                case '\u0988': // ঈ
+                    sb.append('\u0987'); // ই
+                    break;
+                case '\u09c2': // ূ
+                    sb.append('\u09c1'); // ু
+                    break;
+                case '\u098a': // ঊ
+                    sb.append('\u0989'); // উ
+                    break;
+                case '\u09af': // য
+                    sb.append('\u099c'); // জ
+                    break;
+                case '\u09dc': // ড়
+                case '\u09dd': // ঢ়
+                    sb.append('\u09b0'); // র
+                    break;
+                case '\u09ce': // ৎ
+                    sb.append('\u09a4'); // ত
+                    break;
+                case '\u0999': // ঙ
+                    sb.append('\u0982'); // ং
+                    break;
+                case '\u0981': // ঁ
+                    break;
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Level-2 Aspiration, Jofola (ব্য↔বে) &amp; Geminate Skeleton: catches missing/extra aspiration
+     * (বুযে->বুঝে, উপস্তিত->উপস্থিত), geminates (খাছি->খাচ্ছি), and initial jofola vowel shifts
+     * (বেবহার->ব্যবহার, বেক্তি->ব্যক্তি, বেস্ত->ব্যস্ত).
+     */
+    static String skeleton2(String w) {
+        String s1 = skeleton1(w);
+        int n = s1.length();
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            char c = s1.charAt(i);
+            // Collapse consonant + virama + য (jofola, e.g. ব্য -> বে) when not followed by া
+            if (i + 2 < n && s1.charAt(i + 1) == '\u09cd' && s1.charAt(i + 2) == '\u099c') {
+                sb.append(foldAspiration(c));
+                if (i + 3 >= n || s1.charAt(i + 3) != '\u09be') {
+                    sb.append('\u09c7'); // ে
+                }
+                i += 2;
+                continue;
+            }
+            // Collapse doubled/aspirated geminate consonants (e.g. চ্ছ -> চ, ক্ক -> ক, ত্ত -> ত)
+            if (i + 2 < n && s1.charAt(i + 1) == '\u09cd'
+                    && foldAspiration(c) == foldAspiration(s1.charAt(i + 2))) {
+                sb.append(foldAspiration(c));
+                i += 2;
+                continue;
+            }
+            if (c == '\u09df') { // য়
+                sb.append('\u099c'); // জ
+            } else {
+                sb.append(foldAspiration(c));
+            }
+        }
+        return sb.toString();
+    }
+
+    private static char foldAspiration(char c) {
+        switch (c) {
+            case '\u099d': return '\u099c'; // ঝ -> জ
+            case '\u09ad': return '\u09ac'; // ভ -> ব
+            case '\u0996': return '\u0995'; // খ -> ক
+            case '\u0998': return '\u0997'; // ঘ -> গ
+            case '\u09a5': return '\u09a4'; // থ -> ত
+            case '\u09a7': return '\u09a6'; // ধ -> দ
+            case '\u099b': return '\u099a'; // ছ -> চ
+            case '\u09ab': return '\u09aa'; // ফ -> প
+            case '\u09a0': return '\u099f'; // ঠ -> ট
+            case '\u09a2': return '\u09a1'; // ঢ -> ড
+            default: return c;
+        }
+    }
+
+    /** Fast banded Levenshtein check returning true iff edit distance(a, b) <= 2. */
+    private static boolean editDistanceAtMost2(String a, String b) {
+        int la = a.length();
+        int lb = b.length();
+        if (Math.abs(la - lb) > 2) {
+            return false;
+        }
+        int[] prev = new int[lb + 1];
+        int[] curr = new int[lb + 1];
+        for (int j = 0; j <= lb; j++) {
+            prev[j] = j;
+        }
+        for (int i = 1; i <= la; i++) {
+            curr[0] = i;
+            int rowMin = curr[0];
+            char ca = a.charAt(i - 1);
+            for (int j = 1; j <= lb; j++) {
+                int cost = (ca == b.charAt(j - 1)) ? 0 : 1;
+                int v = Math.min(Math.min(curr[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
+                curr[j] = v;
+                if (v < rowMin) {
+                    rowMin = v;
+                }
+            }
+            if (rowMin > 2) {
+                return false;
+            }
+            int[] tmp = prev;
+            prev = curr;
+            curr = tmp;
+        }
+        return prev[lb] <= 2;
+    }
+
+    /** Pure-Java Base64 decoder (zero Android API-level / Lint dependencies). */
+    private static byte[] decodeBase64Chunks(String[] chunks) {
+        int totalLen = 0;
+        for (String c : chunks) {
+            totalLen += c.length();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream((totalLen * 3) / 4);
+        int buf = 0;
+        int bits = 0;
+        for (String chunk : chunks) {
+            for (int i = 0; i < chunk.length(); i++) {
+                char ch = chunk.charAt(i);
+                int v;
+                if (ch >= 'A' && ch <= 'Z') {
+                    v = ch - 'A';
+                } else if (ch >= 'a' && ch <= 'z') {
+                    v = ch - 'a' + 26;
+                } else if (ch >= '0' && ch <= '9') {
+                    v = ch - '0' + 52;
+                } else if (ch == '+') {
+                    v = 62;
+                } else if (ch == '/') {
+                    v = 63;
+                } else {
+                    continue;
+                }
+                buf = (buf << 6) | v;
+                bits += 6;
+                if (bits >= 8) {
+                    bits -= 8;
+                    out.write((buf >>> bits) & 0xFF);
+                }
+            }
+        }
+        return out.toByteArray();
+    }
+}

@@ -312,6 +312,7 @@ final class GboardRamblerLoanSpell {
    * and when a voice pass begins (enterVoice). If the thread cannot start, loading is reset so a later call can retry.
    */
   static void preload() {
+    GboardRamblerBanglaLexicon.preload();
     try {
       if (table != null || loading) return;
       synchronized (GboardRamblerLoanSpell.class) {

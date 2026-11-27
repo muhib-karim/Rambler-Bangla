@@ -8,6 +8,8 @@ package dev.abotmaker.ramblerenhancements;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
@@ -15,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -50,7 +53,7 @@ import java.util.regex.Pattern;
  */
 public final class RamblerAutoUpdater {
     private static final String TAG = "RamblerUpdater";
-    public static final String CURRENT_VERSION = "31.8.0";
+    public static final String CURRENT_VERSION = "31.9.0";
     public static final String REPO_SLUG = "muhib-karim/Rambler-Bangla";
     public static final String RELEASE_API_URL =
             "https://api.github.com/repos/" + REPO_SLUG + "/releases/latest";
@@ -105,6 +108,12 @@ public final class RamblerAutoUpdater {
         void onProgress(int percent, long downloadedBytes, long totalBytes);
         void onReadyToInstall(File verifiedApk, String sha256Hex);
         void onError(String message);
+    }
+
+    public interface InstallStageCallback {
+        void onStageProgress(int percent);
+        void onCommitted(int sessionId);
+        void onStageError(String message);
     }
 
     private RamblerAutoUpdater() {
@@ -428,60 +437,152 @@ public final class RamblerAutoUpdater {
     }
 
     /**
-     * Streams a SHA-256-verified APK into Android's {@link PackageInstaller} and commits it to
-     * {@code activity} ({@code singleTop} {@code onNewIntent}) so Android displays the native
-     * 1-tap Update confirmation sheet without needing any FileProvider or BroadcastReceiver.
+     * Streams a SHA-256-verified APK into Android's {@link PackageInstaller} on a background
+     * thread (never blocking the UI thread) and commits it to an explicit package-scoped
+     * {@link PendingIntent#getBroadcast} receiver so Android 14–16 foreground activities receive
+     * {@link PackageInstaller#STATUS_PENDING_USER_ACTION} cleanly without Background Activity
+     * Launch (BAL) suppression.
      */
-    public static void launchPackageInstaller(Activity activity, File verifiedApk) throws IOException {
-        if (activity == null || verifiedApk == null || !verifiedApk.isFile()) {
+    public static void launchPackageInstallerAsync(
+            Context context,
+            File verifiedApk,
+            InstallStageCallback callback) {
+        if (context == null || verifiedApk == null || !verifiedApk.isFile()) {
+            if (callback != null) {
+                callback.onStageError("Verified APK file missing.");
+            }
+            return;
+        }
+        final Context appCtx = context.getApplicationContext();
+        final Handler main = new Handler(Looper.getMainLooper());
+        Thread worker = new Thread(() -> {
+            PackageInstaller installer = appCtx.getPackageManager().getPackageInstaller();
+            PackageInstaller.Session session = null;
+            try {
+                // Clean up any abandoned older sessions created by our own app
+                try {
+                    for (PackageInstaller.SessionInfo si : installer.getMySessions()) {
+                        if (si != null && !si.isActive()) {
+                            installer.abandonSession(si.getSessionId());
+                        }
+                    }
+                } catch (Throwable ignored) {
+                }
+
+                long totalBytes = verifiedApk.length();
+                PackageInstaller.SessionParams params =
+                        new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                params.setAppPackageName(appCtx.getPackageName());
+                params.setSize(totalBytes);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_REQUIRED);
+                }
+                int sessionId = installer.createSession(params);
+                session = installer.openSession(sessionId);
+                try (InputStream in = new BufferedInputStream(new FileInputStream(verifiedApk));
+                     OutputStream out = session.openWrite("base.apk", 0L, totalBytes)) {
+                    byte[] buf = new byte[64 * 1024];
+                    long written = 0L;
+                    int lastPct = -1;
+                    int n;
+                    while ((n = in.read(buf)) != -1) {
+                        out.write(buf, 0, n);
+                        written += n;
+                        if (callback != null && totalBytes > 0L) {
+                            int pct = (int) Math.min(100L, (written * 100L) / totalBytes);
+                            if (pct != lastPct && (pct == 100 || pct - lastPct >= 5)) {
+                                lastPct = pct;
+                                final int fPct = pct;
+                                main.post(() -> callback.onStageProgress(fPct));
+                            }
+                        }
+                    }
+                    session.fsync(out);
+                }
+
+                Intent callbackIntent = new Intent(ACTION_INSTALL_RESULT);
+                callbackIntent.setPackage(appCtx.getPackageName());
+                int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    flags |= PendingIntent.FLAG_MUTABLE;
+                }
+                PendingIntent pi = PendingIntent.getBroadcast(
+                        appCtx, sessionId, callbackIntent, flags);
+                session.commit(pi.getIntentSender());
+                final int committedId = sessionId;
+                if (callback != null) {
+                    main.post(() -> callback.onCommitted(committedId));
+                }
+            } catch (Throwable err) {
+                if (session != null) {
+                    try {
+                        session.abandon();
+                    } catch (Throwable ignored) {
+                    }
+                }
+                Log.w(TAG, "PackageInstaller commit failed", err);
+                String msg = err.getMessage() == null ? err.getClass().getSimpleName() : err.getMessage();
+                if (callback != null) {
+                    main.post(() -> callback.onStageError(msg));
+                }
+            } finally {
+                if (session != null) {
+                    try {
+                        session.close();
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }
+        }, "rambler-update-install");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    /** Copies the SHA-256-verified APK into the device Downloads folder as a manual fallback. */
+    public static String saveApkToDownloads(Context context, File verifiedApk, String displayName) throws IOException {
+        if (context == null || verifiedApk == null || !verifiedApk.isFile()) {
             throw new IOException("Verified APK file missing.");
         }
-        PackageInstaller installer = activity.getPackageManager().getPackageInstaller();
-        PackageInstaller.SessionParams params =
-                new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-        params.setAppPackageName(activity.getPackageName());
-        params.setSize(verifiedApk.length());
-        int sessionId = installer.createSession(params);
-        PackageInstaller.Session session = null;
-        try {
-            session = installer.openSession(sessionId);
-            try (InputStream in = new FileInputStream(verifiedApk);
-                 OutputStream out = session.openWrite("base.apk", 0L, verifiedApk.length())) {
+        String fileName = (displayName == null || displayName.trim().isEmpty())
+                ? "RamblerBangla-update.apk"
+                : displayName.trim();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentValues cv = new ContentValues();
+            cv.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+            cv.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.android.package-archive");
+            cv.put(MediaStore.Downloads.RELATIVE_PATH, "Download/");
+            ContentResolver cr = context.getContentResolver();
+            Uri uri = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv);
+            if (uri == null) {
+                throw new IOException("Could not create file in Downloads.");
+            }
+            try (InputStream in = new BufferedInputStream(new FileInputStream(verifiedApk));
+                 OutputStream out = cr.openOutputStream(uri)) {
+                if (out == null) {
+                    throw new IOException("Could not open Downloads output stream.");
+                }
                 byte[] buf = new byte[64 * 1024];
                 int n;
                 while ((n = in.read(buf)) != -1) {
                     out.write(buf, 0, n);
                 }
-                session.fsync(out);
             }
-            Intent callbackIntent = new Intent(activity, activity.getClass());
-            callbackIntent.setAction(ACTION_INSTALL_RESULT);
-            callbackIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                flags |= PendingIntent.FLAG_MUTABLE;
-            }
-            PendingIntent pi = PendingIntent.getActivity(activity, INSTALL_REQUEST_CODE, callbackIntent, flags);
-            session.commit(pi.getIntentSender());
-        } catch (Throwable err) {
-            if (session != null) {
-                try {
-                    session.abandon();
-                } catch (Throwable ignored) {
-                }
-            }
-            if (err instanceof IOException) {
-                throw (IOException) err;
-            }
-            throw new IOException(err.getMessage(), err);
-        } finally {
-            if (session != null) {
-                try {
-                    session.close();
-                } catch (Throwable ignored) {
-                }
+            return "Download/" + fileName;
+        }
+        File ext = context.getExternalFilesDir(null);
+        if (ext == null) {
+            throw new IOException("Storage unavailable.");
+        }
+        File dst = new File(ext, fileName);
+        try (InputStream in = new BufferedInputStream(new FileInputStream(verifiedApk));
+             OutputStream out = new FileOutputStream(dst)) {
+            byte[] buf = new byte[64 * 1024];
+            int n;
+            while ((n = in.read(buf)) != -1) {
+                out.write(buf, 0, n);
             }
         }
+        return dst.getAbsolutePath();
     }
 
     private static HttpURLConnection openSafeConnection(String rawUrl, String accept) throws IOException {

@@ -4,11 +4,15 @@ import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -142,6 +146,21 @@ public final class RamblerEnhancementsActivity extends Activity {
     private volatile RamblerAutoUpdater.ReleaseInfo availableUpdateInfo;
     private volatile boolean checkingForUpdates;
     private boolean autoUpdateCheckedThisSession;
+    private boolean isActivityResumed;
+    private boolean installReceiverRegistered;
+    private AlertDialog activeUpdateProgressDialog;
+    private java.io.File lastVerifiedApkFile;
+    private String lastVerifiedApkName;
+    private Intent pendingInstallConfirmIntent;
+
+    private final BroadcastReceiver installResultReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && RamblerAutoUpdater.ACTION_INSTALL_RESULT.equals(intent.getAction())) {
+                mainHandler.post(() -> handleUpdateInstallIntent(intent));
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,9 +189,27 @@ public final class RamblerEnhancementsActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         setContentView(scroll);
+        registerInstallResultReceiver();
         handleUpdateInstallIntent(launchIntent);
         refreshUi();
         maybeRunAutoUpdateCheck();
+    }
+
+    private void registerInstallResultReceiver() {
+        if (installReceiverRegistered) {
+            return;
+        }
+        try {
+            IntentFilter filter = new IntentFilter(RamblerAutoUpdater.ACTION_INSTALL_RESULT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(installResultReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(installResultReceiver, filter);
+            }
+            installReceiverRegistered = true;
+        } catch (Throwable err) {
+            Log.w(TAG, "Failed to register install result receiver", err);
+        }
     }
 
     @Override
@@ -201,24 +238,95 @@ public final class RamblerEnhancementsActivity extends Activity {
         if (intent == null || !RamblerAutoUpdater.ACTION_INSTALL_RESULT.equals(intent.getAction())) {
             return;
         }
+        dismissUpdateProgressDialog();
         int status = intent.getIntExtra(
                 android.content.pm.PackageInstaller.EXTRA_STATUS,
                 android.content.pm.PackageInstaller.STATUS_FAILURE);
         if (status == android.content.pm.PackageInstaller.STATUS_PENDING_USER_ACTION) {
-            Intent confirm = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+            Intent confirm = extractConfirmIntent(intent);
             if (confirm != null) {
-                try {
-                    startActivity(confirm);
-                } catch (Throwable err) {
-                    showToast("Could not open Android installer: " + err.getMessage());
+                if (isActivityResumed && !isFinishing() && !isDestroyed()) {
+                    launchConfirmIntentNow(confirm);
+                } else {
+                    pendingInstallConfirmIntent = confirm;
+                    refreshUi();
                 }
+            } else {
+                showInstallFallbackDialog("Android did not provide an install confirmation prompt.");
             }
         } else if (status == android.content.pm.PackageInstaller.STATUS_SUCCESS) {
+            pendingInstallConfirmIntent = null;
             showToast("Rambler Bangla updated successfully!");
-        } else if (status != android.content.pm.PackageInstaller.STATUS_FAILURE_ABORTED) {
+        } else if (status == android.content.pm.PackageInstaller.STATUS_FAILURE_ABORTED) {
+            showToast("Update installation cancelled.");
+        } else {
             String msg = intent.getStringExtra(android.content.pm.PackageInstaller.EXTRA_STATUS_MESSAGE);
-            showToast("Update failed" + (msg == null || msg.isEmpty() ? "." : ": " + msg));
+            String detail = "Android PackageInstaller returned error " + status
+                    + (msg == null || msg.isEmpty() ? "." : ": " + msg);
+            showInstallFallbackDialog(detail);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static Intent extractConfirmIntent(Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent.class);
+        }
+        return intent.getParcelableExtra(Intent.EXTRA_INTENT);
+    }
+
+    private void launchConfirmIntentNow(Intent confirm) {
+        pendingInstallConfirmIntent = null;
+        try {
+            // Launch directly from the live foreground Activity (exempt from Android 14-16 BAL)
+            startActivity(confirm);
+        } catch (Throwable firstErr) {
+            try {
+                confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(confirm);
+            } catch (Throwable secondErr) {
+                pendingInstallConfirmIntent = confirm;
+                showInstallFallbackDialog("Could not open Android installer: " + secondErr.getMessage());
+            }
+        }
+    }
+
+    private void dismissUpdateProgressDialog() {
+        AlertDialog dlg = activeUpdateProgressDialog;
+        activeUpdateProgressDialog = null;
+        if (dlg != null) {
+            try {
+                dlg.dismiss();
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    private void showInstallFallbackDialog(String reason) {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        AlertDialog.Builder b = new AlertDialog.Builder(this)
+                .setTitle("Installer needs manual step")
+                .setMessage(reason + "\n\nYou can save the SHA-256-verified APK directly to your Downloads folder and tap it to install.")
+                .setNegativeButton("Close", null);
+        if (pendingInstallConfirmIntent != null) {
+            final Intent retryIntent = pendingInstallConfirmIntent;
+            b.setNeutralButton("Retry Installer", (d, w) -> launchConfirmIntentNow(retryIntent));
+        }
+        if (lastVerifiedApkFile != null && lastVerifiedApkFile.isFile()) {
+            final java.io.File apk = lastVerifiedApkFile;
+            final String name = lastVerifiedApkName;
+            b.setPositiveButton("Save to Downloads", (d, w) -> runAsync(() -> {
+                try {
+                    String saved = RamblerAutoUpdater.saveApkToDownloads(this, apk, name);
+                    toastOnMain("Saved verified APK to " + saved + ". Tap it in Files to install.");
+                } catch (Throwable err) {
+                    toastOnMain("Could not save APK: " + err.getMessage());
+                }
+            }));
+        }
+        b.show();
     }
 
     private void maybeRunAutoUpdateCheck() {
@@ -318,6 +426,8 @@ public final class RamblerEnhancementsActivity extends Activity {
                 .setView(statusView)
                 .setCancelable(false)
                 .create();
+        dismissUpdateProgressDialog();
+        activeUpdateProgressDialog = progressDialog;
         progressDialog.show();
 
         RamblerAutoUpdater.downloadAndVerifyAsync(this, info, new RamblerAutoUpdater.DownloadCallback() {
@@ -338,16 +448,42 @@ public final class RamblerEnhancementsActivity extends Activity {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
-                try {
-                    progressDialog.dismiss();
-                } catch (Throwable ignored) {
-                }
-                showToast("SHA-256 verified! Opening Android installer...");
-                try {
-                    RamblerAutoUpdater.launchPackageInstaller(RamblerEnhancementsActivity.this, verifiedApk);
-                } catch (Throwable err) {
-                    showToast("Could not launch installer: " + err.getMessage());
-                }
+                lastVerifiedApkFile = verifiedApk;
+                lastVerifiedApkName = info.apkName;
+                statusView.setText("SHA-256 verified!\nPreparing Android installer... 0%");
+                RamblerAutoUpdater.launchPackageInstallerAsync(
+                        RamblerEnhancementsActivity.this,
+                        verifiedApk,
+                        new RamblerAutoUpdater.InstallStageCallback() {
+                            @Override
+                            public void onStageProgress(int percent) {
+                                if (!isFinishing() && !isDestroyed()) {
+                                    statusView.setText("SHA-256 verified!\nPreparing Android installer... " + percent + "%");
+                                }
+                            }
+
+                            @Override
+                            public void onCommitted(int sessionId) {
+                                if (!isFinishing() && !isDestroyed()) {
+                                    statusView.setText("Opening Android Update confirmation...");
+                                    // Safety watchdog: never leave user stuck on a spinner if an OEM delays/drops callback
+                                    mainHandler.postDelayed(() -> {
+                                        if (activeUpdateProgressDialog == progressDialog
+                                                && !isFinishing() && !isDestroyed()) {
+                                            dismissUpdateProgressDialog();
+                                            showInstallFallbackDialog(
+                                                    "Android did not open the update confirmation sheet within 10 seconds.");
+                                        }
+                                    }, 10_000L);
+                                }
+                            }
+
+                            @Override
+                            public void onStageError(String message) {
+                                dismissUpdateProgressDialog();
+                                showInstallFallbackDialog("Could not prepare Android installer: " + message);
+                            }
+                        });
             }
 
             @Override
@@ -355,10 +491,7 @@ public final class RamblerEnhancementsActivity extends Activity {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
-                try {
-                    progressDialog.dismiss();
-                } catch (Throwable ignored) {
-                }
+                dismissUpdateProgressDialog();
                 showToast("Update failed: " + message);
             }
         });
@@ -367,7 +500,35 @@ public final class RamblerEnhancementsActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        isActivityResumed = true;
         refreshUi();
+        if (pendingInstallConfirmIntent != null) {
+            Intent confirm = pendingInstallConfirmIntent;
+            mainHandler.post(() -> {
+                if (isActivityResumed && !isFinishing() && !isDestroyed()) {
+                    launchConfirmIntentNow(confirm);
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        isActivityResumed = false;
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        dismissUpdateProgressDialog();
+        if (installReceiverRegistered) {
+            installReceiverRegistered = false;
+            try {
+                unregisterReceiver(installResultReceiver);
+            } catch (Throwable ignored) {
+            }
+        }
+        super.onDestroy();
     }
 
     @Override

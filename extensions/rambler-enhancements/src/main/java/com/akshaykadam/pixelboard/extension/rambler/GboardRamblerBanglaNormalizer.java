@@ -199,6 +199,8 @@ public final class GboardRamblerBanglaNormalizer {
         m.put("পাছে", "পাচ্ছে");
         m.put("ঘুমাছি", "ঘুমাচ্ছি");
         m.put("ঘুমাছে", "ঘুমাচ্ছে");
+        m.put("খুশী", "খুশি");
+        m.put("পোষাক", "পোশাক");
 
         SPELLING_FIXES = Collections.unmodifiableMap(m);
 
@@ -259,6 +261,8 @@ public final class GboardRamblerBanglaNormalizer {
                 String fixed = SPELLING_FIXES.get(word);
                 if (fixed != null) {
                     word = fixed;
+                } else {
+                    word = GboardRamblerBanglaLexicon.correctWord(word);
                 }
 
                 // Check for hyphenated enclitic immediately following this Bengali word
@@ -275,6 +279,8 @@ public final class GboardRamblerBanglaNormalizer {
                         String fixedSuffix = SPELLING_FIXES.get(suffix);
                         if (fixedSuffix != null) {
                             suffix = fixedSuffix;
+                        } else {
+                            suffix = GboardRamblerBanglaLexicon.correctWord(suffix);
                         }
                     }
                     if ("\u0987".equals(suffix) && JOIN_ENCLITIC_I_BASES.contains(word)) {
