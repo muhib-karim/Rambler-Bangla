@@ -12,6 +12,8 @@ import dev.jason.gboardpatches.extension.backuprestore.GboardBackupRestoreSettin
 import dev.jason.gboardpatches.extension.clipboard.GboardClipboardSettingsFeature;
 import dev.jason.gboardpatches.extension.developeroptions.GboardDeveloperOptionsSettingsFeature;
 import dev.jason.gboardpatches.extension.keyboard.GboardAiVoiceSettingsGroupFeature;
+import dev.jason.gboardpatches.extension.keyboard.GboardAmoledDarkKeyboardSettingsFeature;
+import dev.jason.gboardpatches.extension.keyboard.GboardAtMentionSettingsFeature;
 import dev.jason.gboardpatches.extension.keyboard.GboardKeyboardAppearanceSettingsGroupFeature;
 import dev.jason.gboardpatches.extension.keyboard.GboardKeyboardLayoutSettingsGroupFeature;
 import dev.jason.gboardpatches.extension.keyboard.GboardKeyboardToolsSettingsGroupFeature;
@@ -39,9 +41,11 @@ public final class GboardPatchesSettingsFeatureRegistry {
     public static List<GboardPatchesSettingsContract.Feature> allFeatures(Context context) {
         return Collections.unmodifiableList(Arrays.asList(
                 // Keyboard
+                new GboardAmoledDarkKeyboardSettingsFeature(context),
                 new GboardKeyboardAppearanceSettingsGroupFeature(context),
                 new GboardKeyboardLayoutSettingsGroupFeature(context),
                 new GboardKeyboardToolsSettingsGroupFeature(context),
+                new GboardAtMentionSettingsFeature(context),
                 new GboardLauncherIconSettingsFeature(context),
                 // Voice & Smart Input
                 new GboardAiVoiceSettingsGroupFeature(context),

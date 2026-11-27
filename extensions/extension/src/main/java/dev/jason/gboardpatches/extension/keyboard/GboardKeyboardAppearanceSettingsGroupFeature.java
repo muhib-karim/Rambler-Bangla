@@ -38,7 +38,6 @@ public final class GboardKeyboardAppearanceSettingsGroupFeature
                 GboardSettingsText.get(context,
                         R.string.gboard_patches_group_keyboard_empty_summary),
                 Arrays.asList(
-                        new GboardAmoledDarkKeyboardSettingsFeature(context),
                         new GboardFrostedGlassSettingsFeature(context),
                         new GboardCustomThemeSettingsFeature(context),
                         new GboardRoundedKeyboardSettingsFeature(context),

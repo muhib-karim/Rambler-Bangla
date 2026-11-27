@@ -841,64 +841,9 @@ public final class RamblerEnhancementsActivity extends Activity {
                 + "Converted voice commits: " + converted;
         addRow("Active Bangla layers", activeLayers, enabled ? "Active" : "Paused", false, null);
 
-        if (RamblerDynamicConfig.FEATURE_AT_MENTION_SUGGESTIONS) {
-            addSectionHeader("@Mention & email strip (SwiftKey-style)");
-            boolean atOn = RamblerAtMentionStore.isEnabled(this);
-            java.util.List<RamblerAtMentionStore.Entry> learnedEntries =
-                    RamblerAtMentionStore.readEntries(this);
-            int learnedCount = learnedEntries.size();
-            addToggleRow(
-                    "@Mention & email strip suggestions",
-                    "Shows YOUR learned @handles (@grok, @claude) on the suggestion strip when typing @, and learned email domains when typing name@. Learns automatically on space, Send/Enter, keyboard close, and voice dictation. Long-press any chip to forget. Always off in password/incognito fields.",
-                    atOn,
-                    checked -> {
-                        RamblerAtMentionStore.setEnabled(this, checked);
-                        RamblerFlagRuntime.refreshLiveFlags();
-                        refreshUi();
-                    });
-            addRow(
-                    "Add custom @mentions or domains",
-                    "Seed your favorite @handles or email domains right away (e.g. @grok @claude @gmail.com) so they appear immediately after @.",
-                    "Add",
-                    true,
-                    () -> showTextInputDialog(
-                            "Add @mentions",
-                            "@grok @claude @chatgpt @gmail.com",
-                            "",
-                            raw -> {
-                                int added = RamblerAtMentionStore.recordTokensFromText(this, raw);
-                                showToast(added > 0
-                                        ? ("Saved " + added + " @mention" + (added == 1 ? "" : "s"))
-                                        : "Include @ before each handle (e.g. @grok @claude)");
-                                refreshUi();
-                            }));
-            StringBuilder preview = new StringBuilder();
-            for (int i = 0; i < Math.min(learnedEntries.size(), 6); i++) {
-                if (i > 0) {
-                    preview.append(", ");
-                }
-                preview.append(learnedEntries.get(i).token);
-            }
-            if (learnedEntries.size() > 6) {
-                preview.append(", …");
-            }
-            addRow(
-                    "Learned @mentions & domains",
-                    learnedCount == 0
-                            ? "Nothing learned yet. Type any @handle (e.g. @grok) or tap Add above — standalone @ never shows fixed canned suggestions."
-                            : (preview + " — tap to clear all learned @mentions."),
-                    learnedCount + " saved",
-                    learnedCount > 0,
-                    () -> {
-                        RamblerAtMentionStore.clearAll(this);
-                        showToast("Cleared learned @mentions.");
-                        refreshUi();
-                    });
-        }
-
         if (RamblerDynamicConfig.FEATURE_HIDDEN_FLAGS || RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS) {
-            addSectionHeader("Rambler extras & hidden flags (live override)");
-            for (RamblerHiddenFlagOverrideRuntime.Entry entry : RamblerHiddenFlagOverrideRuntime.entries()) {
+            addSectionHeader("Rambler voice extras (live override)");
+            for (RamblerHiddenFlagOverrideRuntime.Entry entry : RamblerHiddenFlagOverrideRuntime.voiceEntries()) {
                 boolean on = RamblerHiddenFlagOverrideRuntime.isEnabled(
                         this, entry.flagName, entry.defaultEnabled);
                 final String flagName = entry.flagName;

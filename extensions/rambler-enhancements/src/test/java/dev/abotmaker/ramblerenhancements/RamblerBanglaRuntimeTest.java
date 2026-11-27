@@ -377,14 +377,19 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertEquals(sha, RamblerAutoUpdater.parseExpectedSha256(sums, info.apkName));
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
-        // About → App updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("31.6.0", RamblerAutoUpdater.CURRENT_VERSION);
+        // About → App auto-updates section routes directly to SECTION_UPDATES
+        Assert.assertEquals("31.7.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));
         Assert.assertEquals(
                 "App updates",
                 RamblerEnhancementsActivity.titleForSection("updates"));
+        // Voice-only flags exclude keyboard/clipboard flags moved to Patches
+        for (RamblerHiddenFlagOverrideRuntime.Entry e : RamblerHiddenFlagOverrideRuntime.voiceEntries()) {
+            Assert.assertNotEquals("enable_system_clipboard_direct_paste_for_quick_paste", e.flagName);
+            Assert.assertNotEquals("enable_email_provider_completion", e.flagName);
+        }
     }
 
     private static boolean containsBengali(String s) {

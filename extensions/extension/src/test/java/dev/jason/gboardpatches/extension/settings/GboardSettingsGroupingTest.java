@@ -96,9 +96,11 @@ public final class GboardSettingsGroupingTest {
                         + "GboardKeyboardLayoutSettingsGroupFeature.java");
 
         assertInOrder(registrySource,
+                "new GboardAmoledDarkKeyboardSettingsFeature(context)",
                 "new GboardKeyboardAppearanceSettingsGroupFeature(context)",
                 "new GboardKeyboardLayoutSettingsGroupFeature(context)",
                 "new GboardKeyboardToolsSettingsGroupFeature(context)",
+                "new GboardAtMentionSettingsFeature(context)",
                 "new GboardLauncherIconSettingsFeature(context)",
                 "new GboardAiVoiceSettingsGroupFeature(context)",
                 "new GboardLanguageModelSettingsFeature(context)",
@@ -108,7 +110,6 @@ public final class GboardSettingsGroupingTest {
                 "new GboardBackupRestoreSettingsFeature(context)",
                 "new GboardDeveloperOptionsSettingsFeature(context)");
         assertInOrder(appearanceGroupSource.substring(appearanceGroupSource.indexOf("Arrays.asList(")),
-                "new GboardAmoledDarkKeyboardSettingsFeature(context)",
                 "new GboardFrostedGlassSettingsFeature(context)",
                 "new GboardCustomThemeSettingsFeature(context)",
                 "new GboardRoundedKeyboardSettingsFeature(context)",

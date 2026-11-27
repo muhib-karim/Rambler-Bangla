@@ -21,27 +21,35 @@ private const val ABOUT_PREFERENCE_CLASS =
     "com.google.android.libraries.inputmethod.settings.widget.ExtendedPreference"
 private const val ABOUT_APP_UPDATES_KEY = "gboard_about_app_updates"
 private const val ABOUT_APP_UPDATES_ACTION = "dev.abotmaker.ramblerenhancements.OPEN_SETTINGS"
+private const val ABOUT_APP_UPDATES_TARGET_CLASS =
+    "dev.abotmaker.ramblerenhancements.RamblerEnhancementsActivity"
 private const val ABOUT_APP_UPDATES_SECTION_EXTRA = "section"
 private const val ABOUT_APP_UPDATES_SECTION_VALUE = "updates"
 
 internal val gboardAboutPageResourcePatch = resourcePatch(
     description = "在關於頁加入 patch 資訊。"
 ) {
-    execute {
+    finalize {
         applyAboutPagePatch()
     }
 }
 context(context: ResourcePatchContext)
 private fun applyAboutPagePatch() {
+    val targetPackage = context.document("AndroidManifest.xml").use { manifestDocument ->
+        manifestDocument.documentElement.getAttribute("package").takeIf { it.isNotBlank() }
+    }
     val aboutDocument = context.document(ABOUT_XML)
     try {
-        applyGboardAboutPagePatch(aboutDocument)
+        applyGboardAboutPagePatch(aboutDocument, targetPackage)
     } finally {
         aboutDocument.close()
     }
 }
 
-internal fun applyGboardAboutPagePatch(aboutDocument: Document) {
+internal fun applyGboardAboutPagePatch(
+    aboutDocument: Document,
+    targetPackage: String? = null,
+) {
     val screen = aboutDocument.documentElement
     val childElements = screen.childElements()
     val versionCandidates = childElements.filter { child ->
@@ -89,9 +97,11 @@ internal fun applyGboardAboutPagePatch(aboutDocument: Document) {
     val appUpdatesPreference = ensureAboutSectionPreference(
         document = aboutDocument,
         key = ABOUT_APP_UPDATES_KEY,
-        title = "App updates",
-        summary = "Auto-check GitHub Releases & install updates in-app (SHA-256 verified)",
+        title = "App auto-updates",
+        summary = "Auto-check GitHub Releases & install verified updates in-app",
         action = ABOUT_APP_UPDATES_ACTION,
+        targetPackage = targetPackage,
+        targetClass = ABOUT_APP_UPDATES_TARGET_CLASS,
         extraName = ABOUT_APP_UPDATES_SECTION_EXTRA,
         extraValue = ABOUT_APP_UPDATES_SECTION_VALUE,
     )
@@ -104,6 +114,8 @@ private fun ensureAboutSectionPreference(
     title: String,
     summary: String,
     action: String,
+    targetPackage: String?,
+    targetClass: String,
     extraName: String,
     extraValue: String,
 ): Element {
@@ -115,8 +127,13 @@ private fun ensureAboutSectionPreference(
         intentUrl = null,
     )
     preference.setAndroidAttribute("selectable", "true")
+    preference.setAndroidAttribute("focusable", "true")
     val intent = preference.ensureIntent()
     intent.setAndroidAttribute("action", action)
+    if (!targetPackage.isNullOrBlank()) {
+        intent.setAndroidAttribute("targetPackage", targetPackage)
+    }
+    intent.setAndroidAttribute("targetClass", targetClass)
     intent.removeAttributeNS(ANDROID_NS, "data")
     intent.removeAttribute("android:data")
     val existingExtra = intent.childElements("extra").firstOrNull {
