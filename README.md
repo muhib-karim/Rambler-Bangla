@@ -316,7 +316,7 @@ Every patch — both in the unified **Morphe 2.1.0** suite (`patches/`, `extensi
 | --- | --- |
 | **88 Python unit tests** (`tests/python/`, stdlib only) | Smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, dataflow search, profile validation, loanword `OVERRIDE` sync, homepage & GitHub Pages integrity (`test_docs_homepage.py`), clipboard-history store/privacy checks, and personalization analyzer checks |
 | **Static suite**, 22 checks (`tests/run_tests.sh`) | 51 JVM policy assertions, synthetic zero-Google fixture APK build (smali + d8 + aapt2 + v2 sign), end-to-end hook verification, fail-closed negative tests (wrong fingerprint, tampered rule, re-patch each exit 2 with no APK), astral-label AXML round-trip, and `scripts/verify_apk.sh single` |
-| **Morphe & Android Extensions** (`./gradlew ...`) | `:extensions:rambler-enhancements:testDebugUnitTest` (Bangla phonetic, loanword, Rambler+ flags, `@mention` store, AMOLED toggle & clipboard reorder) + `lintDebug`, `:extensions:calculator:testDebugUnitTest`, `:patches:verifyGboardCapabilityWiring`, **313 `:patches:test`** checks, `:patches:buildAndroid` (`patches-*.mpp`), and `generatePatchesList` |
+| **Morphe & Android Extensions** (`./gradlew ...`) | `:extensions:rambler-enhancements:testDebugUnitTest` (Bangla phonetic, loanword, Rambler+ flags, `@mention` store, AMOLED toggle & clipboard reorder) + `lintDebug`, `:extensions:calculator:testDebugUnitTest`, `:patches:verifyGboardCapabilityWiring`, **314 `:patches:test`** checks, `:patches:buildAndroid` (`patches-*.mpp`), and `generatePatchesList` |
 | **Android 15 KVM Emulator Smoke Test** (`android-smoke.yml`) | Manual SHA-256-pinned workflow on hardware-KVM API 35 emulator: APK install, launch, live process, IME enable/set, and zero `FATAL`/`ANR` in logcat |
 
 <p align="center"><img src="docs/assets/test-run.svg" alt="Terminal output of the device-free static test suite and unit test runner" width="760"></p>
@@ -333,7 +333,7 @@ Requirements: JDK 21, Android SDK (`platforms;android-35`, `platforms;android-36
 git clone https://github.com/muhib-karim/Rambler-Bangla.git
 cd Rambler-Bangla
 
-# Build all 3 Android extensions (.rve), run unit tests, lint, 313 patch tests, and package patches-31.3.1.mpp
+# Build all 3 Android extensions (.rve), run unit tests, lint, 314 patch tests, and package patches-31.3.1.mpp
 ./gradlew --no-daemon \
   :extensions:extension:syncExtension \
   :extensions:calculator:testDebugUnitTest \
