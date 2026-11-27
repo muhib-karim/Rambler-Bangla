@@ -16,7 +16,8 @@ public class RamblerBanglaRuntimeTest {
     @After
     public void tearDown() {
         GboardRamblerScriptFix.jvmLayoutKind = 0;
-        GboardRamblerScriptFix.setActiveGboardLocale(null);
+        GboardRamblerScriptFix.setActiveGboardKeyboard(null, null);
+        GboardRamblerLiteScriptRuntime.resetActiveKeyboardModeForTesting();
         GboardRamblerSegmentLock.resetPin();
         RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC = false;
         RamblerDynamicConfig.FEATURE_RAMBLER_EXTRAS = false;
@@ -27,7 +28,7 @@ public class RamblerBanglaRuntimeTest {
     }
 
     @Test
-    public void liteScriptRuntimePreservesNativeBengaliAndRespectsBnLatn() {
+    public void liteScriptRuntimePreservesNativeBengaliAndFollowsActiveKeyboardModes() {
         String stockRule = "\n3. Hinglish Override: force Banglish\n";
         Assert.assertEquals(
                 GboardRamblerLiteScriptRuntime.NATIVE_SCRIPT_RULE,
@@ -53,53 +54,104 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertEquals(
                 samplePrompt,
                 GboardRamblerLiteScriptRuntime.rewriteCleanupPromptScriptGate(samplePrompt, "bn-Latn"));
+
+        // Active keyboard mode overrides global enabledLanguages ("en-US, bn-BD, bn-XU")
+        GboardRamblerScriptFix.setActiveGboardKeyboard("en-US", "qwerty");
+        Assert.assertEquals(
+                GboardRamblerLiteScriptRuntime.ENGLISH_LATIN_SCRIPT_RULE,
+                GboardRamblerLiteScriptRuntime.selectHinglishOverrideRule(stockRule, "en-US, bn-BD"));
+        String enPrompt = GboardRamblerLiteScriptRuntime.rewriteCleanupPromptScriptGate(samplePrompt, "en-US, bn-BD");
+        Assert.assertTrue(enPrompt.contains("ENGLISH / PHONETIC LATIN"));
+
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh|bengali_bangladesh");
+        Assert.assertEquals(
+                GboardRamblerLiteScriptRuntime.ALL_BANGLA_SCRIPT_RULE,
+                GboardRamblerLiteScriptRuntime.selectHinglishOverrideRule(stockRule, "en-US, bn-BD"));
+        String bnPrompt = GboardRamblerLiteScriptRuntime.rewriteCleanupPromptScriptGate(samplePrompt, "en-US, bn-BD");
+        Assert.assertTrue(bnPrompt.contains("ALL BANGLA"));
+
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration|qwerty");
+        Assert.assertEquals(
+                GboardRamblerLiteScriptRuntime.MIXED_BN_EN_SCRIPT_RULE,
+                GboardRamblerLiteScriptRuntime.selectHinglishOverrideRule(stockRule, "en-US, bn-BD"));
+        String mixPrompt = GboardRamblerLiteScriptRuntime.rewriteCleanupPromptScriptGate(samplePrompt, "en-US, bn-BD");
+        Assert.assertTrue(mixPrompt.contains("MIXED BANGLA + ENGLISH"));
     }
 
     @Test
-    public void phoneticVoiceEngineEndToEndBanglaLoanwordsAndMultilingual() {
-        // 1. Pure Bangla phonetic voice dictation on multilingual AUTO (bn-Latn / EN+BN)
-        GboardRamblerScriptFix.jvmLayoutKind = 2;
+    public void threeKeyboardModesHandleAllBanglaMixedAndEnglishPhoneticCleanly() {
+        // Verify exact Gboard 18.5.4 keyboard classification:
+        // 1 = All Bangla, 2 = Mixed Bangla + English, 3 = English / Phonetic Latin
+        Assert.assertEquals(1, GboardRamblerScriptFix.classifyActiveKeyboard("bn-BD", "ime_bengali_bangladesh|bengali_bangladesh"));
+        Assert.assertEquals(1, GboardRamblerScriptFix.classifyActiveKeyboard("bn-IN", "ime_bengali_india|bengali_india"));
+        Assert.assertEquals(2, GboardRamblerScriptFix.classifyActiveKeyboard("bn-XU", "ime_bengali_india_transliteration"));
+        Assert.assertEquals(2, GboardRamblerScriptFix.classifyActiveKeyboard("bn-BD", "qwerty"));
+        Assert.assertEquals(3, GboardRamblerScriptFix.classifyActiveKeyboard("en-US", "qwerty"));
+        Assert.assertEquals(3, GboardRamblerScriptFix.classifyActiveKeyboard("bn-XA", "ime_bengali_latin"));
+        Assert.assertEquals(3, GboardRamblerScriptFix.classifyActiveKeyboard("bn-Latn", null));
+
+        // MODE 1: All Bangla (বাংলা) — converts EVERYTHING (including English loanwords and already-mixed commits)
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+        String allBnLoan = GboardRamblerScriptFix.processVoice(
+                "ami ajke office e jabo ar company er meeting korbo");
+        Assert.assertTrue("Expected Bengali Unicode, got: " + allBnLoan, containsBengali(allBnLoan));
+        Assert.assertFalse("Loanword 'company' should convert in All Bangla mode: " + allBnLoan,
+                allBnLoan.toLowerCase().contains("company"));
+        Assert.assertFalse("Loanword 'office' should convert in All Bangla mode: " + allBnLoan,
+                allBnLoan.toLowerCase().contains("office"));
+        String allBnPartial = GboardRamblerScriptFix.processVoice(
+                "Bangla English mishano bujhi na. বাংলা ইংলিশ কথা মিশাই বুঝে.");
+        Assert.assertFalse("All Bangla must convert leftover Latin even when Bengali already exists: " + allBnPartial,
+                allBnPartial.toLowerCase().contains("mishano"));
+
+        // MODE 2: Mixed Bangla + English (abc -> বাংলা) — Bangla clauses/words in বাংলা, English words/clauses in English
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
         String greeting = GboardRamblerScriptFix.processVoice("ami bhalo achi, tumi kemon acho?");
         Assert.assertTrue("Expected Bengali greeting, got: " + greeting, containsBengali(greeting));
         Assert.assertFalse("Should not remain ASCII Banglish: " + greeting, greeting.contains("bhalo"));
 
-        // 2. Mixed Bangla + English loanwords (CMUdict loanword spellings in Bangla sentence)
-        String loanwordSentence = GboardRamblerScriptFix.processVoice(
-                "ami ajke office e jabo ar company er meeting korbo");
-        Assert.assertTrue("Expected Bengali Unicode, got: " + loanwordSentence, containsBengali(loanwordSentence));
-        Assert.assertFalse("Loanword 'company' should convert in Bangla sentence: " + loanwordSentence,
-                loanwordSentence.toLowerCase().contains("company"));
-        Assert.assertFalse("Loanword 'office' should convert in Bangla sentence: " + loanwordSentence,
-                loanwordSentence.toLowerCase().contains("office"));
+        // Pure English stays byte-identical
+        Assert.assertEquals("Please send the project report tomorrow.",
+                GboardRamblerScriptFix.processVoice("Please send the project report tomorrow."));
 
-        // 3. Pure English sentence stays 100% byte-identical
-        String enOut = GboardRamblerScriptFix.processVoice("Please send the project report tomorrow.");
-        Assert.assertEquals("Please send the project report tomorrow.", enOut);
+        // Real Screenshot 1 mixed sentence #1 (already contains Bengali + Romanized Bangla + English word)
+        String mix1 = GboardRamblerScriptFix.processVoice(
+                "Bangla English mishano bujhi na. বাংলা ইংলিশ কথা মিশাই বুঝে.");
+        Assert.assertTrue("Bangla words must convert in Mixed mode: " + mix1, mix1.contains("বাংলা"));
+        Assert.assertTrue("English word must stay English in Mixed mode: " + mix1, mix1.contains("English"));
+        Assert.assertFalse("Romanized 'mishano' must convert in Mixed mode: " + mix1,
+                mix1.toLowerCase().contains("mishano"));
+        Assert.assertTrue("Existing Bengali tail must stay intact: " + mix1,
+                mix1.contains("বাংলা ইংলিশ কথা মিশাই বুঝে."));
 
-        // 4. Multi-sentence mixed dictation with protected spans (#tag, @handle, URL, time)
-        String mixedOut = GboardRamblerScriptFix.processVoice(
+        // Real Screenshot 1 mixed sentence #2 (Bangla clauses + English word + English tail clause)
+        String mix2 = GboardRamblerScriptFix.processVoice(
+                "Pura ta Bangla ashtese, English e ashe na, and then it should understand Bangla English altogether.");
+        Assert.assertTrue("First Bangla clause must convert: " + mix2, containsBengali(mix2));
+        Assert.assertFalse("'ashtese' must convert in Mixed mode: " + mix2, mix2.toLowerCase().contains("ashtese"));
+        Assert.assertTrue("English word inside Bangla clause must stay English: " + mix2, mix2.contains("English"));
+        Assert.assertTrue("English tail clause must stay English: " + mix2,
+                mix2.endsWith("and then it should understand Bangla English altogether."));
+
+        // Protected spans stay untouched in Mixed mode
+        String mixProt = GboardRamblerScriptFix.processVoice(
                 "ami kal office jabo #RamblerBangla @muhib https://example.com 5pm. Please check it.");
-        Assert.assertTrue("Expected Bangla sentence in mixed output: " + mixedOut, containsBengali(mixedOut));
-        Assert.assertTrue("Hashtag must stay Latin: " + mixedOut, mixedOut.contains("#RamblerBangla"));
-        Assert.assertTrue("Handle must stay Latin: " + mixedOut, mixedOut.contains("@muhib"));
-        Assert.assertTrue("URL must stay Latin: " + mixedOut, mixedOut.contains("https://example.com"));
-        Assert.assertTrue("English sentence must stay English: " + mixedOut, mixedOut.endsWith("Please check it."));
+        Assert.assertTrue(containsBengali(mixProt));
+        Assert.assertTrue(mixProt.contains("office"));
+        Assert.assertTrue(mixProt.contains("#RamblerBangla"));
+        Assert.assertTrue(mixProt.contains("@muhib"));
+        Assert.assertTrue(mixProt.contains("https://example.com"));
+        Assert.assertTrue(mixProt.endsWith("Please check it."));
 
-        // 5. Native bn-BD active Gboard locale converts even short phrases
-        GboardRamblerScriptFix.jvmLayoutKind = 0;
-        GboardRamblerScriptFix.setActiveGboardLocale("bn-BD");
-        String bnOnly = GboardRamblerScriptFix.processVoice("dhaka bhalo shomoy");
-        Assert.assertTrue("bn-BD active locale must convert to Bengali: " + bnOnly, containsBengali(bnOnly));
-
-        // 6. bn-Latn active Gboard locale uses multilingual AUTO (converts Bangla, preserves English)
-        GboardRamblerScriptFix.setActiveGboardLocale("bn-Latn");
-        Assert.assertTrue(containsBengali(GboardRamblerScriptFix.processVoice("ami ekhon bari jabo")));
-        Assert.assertEquals("Good morning everyone.", GboardRamblerScriptFix.processVoice("Good morning everyone."));
-
-        // 7. English-only layout (k3) stays untouched when explicitly forced
-        GboardRamblerScriptFix.setActiveGboardLocale(null);
-        GboardRamblerScriptFix.jvmLayoutKind = 3;
+        // MODE 3: English (US) — NEVER hijacked into Bengali Unicode, stays phonetic Latin / English
+        GboardRamblerScriptFix.setActiveGboardKeyboard("en-US", "qwerty");
         Assert.assertEquals("ami bhalo achi", GboardRamblerScriptFix.processVoice("ami bhalo achi"));
+        Assert.assertEquals("Pura ta Bangla ashtese, English e ashe na.",
+                GboardRamblerScriptFix.processVoice("Pura ta Bangla ashtese, English e ashe na."));
+
+        // Optional Bangla (Latin) (bn-XA) also stays phonetic Latin
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XA", "ime_bengali_latin");
+        Assert.assertEquals("ami ekhon bari jabo", GboardRamblerScriptFix.processVoice("ami ekhon bari jabo"));
     }
 
     @Test
@@ -239,9 +291,11 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertFalse(RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(null));
         Assert.assertFalse(RamblerEnhancementsSettings.isAmoledDarkKeyboardEnabled());
 
-        // Clipboard drag-to-reorder defaults ON
+        // Clipboard drag-to-reorder defaults ON; Hide launcher icon defaults OFF
         Assert.assertTrue(RamblerEnhancementsSettings.DEFAULT_CLIPBOARD_DRAG_REORDER);
         Assert.assertTrue(RamblerEnhancementsSettings.readClipboardDragReorderEnabled(null));
+        Assert.assertFalse(RamblerEnhancementsSettings.DEFAULT_HIDE_LAUNCHER_ICON);
+        Assert.assertFalse(RamblerEnhancementsSettings.readHideLauncherIcon(null));
 
         // Header (0), Recent (1), Pinned (2): only same-section moves without crossing headers allowed
         int[] sections = new int[] { 0, 1, 1, 1, 0, 2, 2, 2 };

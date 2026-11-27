@@ -4176,23 +4176,6 @@ public final class GboardPatchesSettingsActivity extends Activity
                 () -> showLanguageDialog(host))
                 .setDecoration(new GboardPatchesSettingsContract.RowDecoration()
                         .leadingIcon(GboardPatchesIcons.TRANSLATE, "slate")));
-        List<GboardPatchesSettingsContract.Row> aboutRows =
-                new ArrayList<GboardPatchesSettingsContract.Row>();
-        aboutRows.add(new GboardPatchesSettingsContract.CommandRow(
-                GboardSettingsText.get(context, R.string.gboard_patches_about_author_title),
-                aboutAuthor,
-                true,
-                authorAction)
-                .setDecoration(new GboardPatchesSettingsContract.RowDecoration()
-                        .leadingIcon(GboardPatchesIcons.PERSON, "slate")));
-        aboutRows.add(new GboardPatchesSettingsContract.CommandRow(
-                GboardSettingsText.get(context,
-                        R.string.gboard_patches_about_patch_version_title),
-                patchVersion,
-                true,
-                patchRepositoryAction)
-                .setDecoration(new GboardPatchesSettingsContract.RowDecoration()
-                        .leadingIcon(GboardPatchesIcons.TAG, "slate")));
         String rootTitle = GboardSettingsText.get(context, R.string.gboard_patches_activity_title);
         return new GboardPatchesSettingsContract.Screen(
                 rootTitle,
@@ -4208,11 +4191,7 @@ public final class GboardPatchesSettingsActivity extends Activity
                         new GboardPatchesSettingsContract.Section(
                                 GboardSettingsText.get(context,
                                         R.string.gboard_patches_section_preferences),
-                                preferenceRows),
-                        new GboardPatchesSettingsContract.Section(
-                                GboardSettingsText.get(context,
-                                        R.string.gboard_patches_section_about),
-                                aboutRows)));
+                                preferenceRows)));
     }
 
     private static void showLanguageDialog(GboardPatchesSettingsContract.FeatureHost host) {

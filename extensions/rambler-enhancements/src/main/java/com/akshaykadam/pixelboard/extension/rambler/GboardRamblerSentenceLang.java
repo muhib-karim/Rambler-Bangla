@@ -41,10 +41,11 @@ final class GboardRamblerSentenceLang {
   static final HashSet<String> BN_CONTENT = set(
       "onek", "beshi", "kotha", "shobai", "sobai", "ektu", "gorom", "thanda", "tay", "thak", "tarpor", "bhalo", "valo", "sundor",
       "shundor", "kichu", "kisu", "kichui", "tokhon", "ajke", "kalke", "porshu", "shob", "shudhu", "abar", "khub", "thik",
-      "accha", "achha", "hoyto", "mone", "pari", "parbo", "parbe", "lage", "lagche", "laglo", "jani", "bujhi", "bujhlam", "dorkar",
+      "accha", "achha", "hoyto", "mone", "pari", "parbo", "parbe", "pare", "lage", "lagche", "laglo", "jani", "bujhi", "bujhlam",
+      "bujhbe", "bujhte", "bujhe", "bujhina", "bolle", "bole", "pura", "purata", "mishano", "mishai", "misai", "mishay", "dorkar",
       "kaj", "bari", "basha", "khabar", "khete", "khabo", "ghum", "pani", "taka", "rasta", "shomoy", "somoy", "bondhu", "bhai",
-      "apu", "boro", "choto", "kharap", "mishti", "sokal", "bikel", "raat", "dupur", "shondha", "aste", "taratari", "ekhuni",
-      "ekdom", "kono", "keu", "amio", "tumio", "sheshe", "prothom", "korsi", "bolsi", "khaisi", "gesi", "hoise", "ashtese",
+      "apu", "boro", "choto", "kharap", "mishti", "sokal", "bikel", "raat", "dupur", "shondha", "aste", "ashte", "taratari", "ekhuni",
+      "ekdom", "kono", "keu", "amio", "tumio", "sheshe", "prothom", "korsi", "bolsi", "khaisi", "gesi", "hoise", "ashtese", "ashe",
       "jaitesi", "dekhsi", "parsi", "lagse", "kal", "jabe", "jaben", "ashen", "shuno", "shono");
   // Short English chat forms: English evidence even though the dictionary does not carry them.
   static final HashSet<String> EN_SLANG = set(
@@ -151,13 +152,15 @@ final class GboardRamblerSentenceLang {
     StringBuilder out = new StringBuilder(n + 16);
     int a = 0;
     while (a < N) {
-      // Sentence = tokens up to and including a run of . ? ! \u0964 \u2026 (outside protected spans) followed by whitespace/end, or a newline.
+      // Split at sentence boundaries (. ? ! । … \n) AND clause punctuation (, ; : —) outside protected spans
+      // so mixed Bangla + English sentences (e.g. "Pura ta Bangla ashtese, English e ashe na, and then...")
+      // classify each clause independently instead of forcing one script onto the whole sentence.
       int b = a;
       while (b < N) {
         String t = tok.get(b); int st = start.get(b);
         if (t.equals("\n")) { b++; break; }
-        if (isEnd(t) && !prot[st]) {
-          int k = b; while (k + 1 < N && isEnd(tok.get(k + 1))) k++;
+        if ((isEnd(t) || isClauseBreak(t)) && !prot[st]) {
+          int k = b; while (k + 1 < N && (isEnd(tok.get(k + 1)) || isClauseBreak(tok.get(k + 1)))) k++;
           if (k + 1 >= N || Character.isWhitespace(tok.get(k + 1).charAt(0))) { b = k + 1; break; }
           b = k + 1; continue;
         }
@@ -181,6 +184,14 @@ final class GboardRamblerSentenceLang {
 
   static boolean isEnd(String t) {
     return t.length() == 1 && ".?!\u0964\u2026".indexOf(t.charAt(0)) >= 0;
+  }
+
+  static boolean isClauseBreak(String t) {
+    return t.length() == 1 && ",;:\u2014".indexOf(t.charAt(0)) >= 0;
+  }
+
+  static boolean isBengaliChar(char c) {
+    return c >= '\u0980' && c <= '\u09FF';
   }
 
   static void mark(boolean[] p, Matcher m, int n) {
@@ -233,9 +244,11 @@ final class GboardRamblerSentenceLang {
       cls[x] = near ? T_BN_GRAM : (english.contains(lo) && lo.length() > 1 ? T_EN_WEAK : T_NEUTRAL);
     }
     int words = 0;
+    boolean hasExistingBengali = false;
     for (int x = a; x < b; x++) {
       String t = tok.get(x);
       int c = cls[x - a];
+      if (!t.isEmpty() && isBengaliChar(t.charAt(0))) hasExistingBengali = true;
       if (latin(t.charAt(0)) && c != T_PROT) words++;
       switch (c) {
         case T_BN_GRAM: wb += 2; nb++; break;
@@ -246,6 +259,10 @@ final class GboardRamblerSentenceLang {
         case T_EN_WEAK: we += 0.5; break;
         default: break;
       }
+    }
+    if (hasExistingBengali) {
+      wb += 2;
+      nb++;
     }
     boolean bangla;
     String rule;
@@ -264,7 +281,14 @@ final class GboardRamblerSentenceLang {
     }
     for (int x = a; x < b; x++) {
       String t = tok.get(x);
-      if (!bangla || cls[x - a] == T_PROT || !latin(t.charAt(0))) { out.append(t); continue; }
+      int c = cls[x - a];
+      if (!bangla || c == T_PROT || !latin(t.charAt(0))) { out.append(t); continue; }
+      // True Mixed Bangla + English (abc -> বাংলা): keep clear English words in English Latin
+      // inside a Bangla clause while converting Bangla/Romanized words to Bengali Unicode.
+      if (c == T_EN || c == T_EN_GRAM || c == T_EN_WEAK) {
+        out.append(t);
+        continue;
+      }
       out.append(render(t, english));
     }
   }

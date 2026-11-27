@@ -20,12 +20,103 @@ public final class GboardRamblerScriptFix {
     private static java.text.SimpleDateFormat diagSdf;
     public static int jvmLayoutKind;
     private static volatile java.lang.String activeGboardLocale;
+    private static volatile java.lang.String activeGboardLayout;
     private static volatile java.lang.String lastVoiceEngine;
 
     public static void setActiveGboardLocale(java.lang.String localeTag) {
+        setActiveGboardKeyboard(localeTag, null);
+    }
+
+    /**
+     * Records the active Gboard keyboard language tag (e.g. {@code bn-BD}, {@code bn-XU},
+     * {@code bn-XA}, {@code en-US}) and layout descriptor (e.g. {@code ime_bengali_bangladesh},
+     * {@code ime_bengali_india_transliteration}, {@code qwerty}) and immediately syncs the
+     * on-device Rambler Lite LLM prompt policy.
+     */
+    public static void setActiveGboardKeyboard(java.lang.String localeTag, java.lang.String layoutDescriptor) {
         activeGboardLocale = (localeTag == null || localeTag.trim().isEmpty())
                 ? null
                 : localeTag.trim();
+        activeGboardLayout = (layoutDescriptor == null || layoutDescriptor.trim().isEmpty())
+                ? null
+                : layoutDescriptor.trim();
+        syncLiteRuntimeMode();
+    }
+
+    private static void syncLiteRuntimeMode() {
+        try {
+            int k = classifyActiveKeyboard(activeGboardLocale, activeGboardLayout);
+            if (k == 1) {
+                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime
+                        .setActiveKeyboardMode(
+                                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime.ActiveKeyboardMode.ALL_BANGLA);
+            } else if (k == 2) {
+                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime
+                        .setActiveKeyboardMode(
+                                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime.ActiveKeyboardMode.MIXED_BN_EN);
+            } else if (k == 3) {
+                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime
+                        .setActiveKeyboardMode(
+                                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime.ActiveKeyboardMode.ENGLISH_LATIN);
+            } else {
+                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime
+                        .setActiveKeyboardMode(
+                                com.akshaykadam.pixelboard.extension.ramblerlite.GboardRamblerLiteScriptRuntime.ActiveKeyboardMode.UNSET);
+            }
+        } catch (java.lang.Throwable ignored) {
+        }
+    }
+
+    /**
+     * Classifies Gboard's active keyboard into the 3 Rambler Bangla dictation modes:
+     * <ul>
+     *   <li>{@code 1} — All Bangla ({@code bn-BD} / {@code bn-IN} / {@code bn-Beng} native layout)</li>
+     *   <li>{@code 2} — Mixed Bangla + English ({@code bn-XU} or {@code abc -> বাংলা} transliteration/phonetic layout)</li>
+     *   <li>{@code 3} — All English / Phonetic Latin ({@code en*}, {@code bn-XA}, {@code bn-Latn}, or other Latin layouts)</li>
+     *   <li>{@code 0} — Unknown (fall back to subtype inspection)</li>
+     * </ul>
+     */
+    public static int classifyActiveKeyboard(java.lang.String localeTag, java.lang.String layoutDescriptor) {
+        java.lang.String loc = localeTag == null ? "" : localeTag.trim().toLowerCase(java.util.Locale.US).replace('_', '-');
+        java.lang.String lay = layoutDescriptor == null ? "" : layoutDescriptor.trim().toLowerCase(java.util.Locale.US);
+        if (loc.isEmpty() && lay.isEmpty()) {
+            return 0;
+        }
+        // Explicit Latin Bangla (Gboard 18.5.4 uses bn-XA / ime_bengali_latin or bn-Latn)
+        if (loc.equals("bn-xa") || loc.startsWith("bn-xa-")
+                || loc.contains("-latn")
+                || lay.contains("bengali_latin") || lay.contains("bangla_latin")) {
+            return 3;
+        }
+        // Explicit Bangla transliteration / abc -> বাংলা (Gboard 18.5.4 uses bn-XU / ime_bengali_*_transliteration)
+        if (loc.equals("bn-xu") || loc.startsWith("bn-xu-")
+                || lay.contains("transliteration")
+                || lay.contains("translit")
+                || lay.contains("phonetic")) {
+            return 2;
+        }
+        // Native Bangla layout (bn-BD, bn-IN, bn-Beng) vs qwerty variant on bn*
+        if (loc.startsWith("bn") || lay.contains("bengali") || lay.contains("bangla")) {
+            if (lay.equals("qwerty") || lay.contains("|qwerty") || lay.contains("qwerty|")) {
+                return 2;
+            }
+            return 1;
+        }
+        // English or any non-Bengali layout -> pure English / phonetic Latin (unless legacy opt-in pair toggle is ON)
+        if (loc.startsWith("en")) {
+            return com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLayoutPair.adjust(3, loc, loc);
+        }
+        return 3;
+    }
+
+    public static java.lang.String activeModeSummary() {
+        int k = currentLayout3();
+        java.lang.String mode = (k == 1) ? "All Bangla (বাংলা)"
+                : (k == 2) ? "Mixed Bangla + English (abc → বাংলা)"
+                : "English / Phonetic Latin";
+        java.lang.String loc = activeGboardLocale == null ? "auto" : activeGboardLocale;
+        java.lang.String lay = activeGboardLayout == null ? "" : (" / " + activeGboardLayout);
+        return mode + " [" + loc + lay + "]";
     }
 
     static void addDiag(java.lang.String str) {
@@ -542,8 +633,8 @@ public final class GboardRamblerScriptFix {
                 addDiag("gate:closed-typing");
                 return input;
             }
-            if (containsBengali(input)) {
-                addDiag("skip:has-bengali");
+            if (!containsLatin(input)) {
+                addDiag("skip:no-latin");
                 return input;
             }
             if (ensureDictionary() == 0) {
@@ -750,18 +841,9 @@ public final class GboardRamblerScriptFix {
             if (i2 != 0) {
                 return i2;
             }
-            java.lang.String gboardTag = activeGboardLocale;
-            if (gboardTag != null && !gboardTag.isEmpty()) {
-                java.lang.String lower = gboardTag.toLowerCase(java.util.Locale.US).replace('_', '-');
-                if (lower.startsWith("bn")) {
-                    if (lower.contains("-latn")) {
-                        return 2;
-                    }
-                    return 1;
-                }
-                if (lower.startsWith("en")) {
-                    return com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLayoutPair.adjust(3, lower, lower);
-                }
+            int activeClassified = classifyActiveKeyboard(activeGboardLocale, activeGboardLayout);
+            if (activeClassified != 0) {
+                return activeClassified;
             }
             android.content.Context currentApplication = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerScriptFixSettings.currentApplication();
             if (currentApplication == null || (inputMethodManager = (android.view.inputmethod.InputMethodManager) currentApplication.getSystemService("input_method")) == null || (currentInputMethodSubtype = inputMethodManager.getCurrentInputMethodSubtype()) == null) {
@@ -898,6 +980,15 @@ public final class GboardRamblerScriptFix {
             return c >= 'A' && c <= 'Z';
         }
         return true;
+    }
+
+    private static boolean containsLatin(java.lang.String str) {
+        for (int i = 0; i < str.length(); i++) {
+            if (isLatinLetter(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean containsBengali(java.lang.String str) {

@@ -1,13 +1,14 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.3.1`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.4.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.3.1`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), fixing the `v31.3.0` ART `VerifyError` in `Lrmt;-><init>` (caused by R8 clobbering `p1` with `move-result p1` before `return-void`) by calling zero-arg `RamblerEnhancementsSettings.isAmoledDarkKeyboardEnabled()`, while delivering:
-   - **Live in-app `AMOLED Dark Keyboard` toggle** (default **OFF** so stock Material You dark gray contrast stays normal unless the user turns AMOLED `#000000` ON in **Rambler Enhancements → Keyboard appearance & clipboard**).
-   - **Persistent 4-direction `Clipboard Drag-to-Reorder`** (new 60th Morphe patch, default **ON**): tap & hold + drag clipboard cards within **Pinned** or **Recent** with persistent `ClipboardContentProvider` timestamp ordering (plus image clip file renames), while keeping stationary long-press Pin/Paste/Delete popup, swipe-to-delete with Undo, and Edit Mode intact.
-   - Maintainer-signed Release APK (`679cfdec...`) verified with real ART `cmd package compile -m verify -f` + live IME activation on Android 15 KVM emulator.
+1. **Completed:** Shipped **`Rambler Bangla v31.4.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **True 3-Keyboard Active-Mode Dictation** (no `Bangla (Latin)` required): `English (US)` = English/phonetic Latin, `বাংলা` = 100% Bangla Unicode (with loanwords), `abc → বাংলা` = clause-aware intra-sentence Mixed Bangla + English across both the Rambler LLM prompt (`GboardRamblerLiteScriptRuntime`) and post-ASR engine (`GboardRamblerScriptFix` / `GboardRamblerSentenceLang`).
+   - **Custom Adaptive Rambler Bangla (`র`) App Logo** bundled from `docs/assets/2-icon-512.png` (adaptive + monochrome + `mdpi`–`xxxhdpi`) and wired in `AndroidManifest.xml`.
+   - **Live `Hide launcher icon` toggle** (Issue #39) under **Rambler Enhancements → Keyboard appearance, clipboard & launcher**.
+   - Updated GitHub homepage, Pages site, Releases, Morphe manifest, and responded to Issues #19 & #39.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

@@ -399,4 +399,31 @@ class RamblerBanglaPatchTest {
         assertEquals(reqSize, reqMethod.implementation!!.instructions.size)
         assertEquals(evSize, evMethod.implementation!!.instructions.size)
     }
+
+    @Test
+    fun ramblerBanglaLauncherIconAssetsExistAndManifestUpdatesCleanly() {
+        val loader = this::class.java.classLoader
+        for (relPath in RAMBLER_BANGLA_ICON_ASSET_PATHS) {
+            val stream = loader.getResourceAsStream("rambler-bangla/icon/$relPath")
+            assertTrue("Missing bundled Rambler Bangla icon asset: $relPath", stream != null)
+            stream!!.use { assertTrue(it.readBytes().isNotEmpty()) }
+        }
+
+        val factory = javax.xml.parsers.DocumentBuilderFactory.newInstance().apply {
+            isNamespaceAware = true
+        }
+        val doc = factory.newDocumentBuilder().parse(
+            java.io.ByteArrayInputStream(
+                """
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.aidev2024.ramblerbangla">
+                    <application android:icon="@mipmap/ic_app" android:roundIcon="@mipmap/ic_app_round" />
+                </manifest>
+                """.trimIndent().toByteArray(Charsets.UTF_8),
+            ),
+        )
+        applyRamblerBanglaLauncherIconManifest(doc)
+        val app = doc.documentElement.getElementsByTagName("application").item(0) as org.w3c.dom.Element
+        assertEquals(RAMBLER_BANGLA_LAUNCHER_ICON_REF, app.getAttributeNS(ANDROID_NS, "icon"))
+        assertEquals(RAMBLER_BANGLA_LAUNCHER_ICON_REF, app.getAttributeNS(ANDROID_NS, "roundIcon"))
+    }
 }
