@@ -232,6 +232,34 @@ public class RamblerBanglaRuntimeTest {
                 null, RamblerFlagRuntime.EMAIL_PROVIDER_COMPLETION_FLAG, Boolean.TRUE));
     }
 
+    @Test
+    public void amoledDefaultsOffAndClipboardDragReorderValidatesSectionsAndTimestamps() {
+        // AMOLED Dark Keyboard defaults OFF so stock Material You dark theme keeps layered contrast
+        Assert.assertFalse(RamblerEnhancementsSettings.DEFAULT_AMOLED_DARK_KEYBOARD);
+        Assert.assertFalse(RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(null));
+
+        // Clipboard drag-to-reorder defaults ON
+        Assert.assertTrue(RamblerEnhancementsSettings.DEFAULT_CLIPBOARD_DRAG_REORDER);
+        Assert.assertTrue(RamblerEnhancementsSettings.readClipboardDragReorderEnabled(null));
+
+        // Header (0), Recent (1), Pinned (2): only same-section moves without crossing headers allowed
+        int[] sections = new int[] { 0, 1, 1, 1, 0, 2, 2, 2 };
+        Assert.assertTrue(RamblerClipboardReorderRuntime.canMoveWithinSameSection(sections, 1, 3));
+        Assert.assertTrue(RamblerClipboardReorderRuntime.canMoveWithinSameSection(sections, 7, 5));
+        Assert.assertFalse(RamblerClipboardReorderRuntime.canMoveWithinSameSection(sections, 0, 1));
+        Assert.assertFalse(RamblerClipboardReorderRuntime.canMoveWithinSameSection(sections, 1, 4));
+        Assert.assertFalse(RamblerClipboardReorderRuntime.canMoveWithinSameSection(sections, 2, 6));
+        Assert.assertFalse(RamblerClipboardReorderRuntime.canMoveWithinSameSection(sections, 2, 2));
+
+        // Timestamps stay within original section range and are strictly descending (even with duplicates)
+        long[] desc = RamblerClipboardReorderRuntime.computeStrictlyDescendingTimestamps(
+                new long[] { 1000L, 5000L, 5000L, 2000L });
+        Assert.assertArrayEquals(new long[] { 5000L, 4999L, 2000L, 1000L }, desc);
+
+        // Zero stock flags (headers / popup open) remain locked at 0
+        Assert.assertEquals(0, RamblerClipboardReorderRuntime.computeMovementFlags(null, null, 0));
+    }
+
     private static boolean containsBengali(String s) {
         if (s == null) return false;
         for (int i = 0; i < s.length(); i++) {

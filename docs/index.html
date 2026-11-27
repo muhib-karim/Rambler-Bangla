@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rambler Bangla: Bengali-first voice typing &amp; 59-patch Morphe suite for Gboard 18.5.4</title>
-<meta name="description" content="Rambler Bangla v31.2.0 is a unified 59-patch Morphe suite for Gboard 18.5.4: Bengali-first phonetic voice typing, unconditional Rambler+ activation, SwiftKey-style @mention strip suggestions, AMOLED Dark Keyboard, Rambler Enhancements, and Gboard Patches. GPL-3.0.">
+<title>Rambler Bangla: Bengali-first voice typing &amp; 60-patch Morphe suite for Gboard 18.5.4</title>
+<meta name="description" content="Rambler Bangla v31.3.0 is a unified 60-patch Morphe suite for Gboard 18.5.4: Bengali-first phonetic voice typing, unconditional Rambler+ activation, native @mention strip suggestions, live-toggled AMOLED Dark Keyboard, persistent Clipboard Drag-to-Reorder, Rambler Enhancements, and Gboard Patches. GPL-3.0.">
 <meta name="theme-color" content="#0B1F3B">
 <meta name="color-scheme" content="dark">
 <meta name="referrer" content="no-referrer">
 <meta property="og:title" content="Rambler Bangla">
-<meta property="og:description" content="Dictate in Bangla. Get Bangla. Unified 59-patch Morphe suite for Gboard 18.5.4 plus fail-closed legacy 18.3.1 patcher.">
+<meta property="og:description" content="Dictate in Bangla. Get Bangla. Unified 60-patch Morphe suite for Gboard 18.5.4 plus fail-closed legacy 18.3.1 patcher.">
 <meta property="og:image" content="https://muhib-karim.github.io/Rambler-Bangla/assets/1-banner.png">
 <link rel="icon" href="assets/4-favicon.png">
 <style>
@@ -175,10 +175,10 @@ footer p{margin:0 0 8px;max-width:80ch}
 <div class="hero-grid">
 <div>
 <h1>Dictate in Bangla.<br> Get Bangla.</h1>
-<p class="lede">A fail-closed, 59-patch Morphe suite for Gboard 18.5.4 (plus the legacy 18.3.1 standalone patcher) that keeps Bengali voice typing in Bengali script, unlocks Rambler+, adds SwiftKey-style @mention suggestions, and bundles AMOLED Dark &amp; Gboard power tools. GPL-3.0.</p>
+<p class="lede">A fail-closed, 60-patch Morphe suite for Gboard 18.5.4 (plus the legacy 18.3.1 standalone patcher) that keeps Bengali voice typing in Bengali script, unlocks Rambler+, adds native @mention suggestions, persistent Clipboard Drag-to-Reorder, and live-toggled AMOLED Dark &amp; Gboard power tools. GPL-3.0.</p>
 <div class="ctas">
 <a class="btn primary" href="#build">Build from source</a>
-<a class="btn ghost" href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">Release v31.2.0</a>
+<a class="btn ghost" href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">Release v31.3.0</a>
 <a class="btn ghost" href="https://github.com/muhib-karim/Rambler-Bangla">GitHub</a>
 </div>
 </div>
@@ -212,10 +212,10 @@ footer p{margin:0 0 8px;max-width:80ch}
 <h2 id="features-h">Features</h2>
 <p class="sub">What the project does today, with the evidence level stated for each.</p>
 <ul class="features">
-<li><h3>Bangla stays Bangla</h3><p>Bengali dictation stays in Bengali Unicode for bn-BD, bn-IN, bn-Beng and phonetic bn-Latn; English stays in Latin.</p><span class="level"><b class="ok">CI + Emulator</b><br>22 end-to-end checks, 59 Morphe patches</span></li>
+<li><h3>Bangla stays Bangla</h3><p>Bengali dictation stays in Bengali Unicode for bn-BD, bn-IN, bn-Beng and phonetic bn-Latn; English stays in Latin.</p><span class="level"><b class="ok">CI + Emulator</b><br>22 end-to-end checks, 60 Morphe patches</span></li>
 <li><h3>Rambler+ &amp; Enhancements</h3><p>Unconditional Rambler+ activation under Voice typing, Hex waveforms, custom per-app instructions, MUSE_STATS dictionary, contacts sync, cursor-aware editing, snippets, stats &amp; toolbar overflow.</p><span class="level"><b class="ok">CI + Emulator</b><br>Verified on Gboard 18.5.4 (API 35 KVM)</span></li>
 <li><h3>@Mention &amp; Email Strip</h3><p>100% personalized <code>@handles</code> (<code>@grok</code>, <code>@claude</code>) and email domains integrated directly into Gboard's native suggestion strip—matching AMOLED Dark, Material You, Frosted Glass &amp; Custom Themes with native drag-up-to-remove and password/incognito bypass.</p><span class="level"><b class="ok">CI + Emulator</b><br>Learns as you type/dictate · native strip</span></li>
-<li><h3>AMOLED Dark &amp; Hidden Flags</h3><p>Pure #000000 Material You AMOLED dark keyboard, one-tap quick-paste clipboard chip, keep-rewritten-on-revert, and live OVERRIDE-store hidden flags.</p><span class="level"><b class="ok">CI + Emulator</b><br>Ported from nl-morphe-patches (GPL-3.0)</span></li>
+<li><h3>Live AMOLED Dark &amp; Clipboard Reorder</h3><p>Live Settings toggle for pure #000000 Material You AMOLED dark (default OFF for normal dark-gray contrast), persistent tap-and-hold Clipboard Drag-to-Reorder, quick-paste chip, and live OVERRIDE-store hidden flags.</p><span class="level"><b class="ok">CI + Emulator</b><br>JADX-verified <code>rmt</code> &amp; <code>fqi</code> hooks</span></li>
 <li><h3>46 Gboard Power Features</h3><p>Frosted Glass blur, Custom Themes, Rounded Panel, Key Shape, Clipboard Enhancements, Web Clipboard, LAN FTP, Calculator, OCR, AI Writing Tools, Bluetooth Mic, Backup &amp; Restore.</p><span class="level"><b class="ok">CI + Emulator</b><br>Integrated from Gboard Patches (GPL-3.0)</span></li>
 <li><h3>Bangla and English together</h3><p>One language per sentence on multilingual layouts (abc → <span class="bn" lang="bn">বাংলা</span> and EN/BN pairing) with live Gboard locale handoff.</p><span class="level"><b class="ok">Host + CI</b><br>292-case host corpus + runtime E2E tests</span></li>
 <li><h3>Real Bangla spellings &amp; Protected spans</h3><p>English loanwords inside Bangla come out as <span class="bn" lang="bn">কোম্পানি, টেলিভিশন, বার্লিন</span> while #hashtags, @handles, links, emails, times, and password/incognito fields stay protected.</p><span class="level"><b class="ok">Host + CI</b><br>2,265 Avro pairs + CMUdict loanwords</span></li>
@@ -258,8 +258,8 @@ footer p{margin:0 0 8px;max-width:80ch}
 <section id="build" aria-labelledby="build-h">
 <div class="wrap">
 <h2 id="build-h">Build from source</h2>
-<p class="sub">JDK 21, Android SDK 35/36, and Python 3. Targets Gboard <code>18.5.4.993608717-release-arm64-v8a</code> via Morphe (59 patches) and legacy Gboard <code>18.3.1.977415014 beta</code> via the standalone smali patcher. Unprofiled builds are refused.</p>
-<pre><code><span class="c"># 1. Build unified 59-patch Morphe bundle (.mpp) for Gboard 18.5.4</span>
+<p class="sub">JDK 21, Android SDK 35/36, and Python 3. Targets Gboard <code>18.5.4.993608717-release-arm64-v8a</code> via Morphe (60 patches) and legacy Gboard <code>18.3.1.977415014 beta</code> via the standalone smali patcher. Unprofiled builds are refused.</p>
+<pre><code><span class="c"># 1. Build unified 60-patch Morphe bundle (.mpp) for Gboard 18.5.4</span>
 ./gradlew :extensions:extension:syncExtension \
   :extensions:calculator:syncExtension \
   :extensions:rambler-enhancements:syncExtension \
@@ -340,7 +340,7 @@ bash tests/run_tests.sh  <span class="c"># TEST SUITE: 22 passed, 0 failed</span
 <section id="roadmap" aria-labelledby="roadmap-h">
 <div class="wrap">
 <h2 id="roadmap-h">Roadmap</h2>
-<p class="sub">Latest release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">v31.2.0</a> (59-patch Morphe suite for Gboard 18.5.4; supersedes v30.0.0 and legacy standalone <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4">v29.4</a>).</p>
+<p class="sub">Latest release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">v31.3.0</a> (60-patch Morphe suite for Gboard 18.5.4; supersedes v31.2.0 and legacy standalone <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4">v29.4</a>).</p>
 <h3>Maintainer builds, October 2026</h3>
 <div class="table" role="region" aria-label="Maintainer builds and evidence levels" tabindex="0">
 <table>
@@ -356,7 +356,6 @@ bash tests/run_tests.sh  <span class="c"># TEST SUITE: 22 passed, 0 failed</span
 <ul class="ticks">
 <li>Multilingual clause segmentation within a sentence.</li>
 <li>Phonetic typing with an EN/BN toggle, and a proper Bangla (Latin) layout.</li>
-<li>Clipboard drag-to-reorder, still in development.</li>
 <li>Better loanword accuracy than the historical 85 of 200 exact.</li>
 </ul>
 <h3>Limitations</h3>
@@ -388,7 +387,7 @@ bash tests/run_tests.sh  <span class="c"># TEST SUITE: 22 passed, 0 failed</span
 
 <footer>
 <div class="wrap">
-<p>Rambler Bangla v31.2.0 is licensed <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/LICENSE">GPL-3.0</a> and credits <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches</a> (Jason Wu, GPL-3.0), <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a> (abotmaker, GPL-3.0), <a href="https://gitlab.com/johninnld/nl-morphe-patches">nl-morphe-patches</a> (johninnld, GPL-3.0), <a href="https://github.com/anomalyco/hex">Hex by Anomaly</a> (MIT), <a href="https://github.com/Akshayykadam/PixelBoard">PixelBoard</a> (GPL-3.0), Morphe (GPL-3.0 + Section 7c), Avro (MPL-2.0), and CMUdict (BSD). Full notices: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a> &amp; <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/THIRD-PARTY-NOTICES.md">THIRD-PARTY-NOTICES.md</a>.</p>
+<p>Rambler Bangla v31.3.0 is licensed <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/LICENSE">GPL-3.0</a> and credits <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches</a> (Jason Wu, GPL-3.0), <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a> (abotmaker, GPL-3.0), <a href="https://gitlab.com/johninnld/nl-morphe-patches">nl-morphe-patches</a> (johninnld, GPL-3.0), <a href="https://github.com/anomalyco/hex">Hex by Anomaly</a> (MIT), <a href="https://github.com/Akshayykadam/PixelBoard">PixelBoard</a> (GPL-3.0), Morphe (GPL-3.0 + Section 7c), Avro (MPL-2.0), and CMUdict (BSD). Full notices: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a> &amp; <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/THIRD-PARTY-NOTICES.md">THIRD-PARTY-NOTICES.md</a>.</p>
 <p>Not affiliated with Google. No trackers, no scripts, no cookies on this page.</p>
 </div>
 </footer>

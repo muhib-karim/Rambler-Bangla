@@ -118,10 +118,116 @@ class RamblerBanglaPatchTest {
         val fields = listOf("Lrmt;->P:I", "Lrmt;->Q:I", "Lrmt;->R:I", "Lrmt;->S:I")
         ctor.applyAmoledDarkPalette("Lrmt;->a:Z", fields)
         val countAfterFirst = ctor.implementation!!.instructions.size
-        assertTrue(countAfterFirst > 8)
+        assertTrue(countAfterFirst > 10)
+        assertTrue(
+            ctor.implementation!!.instructions.any { insn ->
+                ((insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
+                    ?.reference?.toString().orEmpty()).contains("readAmoledDarkKeyboardEnabled")
+            },
+        )
         // Second call must be idempotent
         ctor.applyAmoledDarkPalette("Lrmt;->a:Z", fields)
         assertEquals(countAfterFirst, ctor.implementation!!.instructions.size)
+    }
+
+    @Test
+    fun clipboardDragReorderPatchesTouchCallbackAndIsIdempotent() {
+        val rv = "Landroid/support/v7/widget/RecyclerView;"
+        val vh = "Lkr;"
+        val getMoveFlags = ImmutableMethod(
+            "Lfqi;",
+            "c",
+            listOf(ImmutableMethodParameter(rv, emptySet(), null), ImmutableMethodParameter(vh, emptySet(), null)),
+            "I",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(4),
+        ).toMutable().apply {
+            addInstructions(0, "const/16 v0, 0x3030\nreturn v0")
+        }
+        val onChildDraw = ImmutableMethod(
+            "Lfqi;",
+            "e",
+            listOf(
+                ImmutableMethodParameter("Landroid/graphics/Canvas;", emptySet(), null),
+                ImmutableMethodParameter(rv, emptySet(), null),
+                ImmutableMethodParameter(vh, emptySet(), null),
+                ImmutableMethodParameter("F", emptySet(), null),
+                ImmutableMethodParameter("F", emptySet(), null),
+                ImmutableMethodParameter("I", emptySet(), null),
+                ImmutableMethodParameter("Z", emptySet(), null),
+            ),
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(9),
+        ).toMutable().apply {
+            addInstructions(0, "return-void")
+        }
+        val isLongPress = ImmutableMethod(
+            "Lfqi;",
+            "i",
+            emptyList(),
+            "Z",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(2),
+        ).toMutable().apply {
+            addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+        }
+        val onMove = ImmutableMethod(
+            "Lfqi;",
+            "j",
+            listOf(
+                ImmutableMethodParameter(rv, emptySet(), null),
+                ImmutableMethodParameter(vh, emptySet(), null),
+                ImmutableMethodParameter(vh, emptySet(), null),
+            ),
+            "Z",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            emptySet(),
+            emptySet(),
+            MutableMethodImplementation(5),
+        ).toMutable().apply {
+            addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+        }
+        val fakeCallback = com.android.tools.smali.dexlib2.immutable.ImmutableClassDef(
+            "Lfqi;",
+            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+            "Lma;",
+            emptyList(),
+            null,
+            emptySet(),
+            emptyList(),
+            listOf(getMoveFlags, onChildDraw, isLongPress, onMove),
+        ).let { app.morphe.patcher.util.proxy.mutableTypes.MutableClass(it) }
+
+        val targets = ClipboardTouchCallbackTargets(
+            callbackClass = fakeCallback,
+            superClass = "Lma;",
+            adapterFieldRef = "Lfqi;->c:Lfqn;",
+            recyclerViewType = rv,
+            viewHolderType = vh,
+            getMovementFlagsMethod = fakeCallback.methods.single { it.name == "c" },
+            onChildDrawMethod = fakeCallback.methods.single { it.name == "e" },
+            isLongPressDragMethod = fakeCallback.methods.single { it.name == "i" },
+            onMoveMethod = fakeCallback.methods.single { it.name == "j" },
+            clearViewMethodName = "d",
+            onSelectedChangedMethodName = "f",
+        )
+        applyClipboardDragReorder(targets)
+        val methodNames = fakeCallback.methods.map { it.name }.toSet()
+        assertTrue("ramblerStockMovementFlags" in methodNames)
+        assertTrue("ramblerStockOnChildDraw" in methodNames)
+        assertTrue("d" in methodNames)
+        assertTrue("f" in methodNames)
+        val countAfterFirst = fakeCallback.methods.size
+        // Second call must be idempotent
+        applyClipboardDragReorder(targets)
+        assertEquals(countAfterFirst, fakeCallback.methods.size)
     }
 
     @Test

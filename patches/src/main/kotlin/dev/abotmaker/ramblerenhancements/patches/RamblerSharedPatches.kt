@@ -88,6 +88,8 @@ internal enum class RamblerFeature {
     RAMBLER_EXTRAS,
     HIDDEN_FLAGS,
     AT_MENTION_SUGGESTIONS,
+    AMOLED_DARK_KEYBOARD,
+    CLIPBOARD_REORDER,
 }
 
 internal class RamblerPatchRunState {
@@ -1014,6 +1016,8 @@ internal fun rewriteDynamicConfigClinitOnClass(
     putBool("FEATURE_RAMBLER_EXTRAS", RamblerFeature.RAMBLER_EXTRAS in state.selectedFeatures)
     putBool("FEATURE_HIDDEN_FLAGS", RamblerFeature.HIDDEN_FLAGS in state.selectedFeatures)
     putBool("FEATURE_AT_MENTION_SUGGESTIONS", RamblerFeature.AT_MENTION_SUGGESTIONS in state.selectedFeatures)
+    putBool("FEATURE_AMOLED_DARK_KEYBOARD", RamblerFeature.AMOLED_DARK_KEYBOARD in state.selectedFeatures)
+    putBool("FEATURE_CLIPBOARD_REORDER", RamblerFeature.CLIPBOARD_REORDER in state.selectedFeatures)
 
     // Flag bindings (resolved or 18.5.4 defaults)
     val flags = state.flagTargets

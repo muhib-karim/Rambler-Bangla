@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="title desc">
-  <title id="title">Rambler Bangla — Unified 59-Patch Morphe Suite for Gboard 18.5.4</title>
-  <desc id="desc">Banner: Rambler Bangla v31.2.0, Bengali-first voice typing and 59-patch Morphe suite for Gboard 18.5.4. Features Rambler+, phonetic Bangla, native @mention strip, AMOLED Dark, Hex waveforms, and Gboard power tools.</desc>
+  <title id="title">Rambler Bangla — Unified 60-Patch Morphe Suite for Gboard 18.5.4</title>
+  <desc id="desc">Banner: Rambler Bangla v31.3.0, Bengali-first voice typing and 60-patch Morphe suite for Gboard 18.5.4. Features Rambler+, phonetic Bangla, native @mention strip, live AMOLED toggle, clipboard drag-to-reorder, Hex waveforms, and Gboard power tools.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#061224"/>
@@ -35,14 +35,14 @@
   <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
     <rect x="76" y="40" width="372" height="32" rx="16" fill="#10304F" stroke="#2D6FA3" stroke-width="1.2"/>
     <circle cx="98" cy="56" r="4.5" fill="#9BE0B0"/>
-    <text x="114" y="61" font-size="13" font-weight="600" fill="#B3C9E2" letter-spacing="0.6">v31.2.0  ·  MORPHE 2.1  ·  59 PATCHES</text>
+    <text x="114" y="61" font-size="13" font-weight="600" fill="#B3C9E2" letter-spacing="0.6">v31.3.0  ·  MORPHE 2.1  ·  60 PATCHES</text>
 
     <!-- main wordmark -->
     <text x="76" y="146" font-size="68" font-weight="700" fill="#FFFFFF" letter-spacing="-1.2">Rambler <tspan fill="#F6B13E">Bangla</tspan></text>
     <rect x="78" y="164" width="112" height="5" rx="2.5" fill="#F6B13E"/>
 
     <!-- subtitle -->
-    <text x="76" y="212" font-size="21.5" font-weight="500" fill="#E4EFFA">Bengali-first voice typing &amp; 59-patch Morphe suite for Gboard 18.5.4</text>
+    <text x="76" y="212" font-size="21.5" font-weight="500" fill="#E4EFFA">Bengali-first voice typing &amp; 60-patch Morphe suite for Gboard 18.5.4</text>
 
     <!-- capability pills -->
     <g font-size="13" font-weight="600">
@@ -52,14 +52,14 @@
       <rect x="192" y="246" width="144" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
       <text x="264" y="266" text-anchor="middle" fill="#D6E4F2">Phonetic Bangla</text>
 
-      <rect x="346" y="246" width="158" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
-      <text x="425" y="266" text-anchor="middle" fill="#D6E4F2">Native @Mentions</text>
+      <rect x="346" y="246" width="154" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
+      <text x="423" y="266" text-anchor="middle" fill="#D6E4F2">Native @Mentions</text>
 
-      <rect x="514" y="246" width="128" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
-      <text x="578" y="266" text-anchor="middle" fill="#D6E4F2">AMOLED Dark</text>
+      <rect x="510" y="246" width="146" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
+      <text x="583" y="266" text-anchor="middle" fill="#D6E4F2">Drag Clipboard</text>
 
-      <rect x="652" y="246" width="136" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
-      <text x="720" y="266" text-anchor="middle" fill="#9BE0B0">Fail-Closed CI</text>
+      <rect x="666" y="246" width="136" height="32" rx="16" fill="#10304F" stroke="#2B5379"/>
+      <text x="734" y="266" text-anchor="middle" fill="#9BE0B0">AMOLED Toggle</text>
     </g>
   </g>
 
