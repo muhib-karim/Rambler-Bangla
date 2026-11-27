@@ -1,12 +1,13 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.9.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.0.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.9.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **Full-Language 190,405-Word Offline Bengali Orthography & Phonetic-Skeleton Engine (`GboardRamblerBanglaLexicon`):** Combines OpenBangla Keyboard (GPL-3.0), LibreOffice `bn_BD` Hunspell (GPL-2.0+/LGPL/MPL), and HermitDave FrequencyWords (MIT/CC-BY-SA) with Level-1 homophone snap, Level-2 aspiration/`ব্য`↔`বে`/geminate snap, and agglutinative suffix stripping.
-   - **Android 14–16 In-App Auto-Updater Fix:** Async off-UI-thread `PackageInstaller` staging + explicit package-scoped `PendingIntent.getBroadcast` foreground `BroadcastReceiver` (BAL-safe on `targetSdk 35` / Samsung One UI) + 10s watchdog + 1-tap **"Save to Downloads"** fallback.
+1. **Completed:** Shipped **`Rambler Bangla v32.0.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **Live Gemini Rambler+ Bangla Academy Script Prompt Injection (`RamblerCustomInstructionRules`):** Refreshes active keyboard on every mic tap (`captureSessionContext`) and injects active `বাংলা` / `abc → বাংলা` Bangla Academy Unicode instructions straight into Gemini Rambler+'s live `<custom_instruction>` Bundle (merged with user rules; `English (US)` untouched).
+   - **Zero-Delay Non-Blocking 89k Bengali Lexicon + `সব-i`/`হৈতেচে`/`বানানটা` Fixes:** 0 ms commit blocking, `< 60 ms` async preload, Unicode dash enclitic repair, and natural `হচ্ছে`/`বানানটা`/`ঠিকমতো` normalization.
+   - **~3.9 MB Slimmer APK & All-Android OTA Updater:** Optimized `settings-previews` (`4.55 MB` → `0.89 MB`) + lean lexicon with all 60 patches intact and standard AOSP Android 8–16 BAL-safe in-app updater.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

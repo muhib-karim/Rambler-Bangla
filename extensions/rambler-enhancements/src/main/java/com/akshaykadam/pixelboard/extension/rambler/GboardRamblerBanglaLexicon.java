@@ -93,28 +93,33 @@ public final class GboardRamblerBanglaLexicon {
         }
     }
 
-    static Snapshot ensureSnapshot() {
+    /**
+     * Returns the loaded snapshot immediately with 0 ms blocking on the voice commit thread.
+     * If background preload is still warming on cold boot, kicks off async preload and returns
+     * {@code null} so dictation commits are never delayed.
+     */
+    static Snapshot ensureSnapshotNonBlocking() {
         Snapshot s = snapshot;
         if (s != null) {
             return s;
         }
         preload();
-        try {
-            READY.await(600L, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ignored) {
-            Thread.currentThread().interrupt();
-        }
-        s = snapshot;
-        if (s == null) {
-            // Synchronous fallback if background thread hasn't completed yet (e.g. cold JVM test)
-            loadNow();
-            s = snapshot;
-        }
-        return s;
+        return null;
+    }
+
+    /** Deterministic blocking loader for JVM unit tests only (never called on voice commit thread). */
+    public static int loadBlockingForTesting() {
+        loadNow();
+        Snapshot s = snapshot;
+        return s == null ? 0 : s.validCount;
     }
 
     public static int validWordCount() {
-        Snapshot s = ensureSnapshot();
+        Snapshot s = snapshot;
+        if (s == null) {
+            loadNow();
+            s = snapshot;
+        }
         return s == null ? 0 : s.validCount;
     }
 
@@ -126,7 +131,7 @@ public final class GboardRamblerBanglaLexicon {
         if (word == null || word.length() < 2) {
             return false;
         }
-        Snapshot s = ensureSnapshot();
+        Snapshot s = ensureSnapshotNonBlocking();
         if (s == null || s.validCount == 0) {
             return false;
         }
@@ -134,15 +139,14 @@ public final class GboardRamblerBanglaLexicon {
     }
 
     /**
-     * Repairs an out-of-vocabulary Bengali word using the 190,405-word lexicon, phonetic-skeleton
-     * snap (Level 1 + Level 2), and agglutinative suffix stripping. Valid Bengali words are always
-     * returned unchanged.
+     * Repairs an out-of-vocabulary Bengali word using the lean spoken+core lexicon, phonetic-skeleton
+     * snap (Level 1 + Level 2), and agglutinative suffix stripping. Never blocks voice commits.
      */
     public static String correctWord(String word) {
         if (word == null || word.length() < 2) {
             return word;
         }
-        Snapshot s = ensureSnapshot();
+        Snapshot s = ensureSnapshotNonBlocking();
         if (s == null || s.validCount == 0) {
             return word;
         }
@@ -235,7 +239,7 @@ public final class GboardRamblerBanglaLexicon {
                 // 2. Load ALL 190,405 sorted authoritative Bengali words into a flat UTF-8 byte blob
                 //    + int[] offset table (zero 190K String heap bloat) and backfill formal L1 entries.
                 byte[] validGz = decodeBase64Chunks(GboardRamblerBanglaLexiconData.validDeltaGzipBase64Chunks());
-                ByteArrayOutputStream blobOut = new ByteArrayOutputStream(4_500_000);
+                ByteArrayOutputStream blobOut = new ByteArrayOutputStream(2_200_000);
                 int maxCount = GboardRamblerBanglaLexiconData.VALID_COUNT + 16;
                 int[] offsets = new int[maxCount + 1];
                 int count = 0;
@@ -263,14 +267,6 @@ public final class GboardRamblerBanglaLexicon {
                         byte[] utf8 = w.getBytes(StandardCharsets.UTF_8);
                         blobOut.write(utf8, 0, utf8.length);
                         count++;
-
-                        // Backfill Level-1 homophone index for non-spoken formal words (length 3..15)
-                        if (w.length() >= 3 && w.length() <= 15) {
-                            String k1 = skeleton1(w);
-                            if (!l1.containsKey(k1)) {
-                                l1.put(k1, w);
-                            }
-                        }
                     }
                 }
                 offsets[count] = blobOut.size();

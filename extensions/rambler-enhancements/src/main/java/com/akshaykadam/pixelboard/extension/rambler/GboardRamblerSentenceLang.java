@@ -288,13 +288,8 @@ final class GboardRamblerSentenceLang {
       String t = tok.get(x);
       int c = cls[x - a];
       if (!bangla || c == T_PROT || !latin(t.charAt(0))) { out.append(t); continue; }
-      // True Mixed Bangla + English (abc -> বাংলা): keep clear English words in English Latin
-      // inside a Bangla clause while converting Bangla/Romanized words to Bengali Unicode.
-      if (c == T_EN || c == T_EN_GRAM || c == T_EN_WEAK) {
-        out.append(t);
-        continue;
-      }
       // Hyphenated Bengali enclitic particles after Bengali words (e.g. "সব-i" -> "সব-ই", "বাংলা-o" -> "বাংলা-ও")
+      // MUST run before T_EN_GRAM skip because "i" is classified as EN_GRAM in English!
       if (isBanglaHyphenEnclitic(tok, a, x)) {
         String encl = renderBanglaEnclitic(t.toLowerCase(Locale.US));
         if (encl != null) {
@@ -302,16 +297,28 @@ final class GboardRamblerSentenceLang {
           continue;
         }
       }
+      // True Mixed Bangla + English (abc -> বাংলা): keep clear English words in English Latin
+      // inside a Bangla clause while converting Bangla/Romanized words to Bengali Unicode.
+      if (c == T_EN || c == T_EN_GRAM || c == T_EN_WEAK) {
+        out.append(t);
+        continue;
+      }
       out.append(render(t, english));
     }
+  }
+
+  private static boolean isHyphenOrDash(String s) {
+    if (s == null || s.length() != 1) return false;
+    char ch = s.charAt(0);
+    return ch == '-' || ch == '\u2010' || ch == '\u2011' || ch == '\u2012'
+        || ch == '\u2013' || ch == '\u2014' || ch == '\u2212';
   }
 
   private static boolean isBanglaHyphenEnclitic(ArrayList<String> tok, int clauseStart, int x) {
     if (x < clauseStart + 2) return false;
     String t = tok.get(x);
     if (t.isEmpty() || !latin(t.charAt(0))) return false;
-    String prevTok = tok.get(x - 1);
-    if (!"-".equals(prevTok) && !"\u2013".equals(prevTok)) return false;
+    if (!isHyphenOrDash(tok.get(x - 1))) return false;
     String beforeHyphen = tok.get(x - 2);
     if (beforeHyphen.isEmpty() || !isBengaliChar(beforeHyphen.charAt(beforeHyphen.length() - 1))) return false;
     String lo = t.toLowerCase(Locale.US);

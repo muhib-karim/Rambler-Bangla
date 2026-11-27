@@ -188,13 +188,31 @@ public final class RamblerTextPipeline {
             }
             String pkg = editorInfo == null ? null : editorInfo.packageName;
             RamblerFlagRuntime.onActivePackageChanged(ctx, pkg);
-            if (RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC || RamblerDynamicConfig.FEATURE_BANGLA_LITE_SCRIPT) {
-                String localeTag = extractActiveGboardLocale(agenticExtension);
-                String layoutDescriptor = extractActiveGboardLayoutDescriptor(agenticExtension);
-                GboardRamblerScriptFix.setActiveGboardKeyboard(localeTag, layoutDescriptor);
-            }
+            syncActiveGboardKeyboard(agenticExtension);
         } catch (Throwable throwable) {
             logWarningSafely("onExtensionActivate hook failed", throwable);
+        }
+    }
+
+    /**
+     * Refreshes the active Gboard keyboard locale + layout descriptor ({@code বাংলা},
+     * {@code abc -> বাংলা}, or {@code English (US)}) and warms the lightweight Bengali lexicon
+     * asynchronously so voice commits incur 0 ms latency. Called on both extension activation
+     * and every Rambler+ mic tap ({@code captureSessionContext}).
+     */
+    static void syncActiveGboardKeyboard(Object agenticExtension) {
+        if (!RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC
+                && !RamblerDynamicConfig.FEATURE_BANGLA_LITE_SCRIPT) {
+            return;
+        }
+        try {
+            String localeTag = extractActiveGboardLocale(agenticExtension);
+            String layoutDescriptor = extractActiveGboardLayoutDescriptor(agenticExtension);
+            if (localeTag != null || layoutDescriptor != null) {
+                GboardRamblerScriptFix.setActiveGboardKeyboard(localeTag, layoutDescriptor);
+            }
+            com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon.preload();
+        } catch (Throwable ignored) {
         }
     }
 

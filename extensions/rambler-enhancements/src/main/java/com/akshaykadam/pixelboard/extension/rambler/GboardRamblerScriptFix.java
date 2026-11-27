@@ -109,6 +109,11 @@ public final class GboardRamblerScriptFix {
         return 3;
     }
 
+    public static boolean hasExplicitActiveKeyboard() {
+        return (activeGboardLocale != null && !activeGboardLocale.isEmpty())
+                || (activeGboardLayout != null && !activeGboardLayout.isEmpty());
+    }
+
     public static java.lang.String activeModeSummary() {
         int k = currentLayout3();
         java.lang.String mode = (k == 1) ? "All Bangla (বাংলা)"
@@ -458,6 +463,17 @@ public final class GboardRamblerScriptFix {
         hashMap.put("sundorvabe", "সুন্দরভাবে");
         hashMap.put("shomoy", "সময়");
         hashMap.put("somoy", "সময়");
+        hashMap.put("hoitese", "হচ্ছে");
+        hashMap.put("hoiteche", "হচ্ছে");
+        hashMap.put("hocche", "হচ্ছে");
+        hashMap.put("hoitesilo", "হচ্ছিল");
+        hashMap.put("kortese", "করতেছে");
+        hashMap.put("kortesi", "করতেছি");
+        hashMap.put("boltesi", "বলতেছি");
+        hashMap.put("boltese", "বলতেছে");
+        hashMap.put("likhtese", "লিখতেছে");
+        hashMap.put("thikmoto", "ঠিকমতো");
+        hashMap.put("bananta", "বানানটা");
         hashMap.put("shomoye", "সময়ে");
         hashMap.put("shathe", "সাথে");
         hashMap.put("sathe", "সাথে");
@@ -992,7 +1008,7 @@ public final class GboardRamblerScriptFix {
         return 2;
     }
 
-    private static int currentLayout3() {
+    public static int currentLayout3() {
         android.view.inputmethod.InputMethodManager inputMethodManager;
         android.view.inputmethod.InputMethodSubtype currentInputMethodSubtype;
         int i = 2;
