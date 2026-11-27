@@ -38,33 +38,7 @@
   <img src="docs/feature-showcase.svg" alt="Rambler Bangla v31.2.0 six-pillar feature overview poster" width="100%" />
 </p>
 
----
-
-## Install
-
-Rambler Bangla is **ready out-of-the-box as a Morphe Patcher 2.1.0 patch source** targeting official Gboard `18.5.4.993608717-release-arm64-v8a` (APK or APKS).
-
-### Option A — Morphe Manager (Recommended, 1-Click on Android)
-
-1. Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** (or manually add the bundle URL in Morphe Manager):
-   ```text
-   https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json
-   ```
-2. Select your lawfully obtained **Gboard `18.5.4.993608717-release-arm64-v8a`** APK/APKS.
-3. Keep the recommended defaults or pick any combination of the **59 patches** (`Package Rename` defaults to `Rambler Bangla` / `com.aidev2024.ramblerbangla` so it installs cleanly side-by-side next to stock Gboard).
-4. Tap **Patch**, install, and enable **Rambler Bangla** in Android Keyboard Settings → **Voice typing → Rambler+**.
-
-### Option B — Morphe CLI (Desktop / CI)
-
-```bash
-java -jar morphe-cli.jar patch \
-  -p patches-31.2.0.mpp \
-  -o RamblerBangla-gboard-18.5.4.apk \
-  --keystore your-release.keystore \
-  Gboard_18.5.4.993608717-release-arm64-v8a.apks
-```
-
-> **Bundle metadata:** [`patches-bundle.json`](patches-bundle.json) (Morphe Manager source manifest) · [`patches-list.json`](patches-list.json) (full 59-patch JSON inventory) · [`patches-31.2.0.mpp`](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.2.0)
+> **Quick Morphe Setup:** Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** or paste `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json` in Morphe Manager, then select official Gboard `18.5.4.993608717-release-arm64-v8a`. Full steps in [Install](#install).
 
 ---
 
@@ -214,14 +188,92 @@ Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.m
 ### 4. Gboard Patches / GboardWu (46 patches) *(credit: [jasonwu1994/Gboard-patches](https://github.com/jasonwu1994/Gboard-patches), GPL v3.0)*
 
 <details>
-  <summary><b>Click to expand all 46 Gboard Patches (Themes, Clipboard, Frosted Glass, Web Clipboard, LAN FTP, Calculator, OCR, AI Writing Tools &amp; more)</b></summary>
+  <summary><code>Custom Theme</code> &amp; <code>Frosted Glass</code></summary>
 
-- **Visual & Layout:** `Custom Theme` (Rboard/ZIP), `Frosted Glass` (Android 12+ live blur), `Rounded Keyboard Panel`, `G Logo on Spacebar`, `Key Shape Selection`, `Change emoji size`, `Emojis, stickers & GIFs Tab Order`, `Access Points menu style`, `Top Toolbar Item Count`, `Enable split keyboard`, `Enable accessibility layout`, `Settings Homepage Override`, `Keypress Vibration Intensity Control`.
-- **Clipboard & Productivity:** `Clipboard Enhancements` (retention, item count, preview lines, countdown, Select All), `Clipboard Custom Character Limit`, `Web Clipboard` (LAN browser portal + bidirectional image sync + QS tile), `FTP Server` (LAN file server + QS tile), `Floating Web Search`, `Simple Calculator` (inline suggestion math), `Enable OCR / Scan Text`, `Swipeable Custom Top Row` (text + QuickJS-NG JS slots), `Backup & Restore` (settings JSON + Gboard data ZIP + PB/XML flags).
-- **Editing, Typing & AI:** `AI Writing Tools`, `Advanced Voice Typing`, `Use Bluetooth Microphone`, `Dictionaries & Predictions`, `Grammar Checker`, `Inline Suggestions`, `Enable Inline Autofill Suggestions`, `Quick Insert`, `Close Proactive Suggestions`, `Custom Symbols`, `Long-Press Editing Shortcuts`, `Toolbar Editing Buttons`, `Swipe Down to Dismiss Keyboard`, `Shift + Backspace Forward Delete`, `English QWERTY Up-Flick Uppercase`, `Enable cursor trackpad mode`, `Latin Globe Key Ignore Interval`, `Incognito Mode Toggle`, `Zhuyin Slide Input`, `Zhuyin Quick Traditional/Simplified Toggle`, `Zhuyin Bottom Row Key Sizes`.
-- **Packaging & Developer:** `Package Rename` (defaults to `Rambler Bangla` / `com.aidev2024.ramblerbangla`), `Add Gboard Signature Bypass`, `Developer options`.
-
+  Import custom ZIP themes and themes from the official Rboard repository, plus live Android 12+ background blur and custom-theme transparency.
 </details>
+
+<details>
+  <summary><code>Clipboard Enhancements</code>, <code>Web Clipboard</code> &amp; <code>FTP Server</code></summary>
+
+  Enhance clipboard retention, item limits, preview lines, Select All, and character limits; host a LAN Web Clipboard portal with bidirectional image sync and Quick Settings Tile, or a LAN FTP server directly from your phone.
+</details>
+
+<details>
+  <summary><code>Long-Press Editing Shortcuts</code></summary>
+
+  Add Select all, Undo, Copy, Cut, Paste, and Redo long-press shortcuts to English QWERTY and Zhuyin.
+</details>
+
+<details>
+  <summary><code>Toolbar Editing Buttons</code>, <code>Swipeable Custom Top Row</code> &amp; <code>Simple Calculator</code></summary>
+
+  Add Select All, Copy, Cut, Paste, Forward Delete, Home/End, Tab, and arrow buttons to the toolbar; swipe the top row for customizable text and QuickJS-NG JavaScript slots; compute inline math right in Gboard's suggestion row.
+</details>
+
+<details>
+  <summary><code>Latin Globe Key Ignore Interval</code></summary>
+
+  Add an independent English globe key ignore interval override for post-typing language-switch delay.
+</details>
+
+<details>
+  <summary><code>Enable OCR / Scan Text</code></summary>
+
+  Enable the OCR / Scan Text feature with Latin, Chinese, Japanese, Korean, and Devanagari recognition backends.
+</details>
+
+<details>
+  <summary><code>Use Bluetooth Microphone</code></summary>
+
+  Enables the <code>Voice typing &gt; Use Bluetooth microphone</code> setting and its related rollout gate.
+</details>
+
+<details>
+  <summary><code>AI Writing Tools</code>, <code>Advanced Voice Typing</code> &amp; <code>Backup &amp; Restore</code></summary>
+
+  Enables Writing Tools for all languages, Advanced Voice Typing (Rambler) with automatic punctuation, and full settings JSON + Gboard personal data ZIP + raw PB/XML backup &amp; restore.
+</details>
+
+<details>
+  <summary><code>Package Rename</code> &amp; <code>Add Gboard Signature Bypass</code></summary>
+
+  Renames package &amp; app label (defaults to <code>Rambler Bangla</code> / <code>com.aidev2024.ramblerbangla</code>, configurable to <code>GboardWu</code> or stock) so it installs side-by-side with stock Gboard, and bypasses signature whitelist checks.
+</details>
+
+<details>
+  <summary><b>Plus all remaining Gboard Patches unlocks (click to expand)</b></summary>
+
+  `Dictionaries & Predictions`, `Floating Web Search`, `Incognito Mode Toggle`, `Custom Symbols`, `Swipe Down to Dismiss Keyboard`, `Shift + Backspace Forward Delete`, `G Logo on Spacebar`, `Rounded Keyboard Panel`, `Emojis, stickers & GIFs Tab Order`, `Keypress Vibration Intensity Control`, `English QWERTY Up-Flick Uppercase`, `Enable Inline Autofill Suggestions`, `Grammar Checker`, `Inline Suggestions`, `Key Shape Selection`, `Change emoji size`, `Enable cursor trackpad mode`, `Enable split keyboard`, `Enable accessibility layout`, `Quick Insert`, `Close Proactive Suggestions`, `Clipboard Custom Character Limit`, `Access Points menu style`, `Top Toolbar Item Count`, `Settings Homepage Override`, `Developer options`, `Zhuyin Slide Input`, `Zhuyin Quick Traditional/Simplified Toggle`, and `Zhuyin Bottom Row Key Sizes`.
+</details>
+
+---
+
+## Install
+
+Rambler Bangla is **ready out-of-the-box as a Morphe Patcher 2.1.0 patch source** targeting official Gboard `18.5.4.993608717-release-arm64-v8a` (APK or APKS).
+
+### Option A — Morphe Manager (Recommended, 1-Click on Android)
+
+1. Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** (or manually add the bundle URL in Morphe Manager):
+   ```text
+   https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json
+   ```
+2. Select your lawfully obtained **Gboard `18.5.4.993608717-release-arm64-v8a`** APK/APKS.
+3. Keep the recommended defaults or pick any combination of the **59 patches** (`Package Rename` defaults to `Rambler Bangla` / `com.aidev2024.ramblerbangla` so it installs cleanly side-by-side next to stock Gboard).
+4. Tap **Patch**, install, and enable **Rambler Bangla** in Android Keyboard Settings → **Voice typing → Rambler+**.
+
+### Option B — Morphe CLI (Desktop / CI)
+
+```bash
+java -jar morphe-cli.jar patch \
+  -p patches-31.2.0.mpp \
+  -o RamblerBangla-gboard-18.5.4.apk \
+  --keystore your-release.keystore \
+  Gboard_18.5.4.993608717-release-arm64-v8a.apks
+```
+
+> **Bundle metadata:** [`patches-bundle.json`](patches-bundle.json) (Morphe Manager source manifest) · [`patches-list.json`](patches-list.json) (full 59-patch JSON inventory) · [`patches-31.2.0.mpp`](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.2.0)
 
 ---
 
