@@ -229,7 +229,12 @@ final class GboardRamblerSentenceLang {
     boolean first = true;
     for (int x = a; x < b; x++) {
       String t = tok.get(x);
-      int c = classify(t, prot[start.get(x)], english);
+      int c;
+      if (!prot[start.get(x)] && isBanglaHyphenEnclitic(tok, a, x)) {
+        c = T_BN_GRAM;
+      } else {
+        c = classify(t, prot[start.get(x)], english);
+      }
       // A capitalised word inside the sentence that is Bangla only by spelling shape is a name (Dhaka, Rahim): no evidence.
       if (c == T_BN && !first && Character.isUpperCase(t.charAt(0)) && t.length() > 1 && t.substring(1).equals(t.substring(1).toLowerCase(Locale.US))
           && !BN_CONTENT.contains(t.toLowerCase(Locale.US)) && !DEMOTION_EXEMPT.contains(t.toLowerCase(Locale.US))) c = T_UNK;
@@ -289,8 +294,43 @@ final class GboardRamblerSentenceLang {
         out.append(t);
         continue;
       }
+      // Hyphenated Bengali enclitic particles after Bengali words (e.g. "সব-i" -> "সব-ই", "বাংলা-o" -> "বাংলা-ও")
+      if (isBanglaHyphenEnclitic(tok, a, x)) {
+        String encl = renderBanglaEnclitic(t.toLowerCase(Locale.US));
+        if (encl != null) {
+          out.append(encl);
+          continue;
+        }
+      }
       out.append(render(t, english));
     }
+  }
+
+  private static boolean isBanglaHyphenEnclitic(ArrayList<String> tok, int clauseStart, int x) {
+    if (x < clauseStart + 2) return false;
+    String t = tok.get(x);
+    if (t.isEmpty() || !latin(t.charAt(0))) return false;
+    String prevTok = tok.get(x - 1);
+    if (!"-".equals(prevTok) && !"\u2013".equals(prevTok)) return false;
+    String beforeHyphen = tok.get(x - 2);
+    if (beforeHyphen.isEmpty() || !isBengaliChar(beforeHyphen.charAt(beforeHyphen.length() - 1))) return false;
+    String lo = t.toLowerCase(Locale.US);
+    return lo.equals("i") || lo.equals("o") || lo.equals("e") || lo.equals("ta") || lo.equals("ti")
+        || lo.equals("te") || lo.equals("ke") || lo.equals("er") || lo.equals("ra")
+        || lo.equals("gulo") || lo.equals("gula") || lo.equals("to") || lo.equals("na");
+  }
+
+  private static String renderBanglaEnclitic(String lo) {
+    if ("i".equals(lo)) return "\u0987";       // ই (সব-ই, না-ই)
+    if ("o".equals(lo)) return "\u0993";       // ও (বাংলা-ও)
+    if ("e".equals(lo)) return "\u098f";       // এ (কাজ-এ)
+    if ("ta".equals(lo)) return "\u099f\u09be"; // টা
+    if ("ti".equals(lo)) return "\u099f\u09bf"; // টি
+    if ("te".equals(lo)) return "\u09a4\u09c7"; // তে
+    if ("ke".equals(lo)) return "\u0995\u09c7"; // কে
+    if ("er".equals(lo)) return "\u098f\u09b0"; // এর
+    if ("ra".equals(lo)) return "\u09b0\u09be"; // রা
+    return null;
   }
 
   static final String[] LETTER = {"\u098f", "\u09ac\u09bf", "\u09b8\u09bf", "\u09a1\u09bf", "\u0987", "\u098f\u09ab", "\u099c\u09bf",

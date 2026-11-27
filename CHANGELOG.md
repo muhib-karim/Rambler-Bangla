@@ -2,6 +2,20 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.5.0] - 2026-11-28
+
+**Pure Bangla Natural Spelling Overhaul, Hyphenated Enclitic Fix, SHA-256 Verified In-App GitHub Auto-Updater & 2-Minute Setup Guide.**
+
+- **Fixed Pure Bangla (`বাংলা`) narration spellings & hyphenated enclitics:**
+  - Wired **curated modern Bengali loanwords** (`CURATED_BANGLA_LOANS`: 70+ everyday words including `english` → `ইংলিশ`, `understand`/`understands` → `আন্ডারস্ট্যান্ড`/`আন্ডারস্ট্যান্ডস`, `clearly` → `ক্লিয়ারলি`, `voice` → `ভয়েস`, `mixture` → `মিক্সচার`, `language` → `ল্যাঙ্গুয়েজ`, `settings` → `সেটিংস`, `example` → `এক্সাম্পল`) + the **2,265-word Avro Tier-1 dictionary** (`GboardRamblerTier1`) ahead of raw CMUdict phonemes in Pure Bangla mode (`layout == 1`), plus `wellFormed`/`repair` validation.
+  - Added systematic CMUdict cleanup (`GboardRamblerLoanSpell.cleanCmuLoanSpelling`) across all 17,841 table entries fixing initial `un-`/`under-` (`অ` → `আ`), `-ear`/`-eer` (`ির্লি` → `িয়ারলি`), `oi`/`oy` glides (`য়স` → `য়েস`), double-`জজ` plurals (`জেস`), and voiced plural `-s` (`জ` → `স`).
+  - Fixed hyphenated Bengali enclitic particles in Mixed mode (`abc → বাংলা`): `সব-i` → **`সব-ই`**, `বাংলা-o` → `বাংলা-ও`, `কাজ-e` → `কাজ-এ` instead of misclassifying `-i` as English `"I"`.
+  - Updated Pure Bangla LLM prompt (`GboardRamblerLiteScriptRuntime`) to request natural modern Bengali spellings.
+- **In-App GitHub Auto-Updater (`RamblerAutoUpdater`):**
+  - Added **Auto-check for updates** toggle (default ON, checks at most once every 12h when opening **Rambler Enhancements**) and **Check for updates now** button under **App updates (GitHub Releases)**.
+  - Strictly allowlisted to `api.github.com/repos/muhib-karim/Rambler-Bangla/releases/latest` and `github.com/muhib-karim/Rambler-Bangla/releases/download/`, verifies downloaded APK's **SHA-256** against `SHA256SUMS.txt` fail-closed, and launches Android's native 1-tap `PackageInstaller` update sheet directly inside the app (no browser or GitHub hunting required).
+- **Beginner-Friendly Setup & Dictation Guide:** Added a clear step-by-step **How to Set Up & Use Rambler Bangla (2-Minute Guide)** to `README.md` and `docs/index.html`.
+
 ## [31.4.0] - 2026-11-28
 
 **True 3-Keyboard Rambler Dictation Modes, Custom Rambler Bangla App Logo (`র`) & Live Hide Launcher Icon Toggle (Issue #39).**

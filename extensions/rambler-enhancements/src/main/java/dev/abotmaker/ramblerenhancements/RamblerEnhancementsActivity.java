@@ -138,6 +138,9 @@ public final class RamblerEnhancementsActivity extends Activity {
     private volatile List<RamblerCustomInstructionRules.AppEntry> installedAppsCache;
     private volatile Map<String, String> packageLabelCache;
     private volatile boolean loadingInstalledApps;
+    private volatile RamblerAutoUpdater.ReleaseInfo availableUpdateInfo;
+    private volatile boolean checkingForUpdates;
+    private boolean autoUpdateCheckedThisSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,7 +169,182 @@ public final class RamblerEnhancementsActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         setContentView(scroll);
+        handleUpdateInstallIntent(launchIntent);
         refreshUi();
+        maybeRunAutoUpdateCheck();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleUpdateInstallIntent(intent);
+    }
+
+    private void handleUpdateInstallIntent(Intent intent) {
+        if (intent == null || !RamblerAutoUpdater.ACTION_INSTALL_RESULT.equals(intent.getAction())) {
+            return;
+        }
+        int status = intent.getIntExtra(
+                android.content.pm.PackageInstaller.EXTRA_STATUS,
+                android.content.pm.PackageInstaller.STATUS_FAILURE);
+        if (status == android.content.pm.PackageInstaller.STATUS_PENDING_USER_ACTION) {
+            Intent confirm = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+            if (confirm != null) {
+                try {
+                    startActivity(confirm);
+                } catch (Throwable err) {
+                    showToast("Could not open Android installer: " + err.getMessage());
+                }
+            }
+        } else if (status == android.content.pm.PackageInstaller.STATUS_SUCCESS) {
+            showToast("Rambler Bangla updated successfully!");
+        } else if (status != android.content.pm.PackageInstaller.STATUS_FAILURE_ABORTED) {
+            String msg = intent.getStringExtra(android.content.pm.PackageInstaller.EXTRA_STATUS_MESSAGE);
+            showToast("Update failed" + (msg == null || msg.isEmpty() ? "." : ": " + msg));
+        }
+    }
+
+    private void maybeRunAutoUpdateCheck() {
+        if (autoUpdateCheckedThisSession || activeSection != null) {
+            return;
+        }
+        autoUpdateCheckedThisSession = true;
+        RamblerAutoUpdater.checkForUpdateAsync(this, false, (latest, newer, err) -> {
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+            if (latest != null && newer) {
+                availableUpdateInfo = latest;
+                refreshUi();
+            }
+        });
+    }
+
+    private void triggerManualUpdateCheck() {
+        if (checkingForUpdates) {
+            showToast("Already checking GitHub for updates...");
+            return;
+        }
+        checkingForUpdates = true;
+        refreshUi();
+        RamblerAutoUpdater.checkForUpdateAsync(this, true, (latest, newer, err) -> {
+            checkingForUpdates = false;
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+            if (err != null) {
+                refreshUi();
+                showToast("Update check failed: " + err);
+                return;
+            }
+            if (latest != null && newer) {
+                availableUpdateInfo = latest;
+                refreshUi();
+                showUpdateAvailableDialog(latest);
+            } else {
+                availableUpdateInfo = null;
+                refreshUi();
+                showToast("You're on the latest version (v" + RamblerAutoUpdater.CURRENT_VERSION + ").");
+            }
+        });
+    }
+
+    private void showUpdateAvailableDialog(RamblerAutoUpdater.ReleaseInfo info) {
+        if (isFinishing() || isDestroyed() || info == null) {
+            return;
+        }
+        String sizeLabel = info.apkSizeBytes > 0L
+                ? String.format(Locale.US, "%.1f MB", info.apkSizeBytes / (1024.0 * 1024.0))
+                : "APK";
+        String msg = "Installed: v" + RamblerAutoUpdater.CURRENT_VERSION
+                + "\nLatest: " + info.tagName + " (" + sizeLabel + ", SHA-256 verified)\n\n"
+                + info.notesPreview;
+        AlertDialog.Builder b = new AlertDialog.Builder(this)
+                .setTitle("Update available: " + info.tagName)
+                .setMessage(msg)
+                .setNegativeButton("Later", null);
+        if (info.hasDirectApk()) {
+            b.setPositiveButton("Download & Update", (d, w) -> startInAppUpdateDownload(info));
+        } else if (!info.htmlUrl.isEmpty()) {
+            b.setPositiveButton("Open GitHub", (d, w) -> {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(info.htmlUrl)));
+                } catch (Throwable ignored) {
+                }
+            });
+        }
+        b.show();
+    }
+
+    private void startInAppUpdateDownload(RamblerAutoUpdater.ReleaseInfo info) {
+        if (!RamblerAutoUpdater.canRequestPackageInstalls(this)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Allow in-app updates")
+                    .setMessage("Android requires allowing 'Install unknown apps' once for Rambler Bangla so updates can install in 1 tap without leaving the app.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Open permission", (d, w) -> {
+                        try {
+                            RamblerAutoUpdater.openUnknownAppSourcesSettings(this);
+                        } catch (Throwable err) {
+                            showToast("Could not open permission screen.");
+                        }
+                    })
+                    .show();
+            return;
+        }
+        TextView statusView = new TextView(this);
+        statusView.setPadding(dp(24), dp(16), dp(24), dp(8));
+        statusView.setText("Downloading " + info.tagName + " and verifying SHA-256...");
+        AlertDialog progressDialog = new AlertDialog.Builder(this)
+                .setTitle("Updating Rambler Bangla")
+                .setView(statusView)
+                .setCancelable(false)
+                .create();
+        progressDialog.show();
+
+        RamblerAutoUpdater.downloadAndVerifyAsync(this, info, new RamblerAutoUpdater.DownloadCallback() {
+            @Override
+            public void onProgress(int percent, long downloadedBytes, long totalBytes) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                double dlMb = downloadedBytes / (1024.0 * 1024.0);
+                double totMb = totalBytes / (1024.0 * 1024.0);
+                statusView.setText(String.format(
+                        Locale.US, "Downloading %s... %d%% (%.1f / %.1f MB)",
+                        info.tagName, percent, dlMb, totMb));
+            }
+
+            @Override
+            public void onReadyToInstall(java.io.File verifiedApk, String sha256Hex) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                try {
+                    progressDialog.dismiss();
+                } catch (Throwable ignored) {
+                }
+                showToast("SHA-256 verified! Opening Android installer...");
+                try {
+                    RamblerAutoUpdater.launchPackageInstaller(RamblerEnhancementsActivity.this, verifiedApk);
+                } catch (Throwable err) {
+                    showToast("Could not launch installer: " + err.getMessage());
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                try {
+                    progressDialog.dismiss();
+                } catch (Throwable ignored) {
+                }
+                showToast("Update failed: " + message);
+            }
+        });
     }
 
     @Override
@@ -561,6 +739,49 @@ public final class RamblerEnhancementsActivity extends Activity {
                     refreshUi();
                 });
 
+        addSectionHeader("App updates (GitHub Releases)");
+        boolean autoUpdateOn = RamblerEnhancementsSettings.readAutoCheckUpdates(this);
+        addToggleRow(
+                "Auto-check for updates",
+                "Automatically checks muhib-karim/Rambler-Bangla on GitHub Releases (at most once every 12h when opening Settings). Downloads are SHA-256 verified before 1-tap install.",
+                autoUpdateOn,
+                checked -> {
+                    RamblerEnhancementsSettings.writeAutoCheckUpdates(this, checked);
+                    if (checked) {
+                        triggerManualUpdateCheck();
+                    } else {
+                        refreshUi();
+                    }
+                });
+        RamblerAutoUpdater.ReleaseInfo pendingUpdate = availableUpdateInfo;
+        String latestSeen = RamblerEnhancementsSettings.readLatestSeenTag(this);
+        String updateBadge;
+        String updateSummary;
+        if (checkingForUpdates) {
+            updateBadge = "Checking...";
+            updateSummary = "Checking GitHub Releases for a newer Rambler Bangla build...";
+        } else if (pendingUpdate != null && RamblerAutoUpdater.isNewerVersion(pendingUpdate.tagName, RamblerAutoUpdater.CURRENT_VERSION)) {
+            updateBadge = "Update " + pendingUpdate.tagName;
+            updateSummary = "New release ready (" + pendingUpdate.tagName + "). Tap to download, verify SHA-256, and update in-place.";
+        } else {
+            updateBadge = "v" + RamblerAutoUpdater.CURRENT_VERSION;
+            updateSummary = "Installed: v" + RamblerAutoUpdater.CURRENT_VERSION
+                    + (latestSeen != null && !latestSeen.isEmpty() ? " · Latest checked: " + latestSeen : "")
+                    + ". Tap to check GitHub Releases now.";
+        }
+        addRow(
+                "Check for updates now",
+                updateSummary,
+                updateBadge,
+                true,
+                () -> {
+                    if (pendingUpdate != null && RamblerAutoUpdater.isNewerVersion(pendingUpdate.tagName, RamblerAutoUpdater.CURRENT_VERSION)) {
+                        showUpdateAvailableDialog(pendingUpdate);
+                    } else {
+                        triggerManualUpdateCheck();
+                    }
+                });
+
         addRow(
                 "Backup & restore (.json)",
                 "Export or import all settings, per-app rules, snippets, replace rules, and dictionary words.",
@@ -571,7 +792,7 @@ public final class RamblerEnhancementsActivity extends Activity {
         // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
         TextView creditView = new TextView(this);
-        creditView.setText("Rambler Bangla v31.4.0 — by muhib-karim (GPLv3)");
+        creditView.setText("Rambler Bangla v31.5.0 — by muhib-karim (GPLv3)");
         creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         creditView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(

@@ -1625,12 +1625,25 @@ internal fun registerSettingsActivity(manifestDoc: Document) {
     val application = manifest.childElements("application").firstOrNull()
         ?: throw PatchException("AndroidManifest.xml is missing <application>")
 
+    // Allow in-app SHA-256-verified GitHub Release updates via PackageInstaller (user still taps Update)
+    val installPerm = "android.permission.REQUEST_INSTALL_PACKAGES"
+    val hasInstallPerm = manifest.childElements("uses-permission").any {
+        it.androidAttr("name") == installPerm
+    }
+    if (!hasInstallPerm) {
+        val permEl = manifestDoc.createElement("uses-permission").apply {
+            setAndroidAttr("name", installPerm)
+        }
+        manifest.insertBefore(permEl, application)
+    }
+
     val existing = application.childElements("activity").firstOrNull {
         it.androidAttr("name") == SETTINGS_ACTIVITY_CLASS
     }
     val activity = existing ?: manifestDoc.createElement("activity").also(application::appendChild)
     activity.setAndroidAttr("name", SETTINGS_ACTIVITY_CLASS)
     activity.setAndroidAttr("exported", "false")
+    activity.setAndroidAttr("launchMode", "singleTop")
     activity.setAndroidAttr("theme", "@android:style/Theme.DeviceDefault.Settings")
     activity.setAndroidAttr("label", "@string/rambler_enhancements_entry_title")
 

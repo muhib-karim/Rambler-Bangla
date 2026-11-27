@@ -103,9 +103,28 @@ public class RamblerBanglaRuntimeTest {
                 "Bangla English mishano bujhi na. বাংলা ইংলিশ কথা মিশাই বুঝে.");
         Assert.assertFalse("All Bangla must convert leftover Latin even when Bengali already exists: " + allBnPartial,
                 allBnPartial.toLowerCase().contains("mishano"));
+        Assert.assertTrue("All Bangla must spell 'English' as 'ইংলিশ' (never 'ইংগলিশ'): " + allBnPartial,
+                allBnPartial.contains("ইংলিশ") && !allBnPartial.contains("ইংগলিশ"));
+
+        // Exact Screenshot regression: Pure Bangla narration spelling accuracy
+        String pureNarration = GboardRamblerScriptFix.processVoice(
+                "বাংলা লিখলে বাংলা বুঝে, English বললে English বুঝে. It understands Bangla, English clearly.");
+        Assert.assertTrue("Expected natural 'ইংলিশ', got: " + pureNarration, pureNarration.contains("ইংলিশ"));
+        Assert.assertFalse("Must not produce 'ইংগলিশ': " + pureNarration, pureNarration.contains("ইংগলিশ"));
+        Assert.assertTrue("Expected natural 'আন্ডারস্ট্যান্ডস', got: " + pureNarration,
+                pureNarration.contains("আন্ডারস্ট্যান্ডস"));
+        Assert.assertTrue("Expected natural 'ক্লিয়ারলি', got: " + pureNarration,
+                pureNarration.contains("ক্লিয়ারলি"));
 
         // MODE 2: Mixed Bangla + English (abc -> বাংলা) — Bangla clauses/words in বাংলা, English words/clauses in English
         GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
+        // Exact Screenshot regression: hyphenated Bengali enclitic 'সব-i' -> 'সব-ই'
+        String encliticMixed = GboardRamblerScriptFix.processVoice(
+                "তারপর কি বাংলার পর English বললে English-ও বুঝবে, বাংলা-ও বুঝবে, সব-i বুঝবে?");
+        Assert.assertTrue("Hyphenated 'সব-i' must convert to 'সব-ই': " + encliticMixed,
+                encliticMixed.contains("সব-ই"));
+        Assert.assertTrue("English words must stay English: " + encliticMixed,
+                encliticMixed.contains("English-ও"));
         String greeting = GboardRamblerScriptFix.processVoice("ami bhalo achi, tumi kemon acho?");
         Assert.assertTrue("Expected Bengali greeting, got: " + greeting, containsBengali(greeting));
         Assert.assertFalse("Should not remain ASCII Banglish: " + greeting, greeting.contains("bhalo"));
@@ -313,6 +332,50 @@ public class RamblerBanglaRuntimeTest {
 
         // Zero stock flags (headers / popup open) remain locked at 0
         Assert.assertEquals(0, RamblerClipboardReorderRuntime.computeMovementFlags(null, null, 0));
+    }
+
+    @Test
+    public void autoUpdaterVersionCompareJsonParsingAllowlistAndSha256() {
+        Assert.assertTrue(RamblerAutoUpdater.isNewerVersion("v31.6.0", "31.5.0"));
+        Assert.assertTrue(RamblerAutoUpdater.isNewerVersion("v32.0.0", "31.5.0"));
+        Assert.assertFalse(RamblerAutoUpdater.isNewerVersion("v31.5.0", "31.5.0"));
+        Assert.assertFalse(RamblerAutoUpdater.isNewerVersion("v31.4.0", "31.5.0"));
+        Assert.assertTrue(RamblerEnhancementsSettings.DEFAULT_AUTO_CHECK_UPDATES);
+        Assert.assertTrue(RamblerEnhancementsSettings.readAutoCheckUpdates(null));
+
+        // Strict download URL allowlist
+        Assert.assertTrue(RamblerAutoUpdater.isAllowedDownloadUrl(
+                "https://github.com/muhib-karim/Rambler-Bangla/releases/download/v31.6.0/RamblerBangla-v31.6.0-gboard-18.5.4-arm64-v8a.apk"));
+        Assert.assertFalse(RamblerAutoUpdater.isAllowedDownloadUrl(
+                "https://evil.example.com/RamblerBangla.apk"));
+        Assert.assertFalse(RamblerAutoUpdater.isAllowedDownloadUrl(
+                "https://github.com/other-user/Rambler-Bangla/releases/download/v99/a.apk"));
+
+        // Pure-Java GitHub release JSON parser
+        String sampleJson = "{"
+                + "\"tag_name\":\"v31.6.0\","
+                + "\"html_url\":\"https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.6.0\","
+                + "\"body\":\"## Rambler Bangla v31.6.0\\n- Better Bangla spellings\\n- Auto updater\","
+                + "\"assets\":["
+                + "  {\"name\":\"patches-31.6.0.mpp\",\"size\":10369380,\"browser_download_url\":\"https://github.com/muhib-karim/Rambler-Bangla/releases/download/v31.6.0/patches-31.6.0.mpp\"},"
+                + "  {\"name\":\"RamblerBangla-v31.6.0-gboard-18.5.4-arm64-v8a.apk\",\"size\":92619004,\"browser_download_url\":\"https://github.com/muhib-karim/Rambler-Bangla/releases/download/v31.6.0/RamblerBangla-v31.6.0-gboard-18.5.4-arm64-v8a.apk\"},"
+                + "  {\"name\":\"SHA256SUMS.txt\",\"size\":201,\"browser_download_url\":\"https://github.com/muhib-karim/Rambler-Bangla/releases/download/v31.6.0/SHA256SUMS.txt\"}"
+                + "]}";
+        RamblerAutoUpdater.ReleaseInfo info = RamblerAutoUpdater.parseLatestReleaseJson(sampleJson);
+        Assert.assertNotNull(info);
+        Assert.assertEquals("v31.6.0", info.tagName);
+        Assert.assertEquals("31.6.0", info.version);
+        Assert.assertTrue(info.hasDirectApk());
+        Assert.assertEquals("RamblerBangla-v31.6.0-gboard-18.5.4-arm64-v8a.apk", info.apkName);
+        Assert.assertEquals(92619004L, info.apkSizeBytes);
+        Assert.assertTrue(info.sha256SumsUrl.endsWith("/SHA256SUMS.txt"));
+
+        // SHA256SUMS.txt parsing
+        String sha = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        String sums = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  patches-31.6.0.mpp\n"
+                + sha + "  RamblerBangla-v31.6.0-gboard-18.5.4-arm64-v8a.apk\n";
+        Assert.assertEquals(sha, RamblerAutoUpdater.parseExpectedSha256(sums, info.apkName));
+        Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
     }
 
     private static boolean containsBengali(String s) {

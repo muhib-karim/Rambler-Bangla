@@ -81,6 +81,12 @@ public final class RamblerEnhancementsSettings {
             "pref_rambler_clipboard_drag_reorder";
     public static final String PREF_KEY_HIDE_LAUNCHER_ICON =
             "pref_rambler_hide_launcher_icon";
+    public static final String PREF_KEY_AUTO_CHECK_UPDATES =
+            "pref_rambler_auto_check_updates";
+    public static final String PREF_KEY_LAST_UPDATE_CHECK_MS =
+            "pref_rambler_last_update_check_ms";
+    public static final String PREF_KEY_LATEST_SEEN_TAG =
+            "pref_rambler_latest_seen_tag";
     public static final String LAUNCHER_ACTIVITY_CLASS =
             "com.google.android.libraries.inputmethod.launcher.LauncherActivity";
 
@@ -123,6 +129,7 @@ public final class RamblerEnhancementsSettings {
     public static final boolean DEFAULT_AMOLED_DARK_KEYBOARD = false;
     public static final boolean DEFAULT_CLIPBOARD_DRAG_REORDER = true;
     public static final boolean DEFAULT_HIDE_LAUNCHER_ICON = false;
+    public static final boolean DEFAULT_AUTO_CHECK_UPDATES = true;
 
     private static final ThreadLocal<Boolean> IN_GBOARD_PREFS_LOOKUP = new ThreadLocal<Boolean>();
     private static volatile GboardPrefsBridge cachedGboardBridge;
@@ -654,6 +661,43 @@ public final class RamblerEnhancementsSettings {
             return false;
         }
         return saved;
+    }
+
+    public static boolean readAutoCheckUpdates(Context context) {
+        return readDedicatedBoolean(context, PREF_KEY_AUTO_CHECK_UPDATES, DEFAULT_AUTO_CHECK_UPDATES);
+    }
+
+    public static boolean writeAutoCheckUpdates(Context context, boolean enabled) {
+        return writeDedicatedBoolean(context, PREF_KEY_AUTO_CHECK_UPDATES, enabled);
+    }
+
+    public static long readLastUpdateCheckMs(Context context) {
+        SharedPreferences prefs = preferencesOrNull(context);
+        if (prefs == null) {
+            return 0L;
+        }
+        try {
+            return prefs.getLong(PREF_KEY_LAST_UPDATE_CHECK_MS, 0L);
+        } catch (Throwable ignored) {
+            return 0L;
+        }
+    }
+
+    public static String readLatestSeenTag(Context context) {
+        return readDedicatedString(context, PREF_KEY_LATEST_SEEN_TAG, "");
+    }
+
+    public static boolean writeLastUpdateCheck(Context context, long timestampMs, String latestTag) {
+        try {
+            SharedPreferences prefs = preferencesOrNull(context);
+            return prefs != null && prefs.edit()
+                    .putLong(PREF_KEY_LAST_UPDATE_CHECK_MS, timestampMs)
+                    .putString(PREF_KEY_LATEST_SEEN_TAG, latestTag == null ? "" : latestTag)
+                    .commit();
+        } catch (Throwable err) {
+            logWarningSafely("Failed to save update check metadata", err);
+            return false;
+        }
     }
 
     public static boolean writeTypingBaselineWpm(Context context, int wpm) {
