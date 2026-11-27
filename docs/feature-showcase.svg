@@ -49,7 +49,7 @@
     <g transform="translate(856 104)">
       <rect width="380" height="192" rx="14" fill="url(#card)" stroke="#2B5379" stroke-width="1.4"/>
       <rect x="20" y="20" width="128" height="24" rx="12" fill="#1C4670"/>
-      <text x="84" y="36" text-anchor="middle" font-size="11.5" font-weight="700" fill="#F6B13E">NEW IN v31.3.0</text>
+      <text x="84" y="36" text-anchor="middle" font-size="11.5" font-weight="700" fill="#F6B13E">NEW IN v31.3.1</text>
       <text x="20" y="74" font-size="19" font-weight="700" fill="#FFFFFF">Live AMOLED Toggle &amp; Glass</text>
       <text x="20" y="100" font-size="13.5" fill="#B3C9E2">In-app AMOLED #000000 toggle (off by default</text>
       <text x="20" y="120" font-size="13.5" fill="#B3C9E2">for balanced dark gray), Frosted Glass blur,</text>
@@ -76,7 +76,7 @@
     <g transform="translate(450 318)">
       <rect width="380" height="192" rx="14" fill="url(#card)" stroke="#2B5379" stroke-width="1.4"/>
       <rect x="20" y="20" width="128" height="24" rx="12" fill="#1C4670"/>
-      <text x="84" y="36" text-anchor="middle" font-size="11.5" font-weight="700" fill="#F6B13E">NEW IN v31.3.0</text>
+      <text x="84" y="36" text-anchor="middle" font-size="11.5" font-weight="700" fill="#F6B13E">NEW IN v31.3.1</text>
       <text x="20" y="74" font-size="19" font-weight="700" fill="#FFFFFF">Drag Clipboard, Calc &amp; LAN</text>
       <text x="20" y="100" font-size="13.5" fill="#B3C9E2">Tap &amp; hold drag-to-reorder clipboards (saved</text>
       <text x="20" y="120" font-size="13.5" fill="#B3C9E2">permanently), Web Clipboard + image sync,</text>
@@ -92,10 +92,10 @@
       <text x="90" y="36" text-anchor="middle" font-size="11.5" font-weight="700" fill="#9BE0B0">PRODUCTION CI</text>
       <text x="20" y="74" font-size="19" font-weight="700" fill="#FFFFFF">Fail-Closed &amp; Morphe Ready</text>
       <text x="20" y="100" font-size="13.5" fill="#B3C9E2">1-click Morphe Manager source, SHA-256</text>
-      <text x="20" y="120" font-size="13.5" fill="#B3C9E2">guards, side-by-side package rename, 313</text>
-      <text x="20" y="140" font-size="13.5" fill="#B3C9E2">patch tests + Android 15 KVM smoke checks.</text>
+      <text x="20" y="120" font-size="13.5" fill="#B3C9E2">guards, side-by-side package rename, 314</text>
+      <text x="20" y="140" font-size="13.5" fill="#B3C9E2">patch tests + Android 15 ART/IME smoke checks.</text>
       <rect x="20" y="154" width="340" height="24" rx="6" fill="#07152B"/>
-      <text x="30" y="170" font-size="12" fill="#9BE0B0">88 Python · 22 Static · 313 Gradle · API 35 KVM</text>
+      <text x="30" y="170" font-size="12" fill="#9BE0B0">88 Python · 22 Static · 314 Gradle · API 35 ART</text>
     </g>
   </g>
 </svg>

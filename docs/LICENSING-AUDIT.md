@@ -1,13 +1,13 @@
-# Licensing audit (2026-11-27, v31.2.0)
+# Licensing audit (2026-11-28, v31.3.1)
 
-Scope: this repository (59-patch Morphe suite for Gboard 18.5.4 + legacy 18.3.1 standalone
-patcher) and all upstream open-source dependencies integrated through `v31.2.0`.
+Scope: this repository (60-patch Morphe suite for Gboard 18.5.4 + legacy 18.3.1 standalone
+patcher) and all upstream open-source dependencies integrated through `v31.3.1`.
 
 ## Repo contents (source & Morphe `.mpp` patch bundle)
 
 | Item | Upstream / Author | License | Compliance status |
 | --- | --- | --- | --- |
-| Rambler Bangla original code (Bangla script policy, phonetic engine, native `@` mention strip) | `muhib-karim` & contributors | **GNU GPL v3.0** (`LICENSE`) | Compatible with all GPL-3.0, MIT, MPL-2.0, and BSD upstreams. |
+| Rambler Bangla original code (Bangla script policy, phonetic engine, native `@` mention strip, persistent clipboard drag-to-reorder) | `muhib-karim` & contributors | **GNU GPL v3.0** (`LICENSE`) | Compatible with all GPL-3.0, MIT, MPL-2.0, and BSD upstreams. |
 | Gboard Patches / GboardWu (46 patches + binding compiler + extension framework) | Jason Wu (`jasonwu1994/Gboard-patches`, commit `aa6cb2bb`) | **GNU GPL v3.0** + Morphe §7c | Full attribution, commit snapshot, and GPL §5a modification notice in `NOTICE`, `ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `README.md`, and `docs/index.html`. |
 | Gboard Rambler Enhancements (7 patches + dynamic resolver + Settings hub) | `@abotmaker` (`abotmaker/gboard-rambler-enhancements`, commit `5f7e50c2`, v1.3.4) | **GNU GPL v3.0** | Full attribution, commit snapshot, and GPL §5a modification notice in `NOTICE`, `ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `README.md`, and `docs/index.html`. |
 | `nl-morphe-patches` / Dutch App Patches (AMOLED Dark, Rambler Extras, Hidden Flags, cloud activation pattern) | `@johninnld` (`johninnld/nl-morphe-patches`, commit `f5607c15`) | **GNU GPL v3.0** + Morphe §7c | Full attribution, commit snapshot, docs link, and GPL §5a modification notice in `NOTICE`, `ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `README.md`, `docs/index.html`, and source headers. |

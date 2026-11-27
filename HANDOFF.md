@@ -14,12 +14,13 @@
    - Optional Firebase Test Lab Robo testing once `gcloud` + a Spark-plan Firebase project are configured.
 
 ## Completed Work
-- **`v31.3.0`** (60 Morphe patches):
-  - Gated `Lrmt;-><init>(Context, Z)V` in `NlMorpheGboardPatches.kt` on `RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(Context)` (default `false`).
-  - Added `gboardClipboardReorderPatch` (`Clipboard Drag-to-Reorder`) patching Gboard's clipboard `ItemTouchHelper.Callback` (`fqi`) via `RamblerClipboardReorderRuntime` (`computeMovementFlags`, `isLongPressDragEnabled`, `onMove`, `onDragDraw`, `onSelectedChanged`, `onClearView`).
+- **`v31.3.1`** ([PR #37](https://github.com/muhib-karim/Rambler-Bangla/pull/37), `be69f33`, 60 Morphe patches):
+  - Fixed `v31.3.0` ART `VerifyError` in `Lrmt;-><init>(Context, Z)V` caused by R8 reusing `p1` (`Context`) as an `int` color return value (`move-result p1`) right before `return-void`, by switching the AMOLED dark toggle check in `NlMorpheGboardPatches.kt` to zero-arg `RamblerEnhancementsSettings.isAmoledDarkKeyboardEnabled()` (backed by `RamblerFlagRuntime.resolveContext()`).
+  - Added a clobbered-`p1` Dexlib2 unit test (`314` `:patches:test` total), strict clean-decompile JADX verification on `rmt` and `fqi`, and real ART `cmd package compile -m verify -f` + live IME activation checks in `.github/workflows/android-smoke.yml`.
+  - Confirmed loading cleanly on the maintainer's physical device after in-place upgrade over `v31.3.0`.
+- **`v31.3.0`** ([PR #36](https://github.com/muhib-karim/Rambler-Bangla/pull/36), superseded by `v31.3.1`):
+  - Introduced the live in-app **AMOLED Dark Keyboard** toggle (default `false`) and `gboardClipboardReorderPatch` (`Clipboard Drag-to-Reorder`) patching Gboard's clipboard `ItemTouchHelper.Callback` (`fqi`) via `RamblerClipboardReorderRuntime`.
   - Added **Keyboard appearance & clipboard** live toggles directly on the main **Rambler Enhancements** hub screen (`RamblerEnhancementsActivity.java`).
-  - Synced `README.md`, `CHANGELOG.md`, `docs/index.html`, `docs/banner.svg`, `docs/feature-showcase.svg`, `docs/PROJECT_BRAIN.md`, `patches-bundle.json`, and `patches-list.json`.
-  - Signed with persistent maintainer cert (`679cfdec...`), verified on Android 15 KVM emulator, and published with HTTP 200 checks.
 - **`v31.2.0`** ([PR #33](https://github.com/muhib-karim/Rambler-Bangla/pull/33), [PR #34](https://github.com/muhib-karim/Rambler-Bangla/pull/34), [PR #35](https://github.com/muhib-karim/Rambler-Bangla/pull/35)):
   - Native Gboard suggestion-strip `@Mention` integration (`pbh`/`pbo`/`owu`/`phr`), full GPL-3.0/MIT/MPL-2.0/BSD/§7c licensing sync, and production-grade GitHub homepage.
 - **Colab cleanup:** Zero active Colab sessions (`colab sessions` verified empty).
@@ -41,15 +42,16 @@
   - `/sdcard/Download/RamblerBangla-v31.3.1-gboard-18.5.4-arm64-v8a.apk`
   - `patches-31.3.1.mpp` on GitHub Release
 
-## Test Results (`v31.3.0`)
+## Test Results (`v31.3.1`)
 - **Python unit tests & selftests:** **88/88** passed (1 skipped), `ci_gate_selftest.sh` **PASS**, `url_allowlist_selftest.sh` **PASS**.
-- **Colab Gradle, Morphe CLI & JADX:** Full extension unit tests + Android Lint, `:patches:verifyGboardCapabilityWiring`, **313/313** `:patches:test`, **60/60** Morphe CLI patches on Gboard `18.5.4`, DEX markers & JADX checks on `rmt` & `fqi` — **PASS**.
-- **GitHub CI, Maintainer Signing & Android 15 KVM Smoke Test:** Verified on PR #36 and `v31.3.0` release.
+- **Colab Gradle, Morphe CLI & Strict JADX:** Full extension unit tests + Android Lint, `:patches:verifyGboardCapabilityWiring`, **314/314** `:patches:test`, **60/60** Morphe CLI patches on Gboard `18.5.4`, DEX markers & strict clean-decompile JADX checks on `rmt` & `fqi` — **PASS**.
+- **GitHub CI, Maintainer Signing & Hardened Android 15 KVM ART+IME Smoke Test:** Verified on PR #37 (`#46009864068`, `#46009864123`, `#46009925295`, `#46010359878`) and `v31.3.1` release.
+- **Physical device check:** Maintainer confirmed `v31.3.1` installed in-place cleanly and keyboard loads normally; ongoing real-world usage feedback pending.
 
 ## Unresolved Issues
-- Real-device microphone ASR check (spoken Bangla dictation) requires physical phone testing by the maintainer.
+- Awaiting maintainer's day-to-day phone feedback on `v31.3.1` (AMOLED toggle, clipboard drag-to-reorder, spoken Bangla ASR).
 - `gcloud` / Firebase Test Lab is not configured in this container.
 
 ## Exact Next Steps
-1. Install `/sdcard/Download/RamblerBangla-v31.3.0-gboard-18.5.4-arm64-v8a.apk` directly over `v31.2.0` to confirm balanced stock dark theme (AMOLED toggle OFF by default, toggleable ON in Rambler Enhancements) and tap-and-hold clipboard drag-to-reorder.
+1. Address any real-device feedback reported by the maintainer on `v31.3.1`.
 2. On approval, apply the proposed `AGENTS.md` rewrite, `.agents/skills/` split, and script cleanups in a dedicated PR.
