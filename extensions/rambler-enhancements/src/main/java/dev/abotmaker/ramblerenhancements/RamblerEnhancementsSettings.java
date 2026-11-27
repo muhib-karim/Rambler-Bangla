@@ -73,6 +73,10 @@ public final class RamblerEnhancementsSettings {
             "pref_rambler_spacebar_long_press_mode";
     public static final String PREF_KEY_SEEDED_CONTACTS =
             "pref_rambler_contacts_seeded_names";
+    public static final String PREF_KEY_AMOLED_DARK_KEYBOARD =
+            "pref_rambler_amoled_dark_keyboard";
+    public static final String PREF_KEY_CLIPBOARD_DRAG_REORDER =
+            "pref_rambler_clipboard_drag_reorder";
 
     private static final String[] LIVE_TOGGLE_KEYS = {
             PREF_KEY_USE_DICTIONARY_WORDS,
@@ -110,6 +114,8 @@ public final class RamblerEnhancementsSettings {
     public static final String SPACEBAR_MODE_HOLD = "hold";
     public static final String SPACEBAR_MODE_TOGGLE = "toggle";
     public static final String DEFAULT_SPACEBAR_LONG_PRESS_MODE = SPACEBAR_MODE_HYBRID;
+    public static final boolean DEFAULT_AMOLED_DARK_KEYBOARD = false;
+    public static final boolean DEFAULT_CLIPBOARD_DRAG_REORDER = true;
 
     private static final ThreadLocal<Boolean> IN_GBOARD_PREFS_LOOKUP = new ThreadLocal<Boolean>();
     private static volatile GboardPrefsBridge cachedGboardBridge;
@@ -576,6 +582,24 @@ public final class RamblerEnhancementsSettings {
                 context,
                 PREF_KEY_SPACEBAR_LONG_PRESS_MODE,
                 normalizeSpacebarLongPressMode(mode));
+    }
+
+    public static boolean readAmoledDarkKeyboardEnabled(Context context) {
+        return readDedicatedBoolean(
+                context, PREF_KEY_AMOLED_DARK_KEYBOARD, DEFAULT_AMOLED_DARK_KEYBOARD);
+    }
+
+    public static boolean writeAmoledDarkKeyboardEnabled(Context context, boolean enabled) {
+        return writeDedicatedBoolean(context, PREF_KEY_AMOLED_DARK_KEYBOARD, enabled);
+    }
+
+    public static boolean readClipboardDragReorderEnabled(Context context) {
+        return readDedicatedBoolean(
+                context, PREF_KEY_CLIPBOARD_DRAG_REORDER, DEFAULT_CLIPBOARD_DRAG_REORDER);
+    }
+
+    public static boolean writeClipboardDragReorderEnabled(Context context, boolean enabled) {
+        return writeDedicatedBoolean(context, PREF_KEY_CLIPBOARD_DRAG_REORDER, enabled);
     }
 
     public static boolean writeTypingBaselineWpm(Context context, int wpm) {

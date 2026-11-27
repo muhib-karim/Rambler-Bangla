@@ -7,22 +7,26 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Status
 
-- `main` (`v31.2.0`, commit `f4f0123`) ships Rambler Bangla as a unified
+- `main` (`v31.3.0`) ships Rambler Bangla as a unified
   Morphe Patcher 2.1.0 suite targeting Gboard `18.5.4.993608717-release-arm64-v8a`
-  with **59 selectable Morphe patches** and a persistent maintainer-signed
+  with **60 selectable Morphe patches** and a persistent maintainer-signed
   release APK (`679cfdec...` for in-place upgrades):
-  - **3 Rambler Bangla patches**: `Rambler Bangla Lite Script Policy`
+  - **4 Rambler Bangla patches**: `Rambler Bangla Lite Script Policy`
     (fail-closed SHA-256 fingerprint-guarded JetsonLite `fja.d` / `ezn.b` hooks,
     supporting both Gboard 18.5.4 `adcb7fd5...` and 18.3.1 `347a9484...` cleanup
     prompts plus Hinglish override `a0245134...`),
     `Rambler Bangla Phonetic & Multilingual Engine` (complete V29.3+/V29.5
     runtime + active Gboard locale handoff via `fhv.w()` + EN/BN pairing default
-    ON + fail-closed sensitive/password/incognito bypass), and
+    ON + fail-closed sensitive/password/incognito bypass),
     `At-Mention & Email Strip Suggestions` (100% personalized `@grok` / `@claude` /
     `@gmail.com` learning injected directly into Gboard's native suggestion strip
-    via `pbh` / `pbo` / `owu` / `phr` with native theme matching & drag-up-to-remove).
+    via `pbh` / `pbo` / `owu` / `phr` with native theme matching & drag-up-to-remove),
+    and `Clipboard Drag-to-Reorder` (4-direction `ItemTouchHelper.Callback` / `fqi`
+    drag-to-reorder within Pinned/Recent with persistent `ClipboardContentProvider`
+    timestamp reassignment + stationary long-press Pin/Delete fallback + live toggle).
   - **3 `nl-morphe-patches` Gboard 18.5.4 ports**: `AMOLED Dark Keyboard`
-    (dynamic `Lrmt;` `#000000` dark surfaces), `Rambler Toolbar & Revert Extras`,
+    (live-toggled `Lrmt;` `#000000` dark surfaces, default OFF so stock Material You
+    dark gray contrast stays normal), `Rambler Toolbar & Revert Extras`,
     and `Hidden Flags Override` (`okf.g(olk.OVERRIDE)` -> `okq.e()`).
   - **7 Gboard Rambler Enhancements patches** merged from
     `abotmaker/gboard-rambler-enhancements` v1.3.4 (GPL-3.0).
@@ -47,6 +51,7 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Session log
 
+- 2026-11-27 (v31.3.0): Added live in-app Settings toggle for `AMOLED Dark Keyboard` (default OFF so stock dark gray contrast stays normal) and persistent 4-direction `Clipboard Drag-to-Reorder` (`fqi` `ItemTouchHelper` patch — 60 patches total), updated GitHub homepage & SVGs, maintainer-signed APK (`679cfdec...`) + API 35 KVM smoke test.
 - 2026-11-27 (v31.2.0): Replaced floating `@` overlay with true native Gboard
   suggestion-strip integration (`pbh` / `pbo` / `owu` / `phr` candidate pipeline;
   zero white box; inherits AMOLED/Material You/Frosted Glass/Custom themes +

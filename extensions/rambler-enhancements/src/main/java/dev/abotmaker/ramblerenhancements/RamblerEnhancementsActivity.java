@@ -520,6 +520,36 @@ public final class RamblerEnhancementsActivity extends Activity {
                     () -> openSection(SECTION_HISTORY));
         }
 
+        if (RamblerDynamicConfig.FEATURE_AMOLED_DARK_KEYBOARD
+                || RamblerDynamicConfig.FEATURE_CLIPBOARD_REORDER) {
+            addSectionHeader("Keyboard appearance & clipboard");
+            if (RamblerDynamicConfig.FEATURE_AMOLED_DARK_KEYBOARD) {
+                boolean amoledOn = RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(this);
+                addToggleRow(
+                        "AMOLED Dark Keyboard (#000000)",
+                        "Turns Material You dark keyboard surfaces pure black. Off by default so stock dark gray contrast stays normal. Re-select your Theme or reopen Gboard to apply.",
+                        amoledOn,
+                        checked -> {
+                            RamblerEnhancementsSettings.writeAmoledDarkKeyboardEnabled(this, checked);
+                            showToast(checked
+                                    ? "AMOLED Dark ON — re-select Dynamic Color in Theme or restart Gboard to apply."
+                                    : "AMOLED Dark OFF — re-select Dynamic Color in Theme or restart Gboard to apply.");
+                            refreshUi();
+                        });
+            }
+            if (RamblerDynamicConfig.FEATURE_CLIPBOARD_REORDER) {
+                boolean reorderOn = RamblerEnhancementsSettings.readClipboardDragReorderEnabled(this);
+                addToggleRow(
+                        "Clipboard drag-to-reorder",
+                        "Tap & hold a clipboard card and drag to rearrange within Pinned or Recent (saved permanently). Tap & hold without moving still opens the Pin/Delete menu; swipe still deletes.",
+                        reorderOn,
+                        checked -> {
+                            RamblerEnhancementsSettings.writeClipboardDragReorderEnabled(this, checked);
+                            refreshUi();
+                        });
+            }
+        }
+
         addRow(
                 "Backup & restore (.json)",
                 "Export or import all settings, per-app rules, snippets, replace rules, and dictionary words.",
@@ -530,7 +560,7 @@ public final class RamblerEnhancementsActivity extends Activity {
         // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
         TextView creditView = new TextView(this);
-        creditView.setText("Rambler Bangla v31.2.0 — by muhib-karim (GPLv3)");
+        creditView.setText("Rambler Bangla v31.3.0 — by muhib-karim (GPLv3)");
         creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         creditView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(

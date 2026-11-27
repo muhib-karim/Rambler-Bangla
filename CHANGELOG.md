@@ -2,6 +2,14 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.3.0] - 2026-11-27
+
+**Live `AMOLED Dark Keyboard` Toggle (Default OFF) & Persistent `Clipboard Drag-to-Reorder` (60 Morphe Patches).**
+
+- **Live in-app `AMOLED Dark Keyboard` toggle (default OFF):** Gated Gboard 18.5.4's Material 3 GM3 dark palette override (`Lrmt;-><init>`) on `RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(context)` with default **OFF** so stock Material You dark themes keep normal layered dark-gray contrast out of the box instead of collapsing all 4 surfaces to pitch `#000000`. Users can toggle pure `#000000` AMOLED Dark ON or OFF anytime under **Rambler Enhancements → Keyboard appearance & clipboard**.
+- **Persistent `Clipboard Drag-to-Reorder` (new 60th Morphe patch, default ON):** Dynamically patches Gboard 18.5.4's clipboard `ItemTouchHelper.Callback` (`fqi`) via `RamblerClipboardReorderRuntime` to support 4-direction (`UP | DOWN | LEFT | RIGHT`) tap-and-hold drag-to-reorder within **Pinned** or **Recent** sections (works on 1/2/3-column staggered grids, locks section headers, preserves card opacity during drag instead of swipe-fade, and persists the new order permanently to `ClipboardContentProvider` by reassigning sorted descending timestamps and cleanly renaming image clip files via `ClipboardKeyboard.ab`). Stationary tap-and-hold (release without dragging) still opens Gboard's Pin/Paste/Delete popup, swipe left/right still deletes with Undo, and Edit Mode stays untouched. Includes a live Settings toggle under **Rambler Enhancements → Keyboard appearance & clipboard**.
+- **Maintainer-signed in-place upgrade:** Signed with the persistent Rambler Bangla maintainer certificate (`679cfdec...`) via `.github/workflows/private-test-build.yml` so `v31.3.0` installs seamlessly over `v31.2.0` with zero data loss.
+
 ## [31.2.0] - 2026-11-27
 
 **True Native Gboard Suggestion-Strip Integration for `@Mention` Suggestions (Zero Floating Overlay / Zero White Background).**
