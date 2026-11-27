@@ -2,6 +2,20 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.8.0] - 2026-11-28
+
+**Foolproof Pure Bangla & Mixed Orthography Engine (Post-LLM & Post-ASR Spell Normalizer, Enclitic Fix & Bangla Dari).**
+
+- **New Post-LLM & Post-ASR Bengali Orthography Normalizer (`GboardRamblerBanglaNormalizer`):**
+  - Runs on **100% of Bengali dictation commits** in Pure Bangla (`বাংলা`) and Mixed (`abc → বাংলা`) modes — even when the on-device Rambler LLM emits pure Bengali Unicode with zero Latin letters (removed the early `!containsLatin(input)` bailout in `GboardRamblerScriptFix`).
+  - Repairs 120+ exact token-boundary Bengali & phonetic loanword misspellings without touching valid Bengali words (`শবদেহ`, `শবদাহ`, `শব্দ` preserved): `শবকিছু` → **`সবকিছু`**, `শবকিছু-আই` → **`সবকিছুই`**, `বুযে`/`বুজে` → **`বুঝে`**, `ভালে`/`ভাল` → **`ভালো`**, `শুন্দর` → **`সুন্দর`**, `শময়` → **`সময়`**, `ওয়টেভার` → **`হোয়াটেভার`**, `ফনেটিকস` → **`ফোনেটিকস`**, `ক্লির্লি` → **`ক্লিয়ারলি`**, `খাছি` → **`খাচ্ছি`**, plus natural compound adverb spacing (`সুন্দর ভাবে` → **`সুন্দরভাবে`**, `ভালো ভাবে` → **`ভালোভাবে`**, `রাইট নাউ` → **`রাইট নাও`**).
+  - Performs Unicode NFC + double-nukta cleanup (`ড়়` → `ড়`, `ঢ়়` → `ঢ়`, `য়়` → `য়`) and converts sentence-ending ASCII `.` after Bengali letters into standard Bengali dari (`।`) in Pure Bangla mode while preserving ellipses (`...`), URLs, and emails.
+- **Fixed Hyphenated `-i` Enclitic Conversion & Expanded Curated Dictionaries:**
+  - Fixed `GboardRamblerScriptFix` & `GboardRamblerSegmentLock` so hyphenated `-i` emits Bengali emphatic enclitic **`ই`** (joining native bases like `সবকিছুই`, `সবই`, `এখনই`) instead of English pronoun `আই`.
+  - Expanded `GboardRamblerScriptFix.EXCEPTIONS` (120+ `shob*`/`bujh*`/`bhalo*`/`shundor*`/`shomoy*` entries, fixed double-nukta literals) and `GboardRamblerLoanSpell.CURATED_BANGLA_LOANS` (+34 curated everyday English-in-Bangla loanwords: `হোয়াটেভার`, `ফোনেটিকস`, `রাইট`, `নাও`, `সেয়িং`, `রিটেন`, `শুড`, `সাপোজড`, `অ্যাকিউরেট`, `প্রপারলি`, etc.), prioritizing `EXCEPTIONS` → `CURATED_BANGLA_LOANS` → Avro Tier-1 ahead of raw CMUdict phonemes.
+  - Strengthened `GboardRamblerLiteScriptRuntime.ALL_BANGLA_SCRIPT_RULE` to explicitly guide the on-device Rambler LLM toward standard Bangla Academy spelling and Bengali dari (`।`).
+- **End-to-End Regression Coverage:** Added `pureBanglaOrthographyNormalizerFixesAllScreenshotSpellings()` verifying both 100%-Bengali LLM output and Romanized ASR paths, plus valid-word preservation.
+
 ## [31.7.0] - 2026-11-28
 
 **Original Rambler Bangla Patches UI (Zero Upstream Repo Icons), Complete Keyboard/Clipboard Migration & Hardened About App Auto-Updates.**

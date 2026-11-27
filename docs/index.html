@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rambler Bangla: Bengali-first voice typing &amp; 60-patch Morphe suite for Gboard 18.5.4</title>
-<meta name="description" content="Rambler Bangla v31.7.0 is a unified 60-patch Morphe suite for Gboard 18.5.4: 3-keyboard Bangla/Mixed/English Rambler+ voice typing with natural Bengali spellings, redesigned 4-section Patches UI, SHA-256 verified in-app GitHub auto-updater under About, custom adaptive logo, Hide launcher icon, native @mention strip, live AMOLED toggle, and Clipboard Drag-to-Reorder. GPL-3.0.">
+<meta name="description" content="Rambler Bangla v31.8.0 is a unified 60-patch Morphe suite for Gboard 18.5.4: 3-keyboard Bangla/Mixed/English Rambler+ voice typing with foolproof Bangla Academy orthography normalizer, redesigned 4-section Patches UI, SHA-256 verified in-app GitHub auto-updater under About, custom adaptive logo, Hide launcher icon, native @mention strip, live AMOLED toggle, and Clipboard Drag-to-Reorder. GPL-3.0.">
 <meta name="theme-color" content="#0B1F3B">
 <meta name="color-scheme" content="dark">
 <meta name="referrer" content="no-referrer">
@@ -178,7 +178,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 <p class="lede">A fail-closed, 60-patch Morphe suite for Gboard 18.5.4 (plus the legacy 18.3.1 standalone patcher) with true 3-keyboard Bangla / Mixed / English Rambler+ voice typing, natural Bengali spellings, SHA-256 verified in-app GitHub updates, custom brand logo, Hide launcher icon, native @mention suggestions, and Clipboard Drag-to-Reorder. GPL-3.0.</p>
 <div class="ctas">
 <a class="btn primary" href="https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&amp;name=Rambler%20Bangla&amp;app=com.google.android.inputmethod.latin&amp;appName=Gboard">Add to Morphe</a>
-<a class="btn ghost" href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">Release v31.7.0</a>
+<a class="btn ghost" href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">Release v31.8.0</a>
 <a class="btn ghost" href="#layouts">2-Min Setup</a>
 <a class="btn ghost" href="https://github.com/muhib-karim/Rambler-Bangla">GitHub</a>
 </div>
@@ -191,7 +191,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 <small>Illustration with synthetic text, not a device screenshot.</small>
 </div>
 </div>
-<figure class="banner"><img src="banner.svg" alt="Rambler Bangla v31.7.0 banner: 60-patch Morphe suite for Gboard 18.5.4" width="1280" height="340"></figure>
+<figure class="banner"><img src="banner.svg" alt="Rambler Bangla v31.8.0 banner: 60-patch Morphe suite for Gboard 18.5.4" width="1280" height="340"></figure>
 </div>
 </div>
 
@@ -202,7 +202,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 <p class="sub">One unified Morphe 2.1 source: 3-mode Bangla/Mixed/English dictation, in-app updates, custom brand logo, and 60 conflict-free Gboard power patches.</p>
 </div>
 <div class="prose">
-<p>Gboard's on-device voice cleanup tends to rewrite Bengali dictation into Latin letters, mangles mixed Bangla + English sentences, hides <b>Rambler+</b> behind rollout gates, removed the old Hide app icon setting, and lacks personalized <code>@handle</code> predictions or clipboard drag-to-reorder. <b>Rambler Bangla v31.7.0</b> combines a <b>60-patch Morphe 2.1 suite for Gboard 18.5.4</b> (3-keyboard active-mode voice routing with natural Bengali spellings, cleanly organized 4-section Patches UI, SHA-256 verified in-app GitHub auto-updater under <b>About → App updates</b>, custom adaptive <code>র</code> launcher logo, live Hide launcher icon &amp; AMOLED Dark controls under <b>Patches → Keyboard</b>, native suggestion-strip <code>@mentions</code>, persistent Clipboard Drag-to-Reorder, Rambler Enhancements, and Gboard Patches) alongside the original <b>fail-closed Gboard 18.3.1 Python smali patcher</b>.</p>
+<p>Gboard's on-device voice cleanup tends to rewrite Bengali dictation into Latin letters, mangles mixed Bangla + English sentences, hides <b>Rambler+</b> behind rollout gates, removed the old Hide app icon setting, and lacks personalized <code>@handle</code> predictions or clipboard drag-to-reorder. <b>Rambler Bangla v31.8.0</b> combines a <b>60-patch Morphe 2.1 suite for Gboard 18.5.4</b> (3-keyboard active-mode voice routing with post-LLM &amp; post-ASR Bangla Academy orthography normalizer, cleanly organized 4-section Patches UI, SHA-256 verified in-app GitHub auto-updater under <b>About → App auto-updates</b>, custom adaptive <code>র</code> launcher logo, live Hide launcher icon &amp; AMOLED Dark controls under <b>Patches → Keyboard</b>, native suggestion-strip <code>@mentions</code>, persistent Clipboard Drag-to-Reorder, Rambler Enhancements, and Gboard Patches) alongside the original <b>fail-closed Gboard 18.3.1 Python smali patcher</b>.</p>
 <div class="callout"><p><b>Honest status.</b> Automated CI proves 88 Python unit tests, 22 static fixture checks, 315 Gradle patch tests, Android extension lint/tests, Morphe CLI 60/60 patching + strict JADX checks, and real Android 15 KVM ART <code>dex2oat</code> verification + live IME smoke tests. Live microphone ASR results come from the maintainer's own phone.</p></div>
 </div>
 </div>
@@ -211,8 +211,8 @@ footer p{margin:0 0 8px;max-width:80ch}
 <section id="features" aria-labelledby="features-h">
 <div class="wrap">
 <h2 id="features-h">Features</h2>
-<p class="sub">Everything inside Rambler Bangla v31.7.0 (60 selectable Morphe patches), with the evidence level stated for each.</p>
-<figure class="showcase"><img src="feature-showcase.svg" alt="Rambler Bangla v31.7.0 six-pillar feature overview poster" width="1280" height="540"></figure>
+<p class="sub">Everything inside Rambler Bangla v31.8.0 (60 selectable Morphe patches), with the evidence level stated for each.</p>
+<figure class="showcase"><img src="feature-showcase.svg" alt="Rambler Bangla v31.8.0 six-pillar feature overview poster" width="1280" height="540"></figure>
 <ul class="features">
 <li><h3>3-Mode Bangla / Mixed / English Voice</h3><p>Only 3 keyboards needed: <code>English (US)</code> stays strictly English / phonetic Latin even when speaking Bangla; <code>বাংলা</code> outputs 100% natural Bengali Unicode (curated spellings + Avro Tier-1 + cleaned CMUdict loanwords); <code>abc → বাংলা</code> delivers true intra-sentence Mixed Bangla + English (including hyphenated enclitics like <span class="bn" lang="bn">সব-ই</span>).</p><span class="level"><b class="ok">CI + Emulator</b><br>22 end-to-end checks, 60 Morphe patches</span></li>
 <li><h3>In-App Auto-Updater (About), Redesigned Patches &amp; Logo</h3><p>Toggleable <b>Auto-check for updates</b> + 1-tap SHA-256-verified GitHub Release installer under <b>Settings → About → App updates</b>, cleanly organized 4-section <b>Patches</b> tab (Keyboard, Voice &amp; Smart Input, Clipboard &amp; Sharing, System &amp; Preferences), custom adaptive Rambler Bangla (<span class="bn" lang="bn">র</span>) app logo, and 1-tap <b>Hide launcher icon</b> under <b>Patches → Keyboard</b>.</p><span class="level"><b class="ok">CI + Emulator</b><br>SHA-256 verified · zero browser needed</span></li>
@@ -347,12 +347,13 @@ bash tests/run_tests.sh  <span class="c"># TEST SUITE: 22 passed, 0 failed</span
 <section id="roadmap" aria-labelledby="roadmap-h">
 <div class="wrap">
 <h2 id="roadmap-h">Roadmap &amp; Releases</h2>
-<p class="sub">Latest release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">v31.7.0</a> (60-patch Morphe suite for Gboard 18.5.4; supersedes v31.5.0 and legacy standalone <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4">v29.4</a>).</p>
+<p class="sub">Latest release: <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest">v31.8.0</a> (60-patch Morphe suite for Gboard 18.5.4; supersedes v31.7.0 and legacy standalone <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4">v29.4</a>).</p>
 <h3>Release milestones &amp; verification</h3>
 <div class="table" role="region" aria-label="Release milestones and verification levels" tabindex="0">
 <table>
 <tr><th scope="col">Release</th><th scope="col">Highlights &amp; Verification</th></tr>
-<tr><td><a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.7.0">v31.7.0</a> (Latest)</td><td><b>Original Rambler Bangla Patches UI &amp; Complete Keyboard Migration:</b> redesigned the <b>Patches</b> tab with a Deep Navy / Ocean / Amber brand theme (hero banner, bordered cards, amber-bar section headers, zero upstream circular icon badges), promoted <b>AMOLED Dark</b>, <b>@Mention &amp; Email Strip</b>, and <b>Hide launcher icon</b> to 1-tap toggles under <b>Patches → Keyboard</b>, moved <b>Quick-paste chip</b> + <b>Drag-to-reorder clips</b> to <b>Patches → Clipboard</b>, kept <b>Rambler Enhancements</b> purely voice-focused, and hardened explicit launch on <b>Settings → About → App auto-updates</b>.</td></tr>
+<tr><td><a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.8.0">v31.8.0</a> (Latest)</td><td><b>Foolproof Pure Bangla &amp; Mixed Orthography Engine:</b> added <code>GboardRamblerBanglaNormalizer</code> running on 100% of Bengali commits (post-LLM pure Bengali &amp; post-ASR), fixing <span class="bn" lang="bn">-আই → -ই</span> enclitics (<span class="bn" lang="bn">সবকিছুই</span>), <span class="bn" lang="bn">শবকিছু → সবকিছু</span>, <span class="bn" lang="bn">বুযে → বুঝে</span>, <span class="bn" lang="bn">ভালে → ভালো</span>, <span class="bn" lang="bn">সুন্দরভাবে</span>, <span class="bn" lang="bn">হোয়াটেভার</span>, <span class="bn" lang="bn">ফোনেটিকস</span>, <span class="bn" lang="bn">রাইট নাও</span>, double-nukta cleanup, and Pure Bangla Bengali dari (<span class="bn" lang="bn">।</span>).</td></tr>
+<tr><td><a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.7.0">v31.7.0</a></td><td><b>Original Rambler Bangla Patches UI &amp; Complete Keyboard Migration:</b> redesigned the <b>Patches</b> tab with a Deep Navy / Ocean / Amber brand theme (hero banner, bordered cards, amber-bar section headers, zero upstream circular icon badges), promoted <b>AMOLED Dark</b>, <b>@Mention &amp; Email Strip</b>, and <b>Hide launcher icon</b> to 1-tap toggles under <b>Patches → Keyboard</b>, moved <b>Quick-paste chip</b> + <b>Drag-to-reorder clips</b> to <b>Patches → Clipboard</b>, kept <b>Rambler Enhancements</b> purely voice-focused, and hardened explicit launch on <b>Settings → About → App auto-updates</b>.</td></tr>
 <tr><td><a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.6.0">v31.6.0</a></td><td>Initial move of <b>App updates</b> under <b>Settings → About</b> and 4-section <b>Patches</b> organization.</td></tr>
 <tr><td><a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.5.0">v31.5.0</a></td><td>Pure Bangla natural spelling overhaul (70+ curated loanwords + Avro Tier-1 priority + CMUdict cleanup + hyphenated enclitic <span class="bn" lang="bn">সব-ই</span>), SHA-256 verified <b>In-App GitHub Auto-Updater</b>, and 2-minute beginner setup guide.</td></tr>
 <tr><td><a href="https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.4.0">v31.4.0</a></td><td>True 3-keyboard active-mode dictation (<code>English (US)</code> / <span class="bn" lang="bn">বাংলা</span> / <code>abc → বাংলা</code>), custom adaptive Rambler Bangla (<span class="bn" lang="bn">র</span>) app logo, and live <b>Hide launcher icon</b> toggle (Issue #39).</td></tr>
@@ -399,7 +400,7 @@ bash tests/run_tests.sh  <span class="c"># TEST SUITE: 22 passed, 0 failed</span
 
 <footer>
 <div class="wrap">
-<p>Rambler Bangla v31.7.0 is licensed <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/LICENSE">GPL-3.0</a> and credits <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches</a> (Jason Wu, GPL-3.0), <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a> (abotmaker, GPL-3.0), <a href="https://gitlab.com/johninnld/nl-morphe-patches">nl-morphe-patches</a> (johninnld, GPL-3.0), <a href="https://github.com/anomalyco/hex">Hex by Anomaly</a> (MIT), <a href="https://github.com/quickjs-ng/quickjs">QuickJS-NG</a> (MIT), <a href="https://github.com/Akshayykadam/PixelBoard">PixelBoard</a> (GPL-3.0), Morphe (GPL-3.0 + Section 7c), Avro (MPL-2.0), and CMUdict (BSD). Full notices: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a> &amp; <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/THIRD-PARTY-NOTICES.md">THIRD-PARTY-NOTICES.md</a>.</p>
+<p>Rambler Bangla v31.8.0 is licensed <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/LICENSE">GPL-3.0</a> and credits <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches</a> (Jason Wu, GPL-3.0), <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a> (abotmaker, GPL-3.0), <a href="https://gitlab.com/johninnld/nl-morphe-patches">nl-morphe-patches</a> (johninnld, GPL-3.0), <a href="https://github.com/anomalyco/hex">Hex by Anomaly</a> (MIT), <a href="https://github.com/quickjs-ng/quickjs">QuickJS-NG</a> (MIT), <a href="https://github.com/Akshayykadam/PixelBoard">PixelBoard</a> (GPL-3.0), Morphe (GPL-3.0 + Section 7c), Avro (MPL-2.0), and CMUdict (BSD). Full notices: <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/ATTRIBUTION.md">ATTRIBUTION.md</a> &amp; <a href="https://github.com/muhib-karim/Rambler-Bangla/blob/main/THIRD-PARTY-NOTICES.md">THIRD-PARTY-NOTICES.md</a>.</p>
 <p>Not affiliated with Google. No trackers, no scripts, no cookies on this page.</p>
 </div>
 </footer>
