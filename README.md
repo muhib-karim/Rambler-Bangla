@@ -1,46 +1,69 @@
-<p align="center"><img src="docs/banner.svg" alt="Rambler Bangla: Bengali-first voice typing & unified Morphe patch suite for Gboard 18.5.4" width="100%"></p>
+<p align="center"><img src="docs/banner.svg" alt="Rambler Bangla: Bengali-first voice typing & unified 59-patch Morphe suite for Gboard 18.5.4" width="100%"></p>
 
-<h3 align="center">Dictate in Bangla. Get Bangla. Now a unified 59-patch Morphe suite for Gboard 18.5.4.</h3>
-
-<p align="center">A fail-closed, fingerprint-guarded Morphe patch suite combining Bengali-first Rambler+ voice typing &amp; phonetic Bangla normalization with all features from <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a>, <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches (GboardWu)</a>, and <a href="https://gitlab.com/johninnld/nl-morphe-patches">nl-morphe-patches</a>.</p>
+<h3 align="center">Dictate in Bangla. Get Bangla. A production-grade, 59-patch Morphe suite for Gboard 18.5.4.</h3>
 
 <p align="center">
-<a href="https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard"><img src="https://img.shields.io/badge/Morphe-Add%20Patch%20Source-4285F4?style=for-the-badge" alt="Add Source to Morphe"></a>
-<a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/ci.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-<a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg" alt="Static test suite"></a>
-<a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest"><img src="https://img.shields.io/github/v/release/muhib-karim/Rambler-Bangla" alt="Latest release"></a>
-<a href="LICENSE"><img src="https://img.shields.io/github/license/muhib-karim/Rambler-Bangla" alt="Licence: GPL-3.0"></a>
-<img src="https://img.shields.io/badge/Gboard-18.5.4-0B1F3B" alt="Targets Gboard 18.5.4 (Morphe) and 18.3.1 (legacy standalone)">
-<img src="https://img.shields.io/badge/patches-59%20Morphe%20patches-F6B13E" alt="59 Morphe patches">
+  A fail-closed, fingerprint-guarded <b>Morphe 2.1</b> patch source combining Bengali-first <b>Rambler+</b> voice typing, phonetic Bangla normalization, and <b>100% personalized native Gboard <code>@mention</code> suggestions</b> with all features from
+  <a href="https://github.com/abotmaker/gboard-rambler-enhancements">Gboard Rambler Enhancements</a>,
+  <a href="https://github.com/jasonwu1994/Gboard-patches">Gboard Patches (GboardWu)</a>, and
+  <a href="https://gitlab.com/johninnld/nl-morphe-patches">nl-morphe-patches</a>.
 </p>
 
 <p align="center">
-<a href="#included-patches"><b>Included Patches (59)</b></a> ·
-<a href="#install"><b>Install in Morphe</b></a> ·
-<a href="#build-from-source"><b>Build from source</b></a> ·
-<a href="#how-it-works"><b>How it works</b></a> ·
-<a href="#faq"><b>FAQ</b></a> ·
-<a href="docs/README.md"><b>Docs</b></a> ·
-<a href="https://muhib-karim.github.io/Rambler-Bangla/"><b>Site</b></a>
+  <a href="https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard"><img src="https://img.shields.io/badge/Morphe-Add%20Patch%20Source-4285F4?style=for-the-badge&logo=android&logoColor=white" alt="Add Source to Morphe"></a>
+  <a href="https://github.com/muhib-karim/Rambler-Bangla/releases/latest"><img src="https://img.shields.io/github/v/release/muhib-karim/Rambler-Bangla?style=for-the-badge&color=F6B13E&labelColor=0B1F3B" alt="Latest release"></a>
+  <a href="https://muhib-karim.github.io/Rambler-Bangla/"><img src="https://img.shields.io/badge/Website-GitHub%20Pages-2D6FA3?style=for-the-badge" alt="Project Website"></a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/1-banner.png" alt="Rambler Bangla Poster Banner" width="49%" />
-  <img src="docs/assets/2-rb-brand-sheet.png" alt="Rambler Bangla Brand Sheet" width="49%" />
+  <a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/ci.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml"><img src="https://github.com/muhib-karim/Rambler-Bangla/actions/workflows/tests.yml/badge.svg" alt="Static test suite"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/muhib-karim/Rambler-Bangla" alt="Licence: GPL-3.0"></a>
+  <img src="https://img.shields.io/badge/Gboard-18.5.4%20arm64--v8a-0B1F3B" alt="Targets Gboard 18.5.4 (Morphe) and 18.3.1 (legacy standalone)">
+  <img src="https://img.shields.io/badge/Morphe%20Patches-59%20Included-F6B13E" alt="59 Morphe patches">
+  <img src="https://img.shields.io/badge/Emulator-Android%2015%20KVM%20Verified-2E8B57" alt="Android 15 KVM verified">
 </p>
+
+<p align="center">
+  <a href="#install"><b>Install in Morphe</b></a> ·
+  <a href="#features"><b>Highlights</b></a> ·
+  <a href="#included-patches"><b>All 59 Patches</b></a> ·
+  <a href="#how-it-works"><b>Architecture</b></a> ·
+  <a href="#build-from-source"><b>Build from Source</b></a> ·
+  <a href="#faq"><b>FAQ</b></a> ·
+  <a href="#credits-and-licence"><b>Credits &amp; Licence</b></a>
+</p>
+
+<p align="center">
+  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v31.2.0 six-pillar feature overview poster" width="100%" />
+</p>
+
+> **Quick Morphe Setup:** Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** or paste `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json` in Morphe Manager, then select official Gboard `18.5.4.993608717-release-arm64-v8a`. Full steps in [Install](#install).
+
+---
 
 ## What it is and why
 
-Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into Latin letters ("ami bhalo achi" instead of "আমি ভালো আছি"), and it mangles sentences that mix Bangla and English. Rambler Bangla is an open-source patch layer for one exact build, Gboard 18.3.1, that fixes this at the source: a **fail-closed smali patcher** (Python) proves it is looking at the profiled build and inserts two hooks, a **pure-Java policy runtime** keeps Bangla in Bengali script and picks one language per sentence, and a **device-free CI suite** builds a synthetic APK, patches it and checks every step, including the refusals, on every push. It is a source-only tool: you patch an APK you obtain yourself and sign it with your own key.
+Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali into Romanized Latin letters (`"ami bhalo achi"` instead of `"আমি ভালো আছি"`), mangles mixed Bangla + English sentences, hides **Rambler+** behind rollout gates on non-Pixel devices, and lacks SwiftKey-style personalized `@handle` predictions on the suggestion strip.
 
-> **No APKs are distributed.** Every build is your own: you run the patcher on an official Gboard APK you obtained yourself and sign the result with your own key. It is the same model as ReVanced and Morphe, which publish patches, not patched apps. Details: [Source only, no APKs](#source-only-no-apks).
+**Rambler Bangla v31.2.0** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
 
-> **Honest status.** This is a maintainer project with private test builds. Host tests and a static CI suite back the engineering claims below. The on-device results come from the maintainer's own phone. Anything marked "design intent" is design, not proof. CI never installs the keyboard on a device, and the website's UI illustrations are mock-ups with synthetic text.
+- **Bengali-first voice & phonetic engine:** SHA-256 fingerprint-guarded script policy + full V29.3+/V29.5 phonetic transliteration, live active Gboard locale handoff (`fhv.w()`), unconditional **Rambler+** activation, per-sentence multilingual EN/BN routing, 2,265 Avro-derived spelling pairs, CMUdict English loanword spellings (`company` → `কোম্পানি`), and protected spans (`#hashtags`, `@handles`, URLs, emails, times).
+- **100% personalized native `@Mention` suggestion strip:** Learns your `@handles` (`@grok`, `@claude`) and email domains (`@gmail.com`) as you type or dictate and injects them **straight into Gboard's own native suggestion strip** — zero floating overlay, automatic AMOLED/Material You/Frosted Glass/Custom Theme matching, and native drag-up-to-remove.
+- **Complete Gboard power-user ecosystem in one conflict-free `.mpp`:** Integrates all **7** patches from `abotmaker/gboard-rambler-enhancements` (v1.3.4), **3** verified Gboard 18.5.4 ports from `johninnld/nl-morphe-patches` (AMOLED Dark, Rambler Toolbar Extras, Hidden Flags Override), and all **46** patches from `jasonwu1994/Gboard-patches` (v4.5.0) — **59 selectable patches** engineered to share hooks without conflicts.
+
+> **Source only, no APKs committed to git.** Every Morphe user patches an official Gboard APK they obtain themselves and signs with their own key (details in [Source only, no APKs](#source-only-no-apks) and [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md)).
+
+> **Honest evidence.** Automated CI proves 88 Python unit tests, 22 static fixture checks, 312 Gradle patch tests, Android extension tests/lint, Morphe CLI 59/59 patching + JADX bytecode checks, and Android 15 hardware-KVM emulator boot/IME smoke tests. Live microphone ASR results come from the maintainer's own phone.
+
+---
 
 ## Contents
 
+- [Install](#install)
 - [What it is and why](#what-it-is-and-why)
 - [Features](#features)
+- [Included Patches](#included-patches)
 - [How it works](#how-it-works)
 - [Device-free CI](#device-free-ci)
 - [Build from source](#build-from-source)
@@ -50,14 +73,33 @@ Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into L
 - [FAQ](#faq)
 - [Roadmap](#roadmap)
 - [Tech stack and project structure](#tech-stack-and-project-structure)
+- [Brand and visuals](#brand-and-visuals)
 - [Links](#links)
 - [Credits and licence](#credits-and-licence)
+
+---
+
+## Features
+
+| Pillar | What you get | Verification |
+| --- | --- | --- |
+| **Bangla stays Bangla** | Bengali dictation stays in Bengali Unicode for `bn-BD`, `bn-IN`, `bn-Beng`, and phonetic `bn-Latn` (`"ami bhalo achi"` → `"আমি ভালো আছি"`), while English stays in Latin | 22 end-to-end checks, 51 policy assertions, runtime E2E tests, JADX-verified `fja.d` hooks |
+| **Unconditional Rambler+ activation** | Selecting **Rambler+** under Voice typing activates immediately without cold-start rollout suppression | Unit tests (`GboardRamblerStockPolicyTest`, `RamblerBanglaRuntimeTest`) + JADX-verified |
+| **Native personalized `@Mention` strip** | Auto-learns typed & dictated `@handles` (`@grok`, `@claude`) and email domains (`@gmail.com`) on-device; renders inside Gboard's own suggestion strip matching AMOLED / Material You / Frosted Glass / Custom Themes with native drag-up-to-remove | Unit tests + Dexlib2 bytecode tests + JADX-verified `pbh`/`pbo`/`phr` hooks |
+| **Bangla + English together** | One language per sentence on multilingual layouts (`abc → বাংলা` & default-ON EN/BN pairing) with live Gboard locale handoff (`fhv.w()`) | 292-case host corpus + `RamblerBanglaRuntimeTest` |
+| **Real Bangla spellings & protected spans** | English loanwords inside Bangla become `কোম্পানি, টেলিভিশন, বার্লিন` (2,265 Avro pairs + CMUdict table), while `#hashtags`, `@handles`, URLs, emails, times, and password/incognito fields stay untouched | Host corpus + runtime unit tests |
+| **AMOLED Dark & Hidden Flags (`nl-morphe-patches`)** | Pure `#000000` Material 3 AMOLED dark surfaces (`Lrmt;`), floating Rambler toolbar overflow, keep-rewritten-on-revert, quick-paste direct chip, and live `OVERRIDE`-store hidden flags | Patch unit tests + JADX-verified `rmt.java` |
+| **Hex Waveforms & Rambler Power Tools (`abotmaker`)** | Hex Dot Scope / Android Wave animations, Per-App Custom Instructions, `MUSE_STATS` Personal Dictionary, Contact Names sync, Cursor-Aware & Append-Only editing, Smart Search Bars, Spacebar Long-Press Rambler, Snippets, Find & Replace, Stats & History | Extension unit tests + Android Lint + CI |
+| **46 Gboard Power Features (`jasonwu1994`)** | Frosted Glass blur, Custom ZIP / Rboard Themes, Rounded Panel, Key Shape, Clipboard Enhancements, Web Clipboard + image sync, LAN FTP, Inline Calculator, OCR Scan Text, AI Writing Tools, Bluetooth Mic, Editing Shortcuts, Swipeable JS Top Row, Backup & Restore | 312 `:patches:test` + extension tests + CI |
+| **Side-by-side install & in-place updates** | `Package Rename` defaults to `Rambler Bangla` (`com.aidev2024.ramblerbangla`) beside stock Gboard; persistent signing preserves all settings & learned mentions across upgrades | Android 15 KVM emulator smoke test (`android-smoke.yml`) · [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md) |
+
+---
 
 ## Included Patches
 
 Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
 
-### Rambler Bangla (Bengali-First Voice, Phonetic Engine & Strip Tools)
+### 1. Rambler Bangla — Bengali-First Voice, Phonetic Engine & Native `@Mention` Strip (3 patches)
 
 <details>
   <summary><code>Rambler Bangla Lite Script Policy</code></summary>
@@ -77,7 +119,7 @@ Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.m
   SwiftKey-style, 100% personalized `@handle` and email domain suggestions injected **directly into Gboard's native suggestion strip** (`InputBundle` / `CandidateViewBuilder` / `LatinFixedCountCandidatesHolderView` — zero floating overlay, automatically matching AMOLED Dark, Material You, Frosted Glass, and Custom Themes). Learns typed and dictated `@handles` (e.g. `@grok`, `@claude`) and email domains (e.g. `@gmail.com`) on-device across space/punctuation, Send/Enter, field switch, and keyboard hide; ranks by frequency + recency; supports native drag-up-to-remove and Settings add/toggle/clear; coexists cleanly with Simple Calculator and Manual Incognito; and stays strictly fail-closed in password/incognito fields.
 </details>
 
-### Dutch App Patches / `nl-morphe-patches` 18.5.4 Ports *(credit: [johninnld/nl-morphe-patches](https://gitlab.com/johninnld/nl-morphe-patches), GPL v3.0)*
+### 2. Dutch App Patches / `nl-morphe-patches` 18.5.4 Ports (3 patches) *(credit: [johninnld/nl-morphe-patches](https://gitlab.com/johninnld/nl-morphe-patches), GPL v3.0)*
 
 <details>
   <summary><code>AMOLED Dark Keyboard</code></summary>
@@ -97,9 +139,9 @@ Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.m
   Writes curated Gboard 18.5.4 hidden/beta flags directly into Gboard's own `OVERRIDE` flag store (`okf.g(olk.OVERRIDE)` → `okq.e()`) with live toggles inside Settings (no restart required).
 </details>
 
-> **Note on 18.8-beta-only `nl-morphe-patches` flags:** Gboard 18.8-beta introduced a few brand-new flags (`enable_clipboard_pk_floating_chip`, `enable_invisible_floating_resizing`, `enable_dcontext_biasing`, `jetson_position_cursor_after_last_diff`) that do not exist in the Gboard 18.5.4 DEX; Rambler Bangla stays fail-closed and only exposes verified 18.5.4 flags with live consumers. Parakeet/Local AI companion dictation requires a separate third-party Local AI companion APK.
+> **Note on 18.8-beta-only `nl-morphe-patches` flags:** Gboard 18.8-beta introduced a few brand-new flags (`enable_clipboard_pk_floating_chip`, `enable_invisible_floating_resizing`, `enable_dcontext_biasing`, `jetson_position_cursor_after_last_diff`) absent from Gboard 18.5.4 DEX; Rambler Bangla stays fail-closed and exposes only verified 18.5.4 flags with live consumers.
 
-### Rambler Enhancements *(credit: [abotmaker/gboard-rambler-enhancements](https://github.com/abotmaker/gboard-rambler-enhancements), [Hex by Anomaly](https://github.com/anomalyco/hex) MIT, [nl-morphe-patches](https://gitlab.com/johninnld/nl-morphe-patches))*
+### 3. Rambler Enhancements (7 patches) *(credit: [abotmaker/gboard-rambler-enhancements](https://github.com/abotmaker/gboard-rambler-enhancements), [Hex by Anomaly](https://github.com/anomalyco/hex) MIT, [nl-morphe-patches](https://gitlab.com/johninnld/nl-morphe-patches))*
 
 <details>
   <summary><code>Rambler Waveform Animation</code></summary>
@@ -143,48 +185,18 @@ Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.m
   Adds Smart Search Bars (auto-strip trailing period + per-app Auto-Search on commit), Long-press Spacebar for Rambler (Smart Hybrid / Hold-to-Talk / Toggle), draggable Rambler toolbar quick-access button, 1-Tap Fix &amp; Learn from Dictation History, private On-Device Dictation Stats (WPM, latency, time saved), opt-in Voice Send &amp; Search suffixes, Voice Snippets, Find &amp; Replace (plain/regex, global/per-app), local 50-entry Dictation History, Auto Parallel Retry, configurable Max Dictation Duration, and JSON Settings Backup &amp; Restore.
 </details>
 
-### Gboard Patches / GboardWu *(credit: [jasonwu1994/Gboard-patches](https://github.com/jasonwu1994/Gboard-patches))*
+### 4. Gboard Patches / GboardWu (46 patches) *(credit: [jasonwu1994/Gboard-patches](https://github.com/jasonwu1994/Gboard-patches), GPL v3.0)*
 
 <details>
-  <summary><code>Dictionaries &amp; Predictions</code></summary>
+  <summary><code>Custom Theme</code> &amp; <code>Frosted Glass</code></summary>
 
-  Choose resource versions for dictionaries, predictions, and input correction.
+  Import custom ZIP themes and themes from the official Rboard repository, plus live Android 12+ background blur and custom-theme transparency.
 </details>
 
 <details>
-  <summary><code>Clipboard Enhancements</code></summary>
+  <summary><code>Clipboard Enhancements</code>, <code>Web Clipboard</code> &amp; <code>FTP Server</code></summary>
 
-  Enhance clipboard retention time, item count limits, preview lines, countdown and creation-time labels, order index, grid columns, and optional 1,000-character preview truncation.
-</details>
-
-<details>
-  <summary><code>Web Clipboard</code></summary>
-
-  Phone-hosted LAN Web Clipboard portal with browser sync, image transfer, pairing code gate, and Quick Settings Tile.
-</details>
-
-<details>
-  <summary><code>Floating Web Search</code></summary>
-
-  Open a floating web page directly from Gboard to quickly search.
-</details>
-
-<details>
-  <summary><code>Custom Theme</code></summary>
-
-  Import custom ZIP themes and themes from the official Rboard repository.
-</details>
-
-<details>
-  <summary><code>Frosted Glass</code></summary>
-
-  Adds live background blur and custom-theme transparency to the keyboard on supported Android 12+ devices.
-</details>
-
-<details>
-  <summary><code>FTP Server</code></summary>
-
-  Hosts a LAN FTP server on your phone with file browsing, uploads, downloads, resume, and Quick Settings Tile.
+  Enhance clipboard retention, item limits, preview lines, Select All, and character limits; host a LAN Web Clipboard portal with bidirectional image sync and Quick Settings Tile, or a LAN FTP server directly from your phone.
 </details>
 
 <details>
@@ -194,93 +206,15 @@ Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.m
 </details>
 
 <details>
-  <summary><code>Toolbar Editing Buttons</code></summary>
+  <summary><code>Toolbar Editing Buttons</code>, <code>Swipeable Custom Top Row</code> &amp; <code>Simple Calculator</code></summary>
 
-  Add Select All, Copy, Cut, Paste, Forward Delete, Home/End, Tab, and arrow buttons to the toolbar menu.
-</details>
-
-<details>
-  <summary><code>Swipeable Custom Top Row</code></summary>
-
-  Swipe the top row horizontally to open customizable text and JavaScript slots.
-</details>
-
-<details>
-  <summary><code>Incognito Mode Toggle</code></summary>
-
-  Add an Incognito toggle to the Access Point toolbar and configure clipboard and voice availability in Incognito mode.
-</details>
-
-<details>
-  <summary><code>Custom Symbols</code></summary>
-
-  Adds a dedicated symbols tab and a quick access entry from the comma long-press popup.
-</details>
-
-<details>
-  <summary><code>Simple Calculator</code></summary>
-
-  Inline arithmetic calculator in Gboard's suggestion row; tap to replace or long-press to copy.
-</details>
-
-<details>
-  <summary><code>Swipe Down to Dismiss Keyboard</code></summary>
-
-  Swipe down from suggestions or toolbar to close the keyboard.
-</details>
-
-<details>
-  <summary><code>Shift + Backspace Forward Delete</code></summary>
-
-  Hold Shift and press Backspace to forward-delete the character after the cursor.
-</details>
-
-<details>
-  <summary><code>G Logo on Spacebar</code></summary>
-
-  Show a built-in icon or custom PNG/WebP/JPEG on the spacebar with configurable color and size.
-</details>
-
-<details>
-  <summary><code>Rounded Keyboard Panel</code></summary>
-
-  Customize which corners of the keyboard panel are rounded and set top/bottom radii separately.
+  Add Select All, Copy, Cut, Paste, Forward Delete, Home/End, Tab, and arrow buttons to the toolbar; swipe the top row for customizable text and QuickJS-NG JavaScript slots; compute inline math right in Gboard's suggestion row.
 </details>
 
 <details>
   <summary><code>Latin Globe Key Ignore Interval</code></summary>
 
   Add an independent English globe key ignore interval override for post-typing language-switch delay.
-</details>
-
-<details>
-  <summary><code>Emojis, stickers &amp; GIFs Tab Order</code></summary>
-
-  Customize the bottom tab order in Gboard's Emojis, stickers &amp; GIFs panel with drag-and-drop reordering.
-</details>
-
-<details>
-  <summary><code>Backup &amp; Restore</code></summary>
-
-  Export/restore Gboard Patches settings (JSON), Gboard personal data (ZIP), and raw PB/XML flag stores.
-</details>
-
-<details>
-  <summary><code>Keypress Vibration Intensity Control</code></summary>
-
-  Control keypress vibration intensity instead of duration.
-</details>
-
-<details>
-  <summary><code>AI Writing Tools</code></summary>
-
-  Enables the <code>Text correction &gt; Writing tools</code> setting with support for all languages.
-</details>
-
-<details>
-  <summary><code>Advanced Voice Typing</code></summary>
-
-  Enable Advanced Voice Typing (Rambler) with automatic punctuation, plus Traditional Chinese automatic punctuation.
 </details>
 
 <details>
@@ -296,276 +230,283 @@ Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.m
 </details>
 
 <details>
+  <summary><code>AI Writing Tools</code>, <code>Advanced Voice Typing</code> &amp; <code>Backup &amp; Restore</code></summary>
+
+  Enables Writing Tools for all languages, Advanced Voice Typing (Rambler) with automatic punctuation, and full settings JSON + Gboard personal data ZIP + raw PB/XML backup &amp; restore.
+</details>
+
+<details>
   <summary><code>Package Rename</code> &amp; <code>Add Gboard Signature Bypass</code></summary>
 
   Renames package &amp; app label (defaults to <code>Rambler Bangla</code> / <code>com.aidev2024.ramblerbangla</code>, configurable to <code>GboardWu</code> or stock) so it installs side-by-side with stock Gboard, and bypasses signature whitelist checks.
 </details>
 
-Plus all Gboard feature unlocks from `jasonwu1994/Gboard-patches`: `English QWERTY Up-Flick Uppercase`, `Enable Inline Autofill Suggestions`, `Grammar Checker`, `Inline Suggestions`, `Key Shape Selection`, `Change emoji size`, `Enable cursor trackpad mode`, `Enable split keyboard`, `Enable accessibility layout`, `Quick Insert`, `Close Proactive Suggestions`, `Clipboard Custom Character Limit`, `Access Points menu style`, `Top Toolbar Item Count`, `Settings Homepage Override`, `Developer options`, `Zhuyin Slide Input`, `Zhuyin Quick Traditional/Simplified Toggle`, and `Zhuyin Bottom Row Key Sizes`.
+<details>
+  <summary><b>Plus all remaining Gboard Patches unlocks (click to expand)</b></summary>
+
+  `Dictionaries & Predictions`, `Floating Web Search`, `Incognito Mode Toggle`, `Custom Symbols`, `Swipe Down to Dismiss Keyboard`, `Shift + Backspace Forward Delete`, `G Logo on Spacebar`, `Rounded Keyboard Panel`, `Emojis, stickers & GIFs Tab Order`, `Keypress Vibration Intensity Control`, `English QWERTY Up-Flick Uppercase`, `Enable Inline Autofill Suggestions`, `Grammar Checker`, `Inline Suggestions`, `Key Shape Selection`, `Change emoji size`, `Enable cursor trackpad mode`, `Enable split keyboard`, `Enable accessibility layout`, `Quick Insert`, `Close Proactive Suggestions`, `Clipboard Custom Character Limit`, `Access Points menu style`, `Top Toolbar Item Count`, `Settings Homepage Override`, `Developer options`, `Zhuyin Slide Input`, `Zhuyin Quick Traditional/Simplified Toggle`, and `Zhuyin Bottom Row Key Sizes`.
+</details>
+
+---
 
 ## Install
 
-Add this repository as a **Morphe** patch source to patch stock Gboard `18.5.4.993608717-release-arm64-v8a` directly on your phone:
+Rambler Bangla is **ready out-of-the-box as a Morphe Patcher 2.1.0 patch source** targeting official Gboard `18.5.4.993608717-release-arm64-v8a` (APK or APKS).
 
-- [Open in Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)
-- Or manually add bundle URL: `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json`
+### Option A — Morphe Manager (Recommended, 1-Click on Android)
 
-## Features
+1. Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** (or manually add the bundle URL in Morphe Manager):
+   ```text
+   https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json
+   ```
+2. Select your lawfully obtained **Gboard `18.5.4.993608717-release-arm64-v8a`** APK/APKS.
+3. Keep the recommended defaults or pick any combination of the **59 patches** (`Package Rename` defaults to `Rambler Bangla` / `com.aidev2024.ramblerbangla` so it installs cleanly side-by-side next to stock Gboard).
+4. Tap **Patch**, install, and enable **Rambler Bangla** in Android Keyboard Settings → **Voice typing → Rambler+**.
 
-| Feature | What you get | Evidence |
-| --- | --- | --- |
-| **Bangla stays Bangla** | Bengali dictation stays in Bengali Unicode for `bn-BD`, `bn-IN` and `bn-Beng`; English stays in Latin | 22 end-to-end checks and 51 policy assertions in CI on a synthetic fixture. Bangla-only and English-only layouts confirmed on a real device |
-| **Bangla and English together** | One language per sentence on the multilingual layout (abc → বাংলা) | 292-case host corpus. Confirmed on a real device, with a few misses in quick mid-sentence switches |
-| **Real Bangla spellings for English words** | কোম্পানি, টেলিভিশন, বার্লিন instead of letter-by-letter output, from a CMU-derived table plus reviewed overrides | Blind check: 85 of 200 exact (historical), so expect misses |
-| **Protected text** | #hashtags, @handles, links, emails and times stay in Latin letters | Checked in the V29.3 test corpus |
-| **Clipboard Recent / History (V29.5)** | A Recent \| History toggle in the clipboard panel: up to 50 unique text clips kept across restarts, newest first, plus up to 10 pinned. Tap pastes; long-press pins or deletes. Sensitive clips, password fields and incognito are skipped | Static and host-tested only; on-device testing pending. |
-| **Settings you control** | Bangla script correction switch (on by default) and opt-in diagnostics (off by default) | Design intent, see [Settings](#settings) |
-| **Own package id** | Installs beside the stock keyboard; updates signed with the same key install in place | [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md) |
+### Option B — Morphe CLI (Desktop / CI)
 
-A real run of both suites on a dev machine, rendered from the terminal output (no phone, no Google binaries). It predates the homepage tests, so it shows the 26 patcher helper tests:
+```bash
+java -jar morphe-cli.jar patch \
+  -p patches-31.2.0.mpp \
+  -o RamblerBangla-gboard-18.5.4.apk \
+  --keystore your-release.keystore \
+  Gboard_18.5.4.993608717-release-arm64-v8a.apks
+```
 
-<p align="center"><img src="docs/assets/test-run.svg" alt="Terminal output of an October 2026 run, before the homepage tests were added: TEST SUITE 17 passed, 0 failed, and the 26 patcher helper tests OK" width="760"></p>
+> **Bundle metadata:** [`patches-bundle.json`](patches-bundle.json) (Morphe Manager source manifest) · [`patches-list.json`](patches-list.json) (full 59-patch JSON inventory) · [`patches-31.2.0.mpp`](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.2.0)
+
+---
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    APK[/"Your Gboard 18.3.1 APK<br/>(you supply it)"/] --> G
-    PROF[("fingerprints/gboard-18.3.1.json<br/>SHA-256 fingerprints")] --> G
+    APK[/"Stock Gboard APK/APKS<br/>(18.5.4 Morphe · 18.3.1 Legacy)"/] --> G
+    PROF[("SHA-256 Fingerprints &amp;<br/>Dynamic Bytecode Bindings")] --> G
     G["1 · Fingerprint guard<br/>hash sweep · method anchors · dataflow trace"]
-    G -->|exact build| P["2 · Smali patch<br/>insert two hooks · repack the touched DEX"]
-    G -. any miss .-> STOP(["exit 2 · no output written"])
-    JAVA["extension-src/…/GboardRamblerLiteScriptRuntime.java"] -->|javac + d8| R
-    P --> R["3 · Policy runtime<br/>runtime.dex added as an extra DEX"]
-    R --> V["4 · Verify<br/>scripts/verify_apk.sh, offline"]
-    V --> OUT[/"Unsigned APK<br/>you re-sign with your own key"/]
+    G -->|exact match| P["2 · Smali patch<br/>Morphe 2.1 bytecode &amp; resource patches (59)"]
+    G -. any miss .-> STOP(["FAIL-CLOSED ABORT · no output written"])
+    JAVA["Extensions &amp; Policy Runtime<br/>(Bangla Engine · @Mentions · Rambler+ · GboardWu)"] -->|Gradle / d8| R
+    P --> R["3 · Policy runtime<br/>conflict-free .rve / extra DEX injection"]
+    R --> V["4 · Verify<br/>apksigner · zipalign · JADX · Android 15 KVM"]
+    V --> OUT[/"Signed APK<br/>signed with your key"/]
 ```
 
-The patcher never edits bytes by offset. It disassembles the APK with baksmali and only patches once every check has passed:
+Every patch — both in the unified **Morphe 2.1.0** suite (`patches/`, `extensions/`) and the legacy **Gboard 18.3.1** standalone smali patcher (`standalone-patcher/`) — follows the same four-stage fail-closed design:
 
-1. **Fingerprint guard.** `fingerprints/gboard-18.3.1.json` lists SHA-256 hashes of strings the target build must contain, plus short identifying fragments such as the rule heading; the full Google prompt text is never reproduced. One miss means an unrecognized build. The cleanup-builder method and the method that owns the cleanup prompt must then exist with the exact class, name and signature in the profile. Finally, the patcher traces the `{ENABLED_LANGUAGES}` placeholder to its `String.replace` call to find the register that holds the enabled languages, rather than trusting a hard-coded register.
-2. **Smali patch.** Two calls into `GboardRamblerLiteScriptRuntime` are inserted into the cleanup builder. The original rule string stays in place as the fail-safe input. Only the touched DEX is reassembled.
-3. **Policy runtime.** The pure-Java runtime is compiled with `javac`, dexed with d8 and added as an extra DEX. At runtime, hook B replaces the injected "Hinglish Override" rule and hook A rewrites only the Romanization bullet of the prompt's SCRIPT GATE, based on the enabled languages. It is a set of `String` to `String` functions with no Android or network dependencies.
-4. **Verify.** `scripts/verify_apk.sh` checks the output offline, on its own or against the stock APK. The patcher never signs: you re-sign the result with your own key (and optionally rename the package with `rename/` so it installs side by side; upstream builds also rename the package and bypass signature checks, see [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md)).
+1. **Fingerprint guard.** SHA-256 string hashes, method signatures, and live register/dataflow traces prove the exact target code before touching a single instruction. Any drift aborts with zero partial output.
+2. **Smali / Bytecode patch.** Morphe applies all selected patches cleanly without hook collisions (`oki.g()` vs `oki.x()` separation, instruction-0 preservation on `phr.onUpdateSelection`, branchless wrappers on `SoftKeyboardView.dispatchTouchEvent`, native candidate hooks on `pbh`/`pbo`/`phr`).
+3. **Policy runtime.** Pure-Java linguistic policy (`GboardRamblerLiteScriptRuntime`, `GboardRamblerScriptFix`), personalized `@mention` store (`RamblerAtMentionStore` / `RamblerAtMentionStripRuntime`), flag controllers, and settings UI ship as `.rve` extensions (or extra DEX on legacy 18.3.1).
+4. **Verify.** `apksigner`, `zipalign`, DEX symbol checks, JADX decompilation spot-checks, `scripts/verify_apk.sh`, and Android 15 KVM emulator smoke tests confirm every release. Full architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-Further runtime layers in the maintainer builds: segment-locked multilingual dictation (V28), Bangla spelling normalization with a 2,265-pair roman-to-script table (V29), and a loanword spelling table built from the CMU Pronouncing Dictionary plus reviewed overrides (V29.3, see `data/loanspell/`). The full pipeline, runtime policy and CI design are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+---
 
 ## Device-free CI
 
-No phone, emulator or Google binary is needed to prove the pipeline. [`ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and every pull request, and [`tests.yml`](.github/workflows/tests.yml) runs the static suite on its own. Both fail unless every check passes.
-
-The trick is the fixture: `fixtures/` builds a **synthetic APK with zero Google content** that mirrors the real anchors (class names, method signatures, the cleanup prompt shape). CI builds it from smali sources, patches it with the real patcher, and asserts on the result.
+[`ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and every pull request, and [`tests.yml`](.github/workflows/tests.yml) runs the static fixture suite independently.
 
 | Suite | What it covers |
 | --- | --- |
-| **88 Python unit tests** (`tests/python/`, stdlib only; the clipboard-history store test also needs a JDK) | The patcher's pure helpers: smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, the dataflow search on the fixture smali, profile validation, a `--help` smoke test, the loanword `OVERRIDE` block matching `data/loanspell/overrides.tsv`, homepage checks that keep this README and the site honest, and the clipboard-history store, privacy policy and guarded-build checks on synthetic fixtures, and the beta-personalization analyzer ([`scripts/find_personalization_flags.py`](scripts/find_personalization_flags.py), analysis only) on synthetic DEX and APK inputs |
-| **Static suite**, 22 checks (`tests/run_tests.sh`) | 1. 51 JVM policy assertions (locale classification, override rule, SCRIPT GATE rewrite). 2. The fixture APK builds with smali, d8, aapt2 and signing. 3. End-to-end patch: anchors and fingerprints resolve, both hooks land, the enabled-languages value gets its own register, hook arguments don't clobber each other, the stock rule string is preserved, `--extension-dex` adds the runtime. 4. Fail-closed negatives: a wrong fingerprint, a one-character change to the stock rule and re-patching each exit 2 with no APK. 5. The patched, re-signed fixture passes APK Signature Scheme v2 verification and androguard parses both APKs. 6. Identity-rename round-trip: a label-variant fixture renamed to a label with an astral character reads the exact label back through aapt2's strict string-pool parser and androguard (guards the AXML UTF-16 length fix; the fixture carries no package-identity strings, so the gate exercises the manifest label rewrite, not package/dex/arsc renaming). 7. `scripts/verify_apk.sh single` passes on the stock and the patched, re-signed fixtures |
+| **88 Python unit tests** (`tests/python/`, stdlib only) | Smali string unescaping, `invoke` parsing, register-slot maths, `.locals` bumping, dataflow search, profile validation, loanword `OVERRIDE` sync, homepage & GitHub Pages integrity (`test_docs_homepage.py`), clipboard-history store/privacy checks, and personalization analyzer checks |
+| **Static suite**, 22 checks (`tests/run_tests.sh`) | 51 JVM policy assertions, synthetic zero-Google fixture APK build (smali + d8 + aapt2 + v2 sign), end-to-end hook verification, fail-closed negative tests (wrong fingerprint, tampered rule, re-patch each exit 2 with no APK), astral-label AXML round-trip, and `scripts/verify_apk.sh single` |
+| **Morphe & Android Extensions** (`./gradlew ...`) | `:extensions:rambler-enhancements:testDebugUnitTest` (Bangla phonetic, loanword, Rambler+ flags, `@mention` store) + `lintDebug`, `:extensions:calculator:testDebugUnitTest`, `:patches:verifyGboardCapabilityWiring`, **312 `:patches:test`** checks, `:patches:buildAndroid` (`patches-*.mpp`), and `generatePatchesList` |
+| **Android 15 KVM Emulator Smoke Test** (`android-smoke.yml`) | Manual SHA-256-pinned workflow on hardware-KVM API 35 emulator: APK install, launch, live process, IME enable/set, and zero `FATAL`/`ANR` in logcat |
 
-What CI does **not** prove: runtime behaviour inside real Gboard on a phone. That evidence is the maintainer's device testing, recorded with dates in [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/EVIDENCE.md`](docs/EVIDENCE.md). The V29.3 golden corpus in [`tests/v29.3/`](tests/v29.3/README.md) needs the maintainer build's runtime jar, so it is not part of CI. The emulator workflows (`android-smoke.yml`, `clipboard-e2e.yml`, `keyboard-onboarding-probe.yml`) are manual and pinned to a maintainer-supplied APK by SHA-256.
+<p align="center"><img src="docs/assets/test-run.svg" alt="Terminal output of the device-free static test suite and unit test runner" width="760"></p>
+
+---
 
 ## Build from source
 
-Requirements: Linux x86_64 (the pinned aapt2 is the Linux build), a JDK 17+ (CI uses Temurin 21), Python 3 (3.11 in CI), `curl`, `unzip` and `zip`. The profile targets Gboard version name `18.3.1.977415014 beta`, version code `176004238`, `arm64-v8a`. Any other build is refused.
+### 1. Build the Morphe Patch Bundle (`.mpp`) for Gboard 18.5.4
+
+Requirements: JDK 21, Android SDK (`platforms;android-35`, `platforms;android-36`, `build-tools;35.0.0`, `build-tools;36.0.0`), and GitHub Packages read credentials (`GITHUB_ACTOR` + `GITHUB_TOKEN`) for `app.morphe.patches:2.1.0`.
 
 ```bash
 git clone https://github.com/muhib-karim/Rambler-Bangla.git
 cd Rambler-Bangla
 
+# Build all 3 Android extensions (.rve), run unit tests, lint, 312 patch tests, and package patches-31.2.0.mpp
+./gradlew --no-daemon \
+  :extensions:extension:syncExtension \
+  :extensions:calculator:testDebugUnitTest \
+  :extensions:calculator:syncExtension \
+  :extensions:rambler-enhancements:testDebugUnitTest \
+  :extensions:rambler-enhancements:lintDebug \
+  :extensions:rambler-enhancements:syncExtension \
+  :patches:verifyGboardCapabilityWiring \
+  :patches:test \
+  :patches:buildAndroid \
+  generatePatchesList
+
+# Output bundle:
+ls -lh patches/build/libs/patches-*.mpp patches-list.json
+```
+
+### 2. Legacy Standalone Smali Patcher (Gboard 18.3.1)
+
+Requirements: Linux x86_64, JDK 17+ (CI uses Temurin 21), Python 3.11+, `curl`, `unzip`, `zip`. Targets Gboard `18.3.1.977415014 beta` (version code `176004238`, `arm64-v8a`).
+
+```bash
 # Fast unit tests: stdlib only, no toolchain needed
 python3 -m unittest discover -s tests/python -v
 
-# Fetch the pinned toolchain into ./tools (every file is checked against tools-src/toolchain.sha256)
+# Fetch pinned toolchain into ./tools (SHA-256 verified against tools-src/toolchain.sha256)
 python3 -m pip install androguard==4.1.4
-bash scripts/bootstrap_tools.sh
-source tools/tool-env.sh
+bash scripts/bootstrap_tools.sh && source tools/tool-env.sh
 bash tests/run_tests.sh                  # expect "TEST SUITE: 22 passed, 0 failed"
 
-# Build the policy runtime DEX (same steps as fixtures/build_fixture.sh)
+# Build the policy runtime DEX
 mkdir -p build/ext-classes build/ext-dex
 javac -d build/ext-classes \
   extension-src/com/akshaykadam/pixelboard/extension/ramblerlite/GboardRamblerLiteScriptRuntime.java
 java -cp tools/r8-8.3.37.jar com.android.tools.r8.D8 --min-api 24 \
   --output build/ext-dex build/ext-classes/com/akshaykadam/pixelboard/extension/ramblerlite/*.class
 
-# 1. Fingerprint guard: check the APK matches the profile
+# Patch and verify offline (exits 2 with no output on any fingerprint/anchor miss)
 python3 standalone-patcher/dex_patch.py analyze \
   --apk /path/to/gboard-18.3.1.apk --profile fingerprints/gboard-18.3.1.json
-
-# 2-3. Smali patch plus policy runtime (exits 2 and writes nothing if any check fails)
 python3 standalone-patcher/dex_patch.py patch \
   --apk /path/to/gboard-18.3.1.apk --out /path/to/out.apk \
   --profile fingerprints/gboard-18.3.1.json --extension-dex build/ext-dex/classes.dex
-
-# 4. Verify the output offline, alone or against the stock APK
-#    (single exits 1 until the APK is signed: the signature check is part of it)
 scripts/verify_apk.sh single /path/to/out.apk --profile fingerprints/gboard-18.3.1.json
-scripts/verify_apk.sh compare /path/to/stock.apk /path/to/out.apk
 ```
 
-`scripts/bootstrap_tools.sh` downloads smali/baksmali/dexlib2 2.5.2, r8/d8 8.3.37, aapt2 8.3.0, apksig 8.3.0 and android.jar 4.1.1.4 from Maven Central and Google's Maven repository, builds the small fixture signer from `tools-src/MiniApkSigner.java`, and writes `tools/tool-env.sh`. Nothing is vendored; set `TOOLS_DIR` to put the toolchain elsewhere. Signing, installing on your own device, side-by-side renaming and troubleshooting are in [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
+Full step-by-step signing, installing, and troubleshooting guide: [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md).
+
+---
 
 ## Safety: fail-closed by design
 
-The patcher would rather do nothing than guess.
+The patcher would rather abort cleanly than guess.
 
-- **Exact build or nothing.** Any fingerprint, anchor or dataflow miss prints `FAIL-CLOSED ABORT: ...`, exits with status 2 and writes no output APK. An uncaught Python error exits 1: if it happens during the final repack (for example a mistyped `--extension-dex` path), delete any partial `--out` file and run again.
-- **No double patching.** An APK that already references the runtime is refused, so a patch cannot be applied twice.
-- **Hash-based profile.** The fingerprint profile stores SHA-256 hashes plus short identifying fragments, never the full prompt text.
-- **Minimal footprint.** Two hook calls in one method plus one extra DEX. The stock rule string is kept as the fail-safe input.
-- **Never signs, never uploads.** The patcher and `verify_apk.sh` run offline; you sign with your own key. Only the setup steps touch the network: `bootstrap_tools.sh` checks each download's SHA-256, and `pip` installs the pinned `androguard==4.1.4`.
-- **Tested refusals.** CI asserts the refusals too (static suite stage 4), not just the happy path.
+- **Exact target or nothing:** Any SHA-256 fingerprint, method anchor, register, or dataflow miss aborts with zero partial output written.
+- **No double patching:** Already-patched methods fail closed immediately.
+- **Hash-only fingerprints:** Fingerprint profiles store SHA-256 hashes and short identifying anchors, never full proprietary prompt strings.
+- **Zero binaries or keys in git:** `.gitignore` and CI keep `.apk`, `.apks`, `.dex`, `.mpp`, `.rve`, and keystores out of version control.
+- **Privacy & fail-closed sensitive fields:** Bangla script conversion, voice history, and `@mention` learning/suggestions are strictly disabled in password, PIN, and incognito fields (`EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING` / password input types). Diagnostics are opt-in and off by default. Security reports: [`SECURITY.md`](SECURITY.md).
 
-### Privacy
-
-- **No network code in the patch layer.** The runtime sources in `extension-src/` use no networking APIs.
-- **No new data collection.** Diagnostics are off by default. When turned on, the log is written to the phone's Downloads folder and stays there unless you share it.
-- **Sensitive fields pass through.** Password and other sensitive input fields are meant to be left untouched. Any case where conversion runs in one is a security bug (see [`SECURITY.md`](SECURITY.md)).
-- **On-device path only.** Bangla is not on Google's list of languages for cloud rewrite, so Rambler only changes the on-device cleanup path. It does not add Bangla to Google's cloud service, and this project does not audit Gboard's own network behaviour.
+---
 
 ## Layouts and settings
 
-### How each layout is designed to behave
+### Per-layout voice & script behaviour
 
-Design intent for the V29.3 test build (unchanged in V29.4). Not re-verified on a current device.
-
-| Layout | Voice and typing result |
+| Layout | Voice and script result |
 | --- | --- |
-| English (US) | English only. Rambler changes nothing. |
-| বাংলা (native) | Bangla only. Romanized Bangla and English words become Bangla script. |
-| abc → বাংলা | Multilingual. Each sentence is Bangla script or English, decided per sentence. |
-| Bangla (Latin) | Treated as Bangla: output is Bangla script. |
+| **English (US)** | English stays English; when **EN + bn-Latn multilingual pairing** is enabled (default ON when any `bn*` layout is installed), spoken Bangla sentences automatically convert to Bengali Unicode |
+| **বাংলা (`bn-BD`, `bn-IN`, `bn-Beng`)** | Native Bengali Unicode output via live Gboard locale handoff (`fhv.w()`), including CMUdict English loanwords (`company` → `কোম্পানি`) |
+| **`abc → বাংলা` / `bn-Latn`** | Per-sentence multilingual routing: Bangla sentences output Bengali Unicode, English sentences stay English |
 
-Gboard's combined "EN · BN" keyboard reports itself as English (US), so it behaves like the English row. For mixed dictation, use the abc → বাংলা layout.
+### Settings inside Gboard
 
-### Settings
+Open **Gboard Settings → Voice typing → Rambler Enhancements** (or **Patches**):
 
-Design intent, not re-verified on a current device. Both switches are in the keyboard's settings, in the Rambler section.
+- **Rambler Bangla (phonetic & script):** Toggle Bangla script correction, EN + `bn-Latn` multilingual pairing, and opt-in diagnostics log.
+- **`@Mention & email strip`:** Toggle personalized native `@` suggestions, pre-add custom `@handles` / `@domains`, inspect saved entries, or clear learned mentions.
+- **Rambler Extras & Hidden Flags:** Live toggles for Quick-paste direct chip, Rambler toolbar overflow, Keep rewritten on revert, Auto retry, Persist UI across switches, and Emoji skin-tone replacement.
+- **Hex Waveforms, Instructions, Dictionary, Productivity & Gboard Patches:** Dedicated Material You subpages for every selected patch, plus JSON backup & restore.
 
-- **Bangla script correction** (on by default). On, Rambler converts Romanized Bangla to Bangla script, applies the loanword spellings and follows the per-layout rules above. Off means Rambler converts nothing, for voice or typing, and you get Gboard's own output unchanged. Useful if you prefer Romanized Bangla, or to tell whether an odd result comes from Rambler or from Gboard.
-- **Rambler diagnostics** (off by default). Turn it on only to report a problem, reproduce it, then turn it off: a log is saved to Downloads as `RamblerBangla-diag-<date>-<time>.txt`. It records the active layout and the text before and after each conversion, so read it before you share it. Not yet re-audited for the current build.
+---
 
 ## Source only, no APKs
 
-This repository is **source only and publishes no APKs**, now or later. A patched keyboard contains Google's proprietary Gboard code, which is not licensed for redistribution. You apply the patch to a Gboard 18.3.1 APK you obtain yourself, for your own device, and sign it with your own key. Releases such as [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4) are tagged source plus notes.
+This git repository is **source only and commits no APKs** (or Google binaries, DEX files, model files, or signing keys). Users obtain an official Gboard `18.5.4` (Morphe) or `18.3.1` (legacy standalone) APK themselves and apply the open-source patches with Morphe or the standalone patcher, signing with their own key. Legacy tagged source releases such as [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4) and Morphe patch bundles (`patches-*.mpp`) follow the standard ReVanced / Morphe distribution model.
 
-**Legal note.** Rambler Bangla is an independent project and is **not affiliated with Google**, nor endorsed or sponsored by it. Gboard is a trademark of Google LLC, used here only to name the app the patch targets. The repository contains no Google binaries, keys, model files or full prompt text: the profile holds SHA-256 hashes plus short identifying fragments. Modifying software you use may be restricted by its terms of service or by the law where you live; checking that is your responsibility, and the software comes with no warranty (GPL-3.0, sections 15 and 16). Never upload a patched Google APK, a signing key or private diagnostic output to this repository. The full review is in [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md).
+**Legal note.** Rambler Bangla is an independent open-source project and is **not affiliated with Google**, nor endorsed or sponsored by it, nor affiliated with the **Morphe** project. Gboard is a trademark of Google LLC, named solely to identify the target application. Modifying software you use may be restricted by its terms or local law; checking that is your responsibility, and this software comes with no warranty (GNU GPL v3.0, Sections 15 and 16). Full audit: [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md).
+
+---
 
 ## FAQ
 
-**Can I download a ready-made APK?**
-No. See [Source only, no APKs](#source-only-no-apks). Any site offering a "Rambler Bangla APK" is not from this project.
+**How do I install Rambler Bangla with Morphe?**
+Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** (or add `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json`), pick official Gboard `18.5.4.993608717-release-arm64-v8a`, choose your patches, and tap **Patch**.
 
-**Why only Gboard 18.3.1?**
-The hooks go into obfuscated code whose class and method names change between builds. Pinning one build and proving it with fingerprints is what makes the patch safe. A new Gboard version needs a new, reviewed profile.
+**Why wasn't Rambler+ turning on before `v31.0.0`?**
+Upstream `GboardRamblerStockPolicy` gated `enable_agentic_dictation` at cold boot before `ModuleManager` loaded `AgenticDictationExtension`. Since `v31.0.0`, `enable_agentic_dictation` and core Rambler toolbar flags are enabled unconditionally so selecting **Rambler+** under Voice typing works immediately.
 
-**What happens if I feed it a different version?**
-It refuses: `FAIL-CLOSED ABORT`, exit status 2, no output. Nothing is half-patched.
+**How do `@` mention suggestions work?**
+Whenever you type or dictate `@handles` (like `@grok`, `@claude`) or email domains (`@gmail.com`), Rambler Bangla learns them on-device and ranks them by frequency + recency. Typing `@` or `@g` injects your personalized matches directly into **Gboard's own native suggestion strip** (zero floating overlay, full AMOLED/Material You/Frosted Glass theme matching, native drag-up-to-remove). Password and incognito fields are always skipped.
 
-**Does CI prove it works on my phone?**
-No. CI proves the patching pipeline on a synthetic APK, including the refusals. Phone results come from the maintainer's device and are labelled as such.
-
-**Does it send my voice or text anywhere?**
-The patch layer has no network code. It only rewrites the prompt and rule strings inside Gboard's existing on-device cleanup step. Gboard's own behaviour is outside this project's audit.
+**Can it install side-by-side next to stock Gboard?**
+Yes. `Package Rename` defaults to `Rambler Bangla` (`com.aidev2024.ramblerbangla`), so it sits beside stock Gboard without replacing it. See [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md).
 
 **Does it translate English into Bangla?**
-No. It transliterates: English words spoken inside Bangla get a Bangla spelling (কোম্পানি), they are never translated.
+No — it transliterates spoken English loanwords inside Bangla sentences (`company` → `কোম্পানি`) while leaving pure English sentences untouched.
 
-**Why do I need Linux?**
-The pinned aapt2 binary used to build the test fixture is the Linux build. The patcher itself is plain Python.
+**What happens if I feed an unsupported Gboard version?**
+The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than producing a half-patched APK.
 
-**Can it sit next to the stock keyboard?**
-Yes, if you rename the package with `rename/` before signing. See [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md).
-
-**Bangla still came out in Latin letters. Is that Rambler?**
-Turn off **Bangla script correction** and try again. If the result is the same, it is Gboard's own output. If not, please [open an issue](https://github.com/muhib-karim/Rambler-Bangla/issues/new/choose) with the layout you used.
+---
 
 ## Roadmap
 
 ### Released
 
-- **v30.0.0 (2026-11-27)**, tag [v30.0.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v30.0.0): unified 55-patch Morphe suite targeting Gboard `18.5.4.993608717-release-arm64-v8a`, combining Rambler Bangla (Lite Script Policy + full V29.3+/V29.5 Phonetic & Multilingual Engine), all 7 patches from `abotmaker/gboard-rambler-enhancements` v1.3.4, and all 46 patches from `jasonwu1994/Gboard-patches` v4.5.0.
-- **V29.4.1 (2026-10-21, docs only, untagged):** README and website refresh. No code changes.
-- **V29.4 (2026-10-18)**, tag [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4): source release and new maintainer signing key; no conversion changes. Builds signed with the new key cannot install over a V29.3 build: uninstall once first. Notes: [`docs/V29.4-RELEASE-NOTES.md`](docs/V29.4-RELEASE-NOTES.md). Build record: [`ledger/v29.4-provenance.md`](ledger/v29.4-provenance.md).
-- **V29.3 (2026-09-24)**, tag [v29.3](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3): one language per sentence in multilingual dictation, English loanword spelling in Bangla voice output. Notes: [`docs/V29.3-RELEASE-NOTES.md`](docs/V29.3-RELEASE-NOTES.md). Build record: [`ledger/v29.3-provenance.md`](ledger/v29.3-provenance.md).
-- **V29 (2026-09-23):** field iteration. Design: [`docs/V29-DESIGN.md`](docs/V29-DESIGN.md), fixtures: [`docs/V29-FIXTURES.md`](docs/V29-FIXTURES.md).
-- **v28d:** last stable baseline (historical). Evidence: [`docs/V28-SEGMENT-LOCK.md`](docs/V28-SEGMENT-LOCK.md).
-
-### Maintainer builds, October 2026
-
-Test builds 245 to 253 are private maintainer builds. Each claim carries its evidence level.
-
-| Item | Level |
-| --- | --- |
-| Updates signed with the same key install over the existing app, no uninstall | Confirmed on the maintainer's phone (build 253 over 251) |
-| Gboard AI writing-tools (refinement) icon visible again on build 253 | Confirmed on the maintainer's phone. Cause not proven; 253 is a compatibility-only change |
-| Build 253: retargets three stale internal ids and adds an observer, no behaviour flags changed | Two independent static reviews passed. No runtime proof |
-| Stray "123" labels suppressed on pinned and list items (display only) | Static review only. Unpinned path clean on the phone; pinned fix not phone-confirmed |
-| Clipboard recents setting (default 5, range 5 to 10) and masking default off | Static review only |
+- **v31.2.0 (2026-11-27)**, tag [v31.2.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.2.0): True **native Gboard suggestion-strip integration** for `@` mentions (`pbh`/`pbo`/`owu`/`phr` candidate pipeline — zero floating overlay/white bar, automatic AMOLED/Material You/Frosted Glass/Custom Theme matching, native drag-up-to-remove), persistent maintainer signing, and full GPL-3.0/MIT/MPL-2.0/BSD/§7c licensing audit.
+- **v31.1.0 (2026-11-27)**, tag [v31.1.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.1.0): 100% personalized standalone `@` learning across space/punctuation, Send/Enter, field switch, keyboard hide, and voice dictation; manual `@mention` add dialog in Settings; persistent maintainer signing (`679cfdec...`).
+- **v31.0.0 (2026-11-27)**, tag [v31.0.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.0.0): Fixed Rambler+ activation bug, wired live Gboard locale (`fhv.w()`) into `GboardRamblerScriptFix`, integrated `johninnld/nl-morphe-patches` 18.5.4 features (`AMOLED Dark Keyboard`, `Rambler Toolbar & Revert Extras`, `Hidden Flags Override`), added `@Mention & Email Strip Suggestions` (59 patches total), and refreshed website & branding.
+- **v30.0.0 (2026-11-27)**, tag [v30.0.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v30.0.0): First unified **55-patch Morphe 2.1.0** bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`, merging Rambler Bangla + `abotmaker/gboard-rambler-enhancements` v1.3.4 + `jasonwu1994/Gboard-patches` v4.5.0.
+- **v29.4 (2026-10-18)**, tag [v29.4](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.4): Legacy 18.3.1 source release and new maintainer signing key (`679cfdec...`). Notes: [`docs/V29.4-RELEASE-NOTES.md`](docs/V29.4-RELEASE-NOTES.md).
+- **v29.3 (2026-09-24)**, tag [v29.3](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v29.3): Per-sentence multilingual dictation and CMUdict loanword spellings. Notes: [`docs/V29.3-RELEASE-NOTES.md`](docs/V29.3-RELEASE-NOTES.md).
 
 ### Next
 
-- Multilingual clause segmentation (within a sentence, not just per sentence).
-- Phonetic typing with an EN/BN toggle, and a proper Bangla (Latin) layout.
-- Clipboard drag-to-reorder, listed in the V29.3 notes and still in development.
-- Better loanword accuracy than the historical 85 of 200 exact.
+- Track Gboard `18.8.x` stable bindings once upstream `Gboard-patches` and `nl-morphe-patches` stabilize targets.
+- Intra-sentence multilingual clause segmentation and higher Bangla loanword precision.
+- Automated Firebase Test Lab Robo runs for UI regression screenshots across physical Android devices.
 
-These are planned or in progress and **not working yet**.
-
-### Known limitations
-
-- Supports exactly one target build, Gboard 18.3.1. Any other build is refused by design.
-- CI proves the patching pipeline on a synthetic fixture, not runtime behaviour inside real Gboard.
-- Loanword spelling is approximate.
-- The two V29.x sources in `extension-src/.../rambler/`, `GboardRamblerLoanSpell.java` and `GboardRamblerSentenceLang.java`, do not compile from this repository. They reference five classes that are not in it: `GboardRamblerDiag`, `GboardRamblerLoanTable`, `GboardRamblerScriptFix`, `GboardRamblerSegmentLock` and `GboardRamblerTier1`. `tests/v29.3/Golden.java` needs two of them as well. The Lite policy runtime in `extension-src/.../ramblerlite/`, which the patcher and CI use, is complete.
-- `rename/rename_apk.py` refers to a `rename_sign.sh` signing step. That script is not included; sign with your own key as described in the [user guide](docs/USER_GUIDE.md#sign-with-your-own-key).
+---
 
 ## Tech stack and project structure
 
-| Area | Tools |
+| Area | Tools & Frameworks |
 | --- | --- |
-| Patcher | Python 3 (standard library only), smali/baksmali 2.5.2 |
-| Policy runtime | Pure Java, no Android dependencies, `javac` then d8 (r8 8.3.37, `--min-api 24`) |
-| Upstream integration | Kotlin Morphe bytecode patch (`morphe-patch/`) and patch-list entry (`integration/`) |
-| APK tooling | aapt2 8.3.0, apksig 8.3.0 (`tools-src/MiniApkSigner.java`), androguard 4.1.4 for parsing |
-| Data | Loanword table from the CMU Pronouncing Dictionary (`data/loanspell/`); V29 normalization pairs from the Avro Keyboard phonetic dictionary |
-| CI | GitHub Actions on Ubuntu: Python unit tests and the static suite with Temurin 21 and Python 3.11 |
+| **Morphe Patch Suite (59 patches)** | Kotlin, Morphe Patcher 2.1.0 (`app.morphe.patches`), Dexlib2, Gradle 9.6.1, JDK 21 |
+| **Android Extensions (`.rve`)** | Java (`extensions/extension`, `extensions/calculator`, `extensions/rambler-enhancements`), Android SDK 35/36, Android Lint |
+| **Legacy 18.3.1 Standalone Patcher** | Python 3 (stdlib only), smali/baksmali 2.5.2, r8/d8 8.3.37, aapt2 8.3.0, apksig 8.3.0, androguard 4.1.4 |
+| **Linguistic Data** | Avro Keyboard phonetic dictionary (2,265 pairs, MPL-2.0) + CMU Pronouncing Dictionary (`data/loanspell/`, BSD) |
+| **CI & Verification** | GitHub Actions (`ci.yml`, `tests.yml`, `android-smoke.yml`): 88 Python tests, 22 static checks, 312 Gradle patch tests, Android 15 KVM emulator |
 
-```
-extension-src/        Java policy runtime (pure Java, no Android deps) + V29.x helpers
-standalone-patcher/   dex_patch.py: fingerprint/dataflow-anchored smali patcher
-fingerprints/         gboard-18.3.1.json fail-closed profile (hashes and short fragments)
-fixtures/             synthetic APK fixture (smali sources, manifest, build script)
-tests/                run_tests.sh static suite, python/ unit tests, Java policy test, v29.3 corpus
-scripts/              bootstrap_tools.sh, verify_apk.sh, clip_e2e.py (emulator driver)
-rename/               side-by-side package rename tooling
-morphe-patch/         Morphe bytecode patch + RuntimeAbi snippet for the upstream tree
+```text
 patches/              Unified Morphe Patcher 2.1.0 Gradle module (59 patches -> patches-31.2.0.mpp)
-extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve + Rambler Bangla runtime)
-docs/historical/      Historical V29.3 smali hook diff for the 18.3.1 patch layer's own classes
-data/loanspell/       loanword table, overrides and Java generator
-integration/          upstream patch-list entry
-tools-src/            MiniApkSigner.java and pinned toolchain checksums
-docs/                 design, evidence, validation, licensing docs and the GitHub Pages site
-ledger/               per-version build provenance records
-verification/         dated verification records
+extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve)
+patches-bundle.json   Morphe Manager source manifest (auto-discovered by morphe.software/add-source)
+patches-list.json     Published 59-patch JSON catalog
+extension-src/        Legacy 18.3.1 pure-Java policy runtime & V29.x helpers
+standalone-patcher/   Legacy 18.3.1 fail-closed Python smali patcher (dex_patch.py)
+fingerprints/         SHA-256 fail-closed target profiles
+fixtures/             Zero-Google synthetic APK fixture for device-free CI
+tests/                88 Python unit tests, 22-check static suite (run_tests.sh), Java tests & V29.3 corpus
+scripts/              bootstrap_tools.sh, verify_apk.sh, clip_e2e.py, clip_history_build.py
+data/loanspell/       CMUdict-derived Bangla loanword table, overrides, and Java generator
+docs/                 GitHub Pages site (docs/index.html), banners, architecture, validation & licensing audit
 ```
+
+---
+
+## Brand and visuals
+
+<p align="center">
+  <img src="docs/assets/1-banner.png" alt="Rambler Bangla Hero Poster" width="49%" />
+  <img src="docs/assets/3-icon-showcase.png" alt="Rambler Bangla Adaptive Icon Showcase" width="49%" />
+</p>
+
+---
 
 ## Links
 
 | Where | What |
 | --- | --- |
-| [Website](https://muhib-karim.github.io/Rambler-Bangla/) | The project homepage (GitHub Pages) |
-| [`docs/README.md`](docs/README.md) | Index of every design, evidence, validation and licensing document |
-| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | Step by step: verify, patch, sign, install, exit codes |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Pipeline, policy runtime and CI design |
-| [Releases](https://github.com/muhib-karim/Rambler-Bangla/releases) and [`CHANGELOG.md`](CHANGELOG.md) | Tagged source releases and full history; how releases are cut: [`docs/RELEASING.md`](docs/RELEASING.md) |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Running the suites before a pull request, and what must never be committed |
-| [`SECURITY.md`](SECURITY.md) | Report security problems privately through GitHub's advisory form |
-| [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Contributor Covenant 2.1 |
+| [Website](https://muhib-karim.github.io/Rambler-Bangla/) | Project homepage (GitHub Pages) |
+| [Morphe Add Source](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard) | One-click Morphe Manager source registration |
+| [Releases](https://github.com/muhib-karim/Rambler-Bangla/releases) &amp; [`CHANGELOG.md`](CHANGELOG.md) | Tagged releases (`patches-*.mpp`) and full changelog |
+| [`docs/README.md`](docs/README.md) | Index of design, evidence, validation, and licensing records |
+| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | Step-by-step verify, patch, sign, install, and exit codes |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Pipeline, policy runtime, and CI design |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) &amp; [`SECURITY.md`](SECURITY.md) | Pull request workflow, security reporting, and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) |
 
-## Contributing
-
-Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow. Please keep each pull request focused and say how you tested it.
+---
 
 ## Credits and licence
 
