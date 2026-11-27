@@ -35,7 +35,7 @@ public final class GboardClipboardSettingsFeatureTest {
                 Arrays.asList("General", "Metadata", "Layout", "Retention", "Extensions"),
                 sectionTitles(sections));
         Assert.assertEquals("ToggleRow", sections.get(0).getItems().get(0).getClass().getSimpleName());
-        Assert.assertEquals(5, sections.get(0).getItems().size());
+        Assert.assertEquals(6, sections.get(0).getItems().size());
         GboardPatchesSettingsContract.ToggleRow selectAll =
                 (GboardPatchesSettingsContract.ToggleRow) sections.get(0).getItems().get(3);
         Assert.assertEquals("Add a Select All button in edit mode", selectAll.getTitle());
@@ -47,6 +47,10 @@ public final class GboardClipboardSettingsFeatureTest {
                 (GboardPatchesSettingsContract.ToggleRow) sections.get(0).getItems().get(4);
         Assert.assertEquals("Drag-to-reorder clips", dragReorder.getTitle());
         Assert.assertTrue(dragReorder.isChecked());
+        GboardPatchesSettingsContract.ToggleRow quickPaste =
+                (GboardPatchesSettingsContract.ToggleRow) sections.get(0).getItems().get(5);
+        Assert.assertEquals("Quick-paste direct clipboard chip", quickPaste.getTitle());
+        Assert.assertTrue(quickPaste.isChecked());
         selectAll.getToggleAction().accept(true);
         GboardPatchesSettingsContract.Screen enabled =
                 new GboardClipboardSettingsFeature().buildScreen(host);
@@ -57,7 +61,7 @@ public final class GboardClipboardSettingsFeatureTest {
         excludePinned.getToggleAction().accept(true);
         Assert.assertTrue(GboardClipboardSettings.readExcludePinned(preferences));
         selectAll.getToggleAction().accept(false);
-        Assert.assertEquals(5,
+        Assert.assertEquals(6,
                 new GboardClipboardSettingsFeature().buildScreen(host).getSections().get(0)
                         .getItems().size());
         GboardPatchesSettingsContract.ToggleRow sensitiveRow =

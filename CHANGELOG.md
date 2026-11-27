@@ -2,6 +2,20 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.7.0] - 2026-11-28
+
+**Original Rambler Bangla Patches UI (Zero Upstream Repo Icons), Complete Keyboard/Clipboard Migration & Hardened About App Auto-Updates.**
+
+- **Original Rambler Bangla `Patches` Visual Identity (`GboardPatchesSettingsActivity`):**
+  - Replaced upstream `jasonwu1994/Gboard-patches`'s Google Blue Material Expressive styling and circular icon badges with Rambler Bangla's own Deep Navy / Ocean / Amber palette (`#070C14` / `#101927` dark, `#F2F5F9` / `#FFFFFF` light), branded gradient hero banner (`RAMBLER BANGLA · v31.7.0`), crisp `16dp` bordered card containers, tracked uppercase amber-bar section headers, and clean border-card typography (zero upstream repo icons).
+- **Complete Keyboard & Clipboard Migration out of `Rambler Enhancements` into `Patches`:**
+  - **Patches → Keyboard:** Promoted **AMOLED Dark Keyboard (#000000)**, **@Mention & Email Strip** (new `GboardAtMentionSettingsFeature` including Add custom `@mentions`, Learned preview/clear, and optional Native email provider completion), and **Hide launcher icon** to direct 1-tap switches right inside `Patches → Keyboard`, alongside **Appearance & Theme**, **Layout & Toolbar**, and **Typing Tools & Gestures**.
+  - **Patches → Clipboard & Sharing → Clipboard:** Added **Quick-paste direct clipboard chip** alongside **Drag-to-reorder clips** and all clipboard patches.
+  - **Pure Voice `Rambler Enhancements`:** Removed `@Mention & email strip` and keyboard/clipboard hidden flags from `RamblerEnhancementsActivity` (`RamblerHiddenFlagOverrideRuntime.voiceEntries()`).
+- **Hardened `Settings → About → App auto-updates`:**
+  - `GboardAboutPageResourcePatch` now runs in `finalize` and writes explicit `android:targetPackage`, `android:targetClass="dev.abotmaker.ramblerenhancements.RamblerEnhancementsActivity"`, `android:focusable="true"`, `android:selectable="true"`, and `section="updates"` for rock-solid Android 14–16 launch.
+- **Full-Text Search Index & Docs Sync:** Regenerated `GboardSettingsSearchIndexData.java`, updated `README.md`, `docs/index.html`, SVGs, and Morphe manifests (`patches-bundle.json`, `patches-list.json`) with complete GPL-3.0/MIT/MPL-2.0/BSD/§7c credits.
+
 ## [31.6.0] - 2026-11-28
 
 **Production Settings Redesign: App Auto-Updates under About, 4-Section Patches Tab & Moved Keyboard/Clipboard/Launcher Controls.**

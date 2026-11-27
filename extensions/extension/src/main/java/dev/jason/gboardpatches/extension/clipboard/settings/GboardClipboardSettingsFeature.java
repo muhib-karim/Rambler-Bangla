@@ -189,6 +189,25 @@ public final class GboardClipboardSettingsFeature
                                 GboardPatchesSettingsContract.refresh(host);
                             }));
                 }
+                if (GboardRamblerKeyboardPrefs.isHiddenFlagsAvailable()) {
+                    generalRows.add(new GboardPatchesSettingsContract.ToggleRow(
+                            GboardSettingsText.get(context,
+                                    R.string.gboard_patches_clipboard_quick_paste_title),
+                            GboardSettingsText.get(context,
+                                    R.string.gboard_patches_clipboard_quick_paste_summary),
+                            true,
+                            GboardRamblerKeyboardPrefs.readHiddenFlagOverride(
+                                    context,
+                                    GboardRamblerKeyboardPrefs.FLAG_QUICK_PASTE_DIRECT_CHIP,
+                                    true),
+                            value -> {
+                                GboardRamblerKeyboardPrefs.writeHiddenFlagOverride(
+                                        context,
+                                        GboardRamblerKeyboardPrefs.FLAG_QUICK_PASTE_DIRECT_CHIP,
+                                        value);
+                                GboardPatchesSettingsContract.refresh(host);
+                            }));
+                }
 
                 List<GboardPatchesSettingsContract.Row> metadataRows =
                         new ArrayList<GboardPatchesSettingsContract.Row>();

@@ -53,9 +53,31 @@ class GboardAboutPageResourcePatchTest {
         assertAboutSectionRow(
             element = children[6],
             key = "gboard_about_app_updates",
-            title = "App updates",
-            summary = "Auto-check GitHub Releases & install updates in-app (SHA-256 verified)",
+            title = "App auto-updates",
+            summary = "Auto-check GitHub Releases & install verified updates in-app",
             action = "dev.abotmaker.ramblerenhancements.OPEN_SETTINGS",
+            targetPackage = null,
+            targetClass = "dev.abotmaker.ramblerenhancements.RamblerEnhancementsActivity",
+            extraName = "section",
+            extraValue = "updates",
+        )
+    }
+
+    @Test
+    fun `explicit target package is written to About app auto-updates intent`() {
+        val document = parse(readFixture())
+
+        applyGboardAboutPagePatch(document, "com.aidev2024.ramblerbangla")
+
+        val children = document.documentElement.childElements().toList()
+        assertAboutSectionRow(
+            element = children[6],
+            key = "gboard_about_app_updates",
+            title = "App auto-updates",
+            summary = "Auto-check GitHub Releases & install verified updates in-app",
+            action = "dev.abotmaker.ramblerenhancements.OPEN_SETTINGS",
+            targetPackage = "com.aidev2024.ramblerbangla",
+            targetClass = "dev.abotmaker.ramblerenhancements.RamblerEnhancementsActivity",
             extraName = "section",
             extraValue = "updates",
         )
@@ -255,6 +277,8 @@ class GboardAboutPageResourcePatchTest {
         title: String,
         summary: String,
         action: String,
+        targetPackage: String?,
+        targetClass: String,
         extraName: String,
         extraValue: String,
     ) {
@@ -263,7 +287,7 @@ class GboardAboutPageResourcePatchTest {
         assertEquals(title, androidAttribute(element, "title"))
         assertEquals(summary, androidAttribute(element, "summary"))
         assertEquals("false", androidAttribute(element, "persistent"))
-        assertEquals("false", androidAttribute(element, "focusable"))
+        assertEquals("true", androidAttribute(element, "focusable"))
         assertEquals("true", androidAttribute(element, "selectable"))
         assertEquals("100", androidAttribute(element, "maxLines"))
 
@@ -271,6 +295,8 @@ class GboardAboutPageResourcePatchTest {
         assertEquals(1, intents.size)
         val intent = intents.single()
         assertEquals(action, androidAttribute(intent, "action"))
+        assertEquals(targetPackage, androidAttribute(intent, "targetPackage"))
+        assertEquals(targetClass, androidAttribute(intent, "targetClass"))
         val extras = intent.childElements("extra").toList()
         assertEquals(1, extras.size)
         assertEquals(extraName, androidAttribute(extras.single(), "name"))

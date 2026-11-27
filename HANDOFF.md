@@ -1,13 +1,14 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.6.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.7.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.6.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **App Auto-Updates under Settings → About:** Added `gboard_about_app_updates` in `GboardAboutPageResourcePatch` opening `RamblerEnhancementsActivity` (`SECTION_UPDATES`) for SHA-256 verified 1-tap GitHub Releases updates.
-   - **Redesigned 4-Section Patches Tab & Moved Keyboard/Clipboard/Launcher Controls:** Reorganized `Patches` into **Keyboard** (*Appearance & Theme* with **AMOLED Dark Keyboard**, *Layout, Keys & Toolbar*, *Typing Tools & Gestures*, and 1-tap **Hide launcher icon**), **Voice & Smart Input**, **Clipboard & Sharing** (with **Drag-to-reorder clips** inside Clipboard + FTP Server), and **System & Preferences** — with regenerated `GboardSettingsSearchIndexData.java` and zero keyboard/updater clutter in **Rambler Enhancements**.
-   - **Production GitHub Homepage & Docs:** Updated `README.md`, `docs/index.html`, `docs/banner.svg`, `docs/feature-showcase.svg`, `patches-bundle.json`, and `patches-list.json` with a full Settings Navigation Map and complete GPL-3.0/MIT/MPL-2.0/BSD/§7c credits.
+1. **Completed:** Shipped **`Rambler Bangla v31.7.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **Original Rambler Bangla `Patches` UI (Zero Upstream Repo Icons):** Branded Deep Navy / Ocean / Amber palette, gradient hero card (`RAMBLER BANGLA · v31.7.0`), `16dp` bordered cards, amber-bar uppercase section headers, and zero upstream circular icon badges.
+   - **Complete Keyboard & Clipboard Migration into `Patches`:** Direct 1-tap **AMOLED Dark Keyboard**, **@Mention & Email Strip** (`GboardAtMentionSettingsFeature`), and **Hide launcher icon** right under **Patches → Keyboard**; **Drag-to-reorder clips** & **Quick-paste direct clipboard chip** under **Patches → Clipboard**; **Rambler Enhancements** kept strictly voice-focused.
+   - **Hardened `Settings → About → App auto-updates`:** `GboardAboutPageResourcePatch` runs in `finalize` writing explicit `targetPackage` + `targetClass` + `section="updates"` for rock-solid Android 14–16 launch.
+   - **Production GitHub Homepage & Docs:** Updated `README.md`, `docs/index.html`, `docs/banner.svg`, `docs/feature-showcase.svg`, `patches-bundle.json`, and `patches-list.json` with regenerated `GboardSettingsSearchIndexData.java` and complete GPL-3.0/MIT/MPL-2.0/BSD/§7c credits.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

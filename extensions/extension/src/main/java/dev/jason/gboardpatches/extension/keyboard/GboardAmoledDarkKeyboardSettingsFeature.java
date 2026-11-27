@@ -5,11 +5,12 @@ import android.content.Context;
 import java.util.Collections;
 
 import dev.jason.gboardpatches.extension.R;
+import dev.jason.gboardpatches.extension.settings.GboardPatchesIcons;
 import dev.jason.gboardpatches.extension.settings.GboardPatchesSettingsContract;
 import dev.jason.gboardpatches.extension.settings.GboardSettingsText;
 
 /**
- * Patches → Keyboard → Appearance & Theme: live AMOLED pure-black (#000000) dark keyboard toggle.
+ * Patches → Keyboard: live 1-tap AMOLED pure-black (#000000) dark keyboard toggle.
  */
 public final class GboardAmoledDarkKeyboardSettingsFeature
         implements GboardPatchesSettingsContract.Feature {
@@ -27,6 +28,26 @@ public final class GboardAmoledDarkKeyboardSettingsFeature
     @Override
     public String getEntrySummary() {
         return text(R.string.gboard_patches_amoled_dark_summary);
+    }
+
+    @Override
+    public int getEntryIcon() {
+        return GboardPatchesIcons.DARK_MODE;
+    }
+
+    @Override
+    public String getEntryTone() {
+        return "violet";
+    }
+
+    @Override
+    public String getRootSectionKey() {
+        return GboardPatchesSettingsContract.ROOT_SECTION_KEYBOARD;
+    }
+
+    @Override
+    public boolean showRootEntryToggle() {
+        return true;
     }
 
     @Override
