@@ -177,3 +177,12 @@ community keyboard themes from the Rboard Theme repository (`GboardThemesV3`):
   loanword spelling table.
 - **smali / baksmali** (JesusFreke) — **BSD License** — build-time tools fetched on demand
   (not vendored).
+- **OpenBangla Keyboard Dictionary** (`OpenBangla/OpenBangla-Keyboard`) — **GNU GPL v3.0**
+  (https://github.com/OpenBangla/OpenBangla-Keyboard) — 159,384 authoritative Bengali words
+  compiled into `GboardRamblerBanglaLexiconData.java` (`v31.9.0`).
+- **LibreOffice `bn_BD` Hunspell Dictionary** (`LibreOffice/dictionaries`) — **GNU GPL v2.0+ / LGPL / MPL**
+  (https://github.com/LibreOffice/dictionaries/tree/master/bn_BD) — Bangladesh Bangla Academy
+  dictionary roots compiled into `GboardRamblerBanglaLexiconData.java` (`v31.9.0`).
+- **HermitDave FrequencyWords (`bn_full.txt`)** (`hermitdave/FrequencyWords`) — **MIT / CC-BY-SA**
+  (https://github.com/hermitdave/FrequencyWords) — spoken Bengali frequency rankings for
+  phonetic-skeleton candidate ranking (`v31.9.0`).

@@ -1,6 +1,6 @@
 # Attribution and licensing
 
-Rambler Bangla v31.2.0 is a unified **GNU GPL v3.0** Morphe patch suite for Gboard 18.5.4+.
+Rambler Bangla v31.9.0 is a unified **GNU GPL v3.0** Morphe patch suite for Gboard 18.5.4+.
 It builds on, integrates, modifies, and explicitly credits the following open-source projects
 in full compliance with their respective source licenses (GNU GPL v3.0 Sections 5a/5b/7c, MIT,
 MPL-2.0, and BSD):
@@ -64,6 +64,15 @@ MPL-2.0, and BSD):
   pronunciations used by `data/loanspell/gen_java.py` to generate the V29.3+ English-to-Bangla
   loanword table (`data/loanspell/loan-table.tsv` and `GboardRamblerLoanTable.java`).
   Full notice: [`NOTICE-cmudict.txt`](NOTICE-cmudict.txt).
+- **OpenBangla Keyboard Dictionary** (`OpenBangla/OpenBangla-Keyboard`, **GNU GPL v3.0**) —
+  https://github.com/OpenBangla/OpenBangla-Keyboard — 159,384 authoritative Bengali words used
+  by `scripts/build_bangla_lexicon.py` to build `GboardRamblerBanglaLexiconData.java`.
+- **LibreOffice `bn_BD` Hunspell Dictionary** (`LibreOffice/dictionaries`, **GNU GPL v2.0+ / LGPL / MPL**) —
+  https://github.com/LibreOffice/dictionaries/tree/master/bn_BD — 79,224 Bangladesh Bangla Academy
+  root entries combined into the 190,405-word offline valid Bengali lexicon.
+- **HermitDave FrequencyWords (`bn_full.txt`)** (`hermitdave/FrequencyWords`, **MIT / CC-BY-SA**) —
+  https://github.com/hermitdave/FrequencyWords — OpenSubtitles spoken Bengali frequency rankings
+  used to rank phonetic-skeleton spell-correction candidates (`v31.9.0`).
 
 ## Licensing & Non-Affiliation
 

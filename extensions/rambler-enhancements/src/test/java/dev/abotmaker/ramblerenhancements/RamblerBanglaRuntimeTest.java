@@ -380,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("31.8.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("31.9.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));
@@ -441,6 +441,40 @@ public class RamblerBanglaRuntimeTest {
             Assert.assertTrue("Must preserve শবদেহ: " + outValid, outValid.contains("শবদেহ"));
             Assert.assertTrue("Must preserve শব্দ: " + outValid, outValid.contains("শব্দ..."));
             Assert.assertTrue("Must convert sentence period to dari: " + outValid, outValid.endsWith("আছে।"));
+        } finally {
+            GboardRamblerScriptFix.jvmLayoutKind = 0;
+        }
+    }
+
+    @Test
+    public void fullLanguageBanglaLexiconFixesUnseenSpellingsWithZeroFalsePositives() {
+        int count = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon.validWordCount();
+        Assert.assertTrue("Expected full ~190k Bengali lexicon loaded, got: " + count, count > 180000);
+
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+        GboardRamblerScriptFix.jvmLayoutKind = 1;
+        try {
+            // Unseen words NOT in the 120-entry manual SPELLING_FIXES list, repaired automatically
+            // by the 190,405-word OpenBangla + bn_BD phonetic-skeleton + suffix engine:
+            String unseen = "পরিক্ষা এবং বিস্ববিদ্যালয় এর ভবিস্যত প্রস্ন অবস্যই বৈসিস্ট্য পোষাক বাংলাদেস জিনীষ মানুস পৃথিবি সুনতে খুসি বেবহার সিক্ষক উপস্তিত.";
+            String out = GboardRamblerScriptFix.processVoice(unseen);
+            String[] expected = {
+                "পরীক্ষা", "বিশ্ববিদ্যালয়", "ভবিষ্যৎ", "প্রশ্ন", "অবশ্যই",
+                "বৈশিষ্ট্য", "পোশাক", "বাংলাদেশ", "জিনিস", "মানুষ",
+                "পৃথিবী", "শুনতে", "খুশি", "ব্যবহার", "শিক্ষক", "উপস্থিত।"
+            };
+            for (String w : expected) {
+                Assert.assertTrue("Missing expected corrected word '" + w + "' in: " + out, out.contains(w));
+            }
+            // Agglutinative inflected suffix repair
+            String inflected = GboardRamblerScriptFix.processVoice("পরিক্ষাতে এবং অবস্যই এবং বিস্ববিদ্যালয়গুলো.");
+            Assert.assertTrue("Expected পরীক্ষাতে: " + inflected, inflected.contains("পরীক্ষাতে"));
+            Assert.assertTrue("Expected অবশ্যই: " + inflected, inflected.contains("অবশ্যই"));
+            Assert.assertTrue("Expected বিশ্ববিদ্যালয়গুলো: " + inflected, inflected.contains("বিশ্ববিদ্যালয়গুলো"));
+
+            // Valid Bengali words must NEVER be falsely altered
+            String validSentence = "দরকার অনেক পৃথিবী ব্যবহার শিক্ষক উপস্থিত জিনিস শুনতে শবদেহ শব্দ।";
+            Assert.assertEquals(validSentence, GboardRamblerScriptFix.processVoice(validSentence));
         } finally {
             GboardRamblerScriptFix.jvmLayoutKind = 0;
         }
