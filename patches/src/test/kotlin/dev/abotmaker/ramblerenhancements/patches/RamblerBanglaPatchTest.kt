@@ -422,8 +422,18 @@ class RamblerBanglaPatchTest {
             ),
         )
         applyRamblerBanglaLauncherIconManifest(doc)
+        registerSettingsActivity(doc)
         val app = doc.documentElement.getElementsByTagName("application").item(0) as org.w3c.dom.Element
         assertEquals(RAMBLER_BANGLA_LAUNCHER_ICON_REF, app.getAttributeNS(ANDROID_NS, "icon"))
         assertEquals(RAMBLER_BANGLA_LAUNCHER_ICON_REF, app.getAttributeNS(ANDROID_NS, "roundIcon"))
+        val perms = doc.documentElement.getElementsByTagName("uses-permission")
+        var hasInstallPerm = false
+        for (i in 0 until perms.length) {
+            val el = perms.item(i) as org.w3c.dom.Element
+            if (el.getAttributeNS(ANDROID_NS, "name") == "android.permission.REQUEST_INSTALL_PACKAGES") {
+                hasInstallPerm = true
+            }
+        }
+        assertTrue("Manifest must include REQUEST_INSTALL_PACKAGES for in-app updater", hasInstallPerm)
     }
 }

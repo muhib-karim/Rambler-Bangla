@@ -57,10 +57,11 @@ public final class GboardRamblerLiteScriptRuntime {
     public static final String ALL_BANGLA_SCRIPT_RULE =
         "3. Native Bengali Script Policy: The user's active keyboard is native"
         + " Bengali (বাংলা). Write ALL spoken content — including Bengali speech"
-        + " and English loanwords spoken inside Bengali — in native Bengali"
-        + " Unicode script (বাংলা). Restore any Romanized Bengali into natural"
-        + " Bengali Unicode script. Keep URLs, emails, #hashtags, and @handles"
-        + " verbatim. Never translate semantic meaning.";
+        + " and English loanwords spoken inside Bengali — in standard, natural"
+        + " modern Bengali Unicode script (e.g., ইংলিশ, আন্ডারস্ট্যান্ড, ক্লিয়ারলি,"
+        + " কম্পিউটার, অফিস — never awkward phoneme spellings like ইংগলিশ or অন্দারস্ট্যান্ডজ)."
+        + " Restore any Romanized Bengali into natural Bengali Unicode script."
+        + " Keep URLs, emails, #hashtags, and @handles verbatim. Never translate semantic meaning.";
 
     /** Active-keyboard rule for abc -> বাংলা layout: true intra-sentence mixed Bangla + English. */
     public static final String MIXED_BN_EN_SCRIPT_RULE =
@@ -271,7 +272,8 @@ public final class GboardRamblerLiteScriptRuntime {
             "   * Active-Keyboard Script Policy (ALL BANGLA, enabled: " + langs + "):"
             + " The user selected the native Bengali keyboard (বাংলা).\n"
             + "     - Write ALL Bengali speech and English loanwords inside Bengali speech"
-            + " in native Bengali Unicode script (বাংলা).\n"
+            + " in standard, natural modern Bengali Unicode script (e.g., ইংলিশ, আন্ডারস্ট্যান্ড,"
+            + " ক্লিয়ারলি — never awkward phoneme spellings like ইংগলিশ or অন্দারস্ট্যান্ডজ).\n"
             + "     - If the ASR transcript Romanized Bengali into Latin letters, restore"
             + " it into natural Bengali Unicode script.\n"
             + "     - Keep URLs, emails, #hashtags, and @handles verbatim. Never translate meaning.\n";

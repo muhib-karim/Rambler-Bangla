@@ -759,15 +759,26 @@ public final class GboardRamblerScriptFix {
                         outTok = convertTokenLoan(tok, lo);
                     }
                 } else {
-                    outTok = mapped.get(i);
+                    java.lang.String lo = tok.toLowerCase(java.util.Locale.US);
+                    // Pure Bangla priority: curated loan overrides -> 2,265-word Avro Tier-1 -> mapped -> LoanTable/transliterator
+                    outTok = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLoanSpell.CURATED_BANGLA_LOANS.get(lo);
                     if (outTok == null) {
-                        outTok = convertTokenLoan(tok, tok.toLowerCase(java.util.Locale.US));
+                        outTok = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerTier1.get(lo);
+                    }
+                    if (outTok == null) {
+                        outTok = mapped.get(i);
+                    }
+                    if (outTok == null) {
+                        outTok = convertTokenLoan(tok, lo);
                     }
                 }
                 if (outTok == null) {
                     java.lang.String normDisp = tok.replace("c", "k").replace("C", "K").replace("x", "ks").replace("X", "Ks");
                     java.lang.String normLo = tok.toLowerCase(java.util.Locale.US).replace("c", "k").replace("x", "ks");
                     outTok = convertTokenLoan(normDisp, normLo);
+                }
+                if (outTok != null && !com.akshaykadam.pixelboard.extension.rambler.GboardRamblerSentenceLang.wellFormed(outTok)) {
+                    outTok = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerSentenceLang.repair(outTok);
                 }
                 if (outTok != null) {
                     sb.append(outTok);

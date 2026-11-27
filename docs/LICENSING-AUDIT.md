@@ -1,7 +1,7 @@
-# Licensing audit (2026-11-28, v31.4.0)
+# Licensing audit (2026-11-28, v31.5.0)
 
 Scope: this repository (60-patch Morphe suite for Gboard 18.5.4 + legacy 18.3.1 standalone
-patcher) and all upstream open-source dependencies integrated through `v31.4.0`.
+patcher) and all upstream open-source dependencies integrated through `v31.5.0`.
 
 ## Repo contents (source & Morphe `.mpp` patch bundle)
 

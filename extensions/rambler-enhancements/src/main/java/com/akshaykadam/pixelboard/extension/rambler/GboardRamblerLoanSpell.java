@@ -184,6 +184,84 @@ final class GboardRamblerLoanSpell {
       "sudan", "\u09b8\u09c1\u09a6\u09be\u09a8",
       "concrete", "\u0995\u0982\u0995\u09cd\u09b0\u09bf\u099f");
 
+  /**
+   * High-frequency modern Bengali loanword spellings overriding raw CMUdict phoneme artifacts
+   * (e.g. "english" -> "ইংলিশ" instead of "ইংগলিশ", "understands" -> "আন্ডারস্ট্যান্ডস" instead of
+   * "অন্ডারস্ট্যান্ডজ", "clearly" -> "ক্লিয়ারলি" instead of "ক্লির্লি").
+   */
+  static final HashMap<String, String> CURATED_BANGLA_LOANS = map(
+      "english", "ইংলিশ",
+      "bangla", "বাংলা",
+      "bengali", "বেঙ্গলি",
+      "understand", "আন্ডারস্ট্যান্ড",
+      "understands", "আন্ডারস্ট্যান্ডস",
+      "understood", "আন্ডারস্টুড",
+      "understanding", "আন্ডারস্ট্যান্ডিং",
+      "clearly", "ক্লিয়ারলি",
+      "clear", "ক্লিয়ার",
+      "nearly", "নিয়ারলি",
+      "mixture", "মিক্সচার",
+      "voice", "ভয়েস",
+      "choice", "চয়েস",
+      "noise", "নয়েজ",
+      "point", "পয়েন্ট",
+      "enjoy", "এনজয়",
+      "language", "ল্যাঙ্গুয়েজ",
+      "languages", "ল্যাঙ্গুয়েজেস",
+      "messages", "মেসেজেস",
+      "package", "প্যাকেজ",
+      "packages", "প্যাকেজেস",
+      "manage", "ম্যানেজ",
+      "manager", "ম্যানেজার",
+      "settings", "সেটিংস",
+      "buttons", "বাটনস",
+      "clipboard", "ক্লিপবোর্ড",
+      "example", "এক্সাম্পল",
+      "exactly", "এক্স্যাক্টলি",
+      "definitely", "ডেফিনিটলি",
+      "usually", "ইউজুয়ালি",
+      "simply", "সিম্পলি",
+      "possible", "পসিবল",
+      "available", "অ্যাভেইলেবল",
+      "comfortable", "কমফোর্টেবল",
+      "everyone", "এভরিওয়ান",
+      "anyone", "এনিওয়ান",
+      "someone", "সামওয়ান",
+      "together", "টুগেদার",
+      "problems", "প্রবলেমস",
+      "questions", "কোয়েশ্চেনস",
+      "answers", "অ্যান্সারস",
+      "version", "ভার্সন",
+      "options", "অপশনস",
+      "function", "ফাংশন",
+      "connection", "কানেকশন",
+      "information", "ইনফরমেশন",
+      "uninstall", "আনইনস্টল",
+      "delete", "ডিলিট",
+      "changes", "চেঞ্জেস",
+      "friends", "ফ্রেন্ডস",
+      "words", "ওয়ার্ডস",
+      "things", "থিংস",
+      "times", "টাইমস",
+      "years", "ইয়ার্স",
+      "hours", "আওয়ার্স",
+      "seconds", "সেকেন্ডস",
+      "works", "ওয়ার্কস",
+      "checked", "চেকড",
+      "fixed", "ফিক্সড",
+      "mixed", "মিক্সড",
+      "white", "হোয়াইট",
+      "colors", "কালারস",
+      "sentence", "সেন্টেন্স",
+      "sentences", "সেন্টেন্সেস",
+      "text", "টেক্সট",
+      "toggle", "টগল",
+      "dictation", "ডিক্টেশন",
+      "spelling", "স্পেলিং",
+      "spellings", "স্পেলিংস",
+      "narration", "ন্যারেশন",
+      "it", "ইট");
+
   private static volatile HashMap<String, String> table;
   private static volatile HashSet<String> bangla;
   private static volatile boolean loading;
@@ -498,10 +576,21 @@ final class GboardRamblerLoanSpell {
         char c = lo.charAt(i);
         if (c < 'a' || c > 'z') return null;
       }
+      String curated = CURATED_BANGLA_LOANS.get(lo);
+      if (curated != null) {
+        diagHits++;
+        return curated;
+      }
       HashSet<String> bn = banglaWords();
       if (bn == null || bn.contains(lo)) return null;
       String r = OVERRIDE.get(lo);
       if (r == null) {
+        // Prefer curated 2,265-word Avro Tier-1 dictionary before raw CMUdict phonemes.
+        String t1 = GboardRamblerTier1.get(lo);
+        if (t1 != null && GboardRamblerSentenceLang.wellFormed(t1)) {
+          diagHits++;
+          return t1;
+        }
         HashMap<String, String> t = table;
         if (t == null) {
           // Table not loaded yet: never wait. Start the load if needed and use the old path for this token.
@@ -510,6 +599,9 @@ final class GboardRamblerLoanSpell {
           return null;
         }
         r = t.get(lo);
+        if (r != null) {
+          r = cleanCmuLoanSpelling(lo, r);
+        }
       }
       if (r == null || !GboardRamblerSentenceLang.wellFormed(r)) return null;
       diagHits++;
@@ -518,5 +610,55 @@ final class GboardRamblerLoanSpell {
       diagFailures++;
       return null;
     }
+  }
+
+  /**
+   * Fixes systematic CMUdict-to-Bengali phoneme artifacts across all 17,841 table entries:
+   * initial "un-" -> "আ", "-ear/-eer" "ির্লি" -> "িয়ারলি", "oi/oy" "য়স/য়ন্ট" -> "য়েস/য়েন্ট",
+   * double "জজ" plurals -> "জেস", voiced plural "-s" trailing "জ" -> "স", and awkward clusters.
+   */
+  static String cleanCmuLoanSpelling(String lo, String bn) {
+    if (lo == null || bn == null || bn.isEmpty()) return bn;
+    String s = bn;
+    if ((lo.startsWith("under") || (lo.startsWith("un") && lo.length() >= 4)) && s.startsWith("অ") && !s.startsWith("অ্যা")) {
+      s = "আ" + s.substring(1);
+    }
+    if (s.contains("ির্লি")) {
+      s = s.replace("ির্লি", "িয়ারলি");
+    }
+    if ((lo.endsWith("ear") || lo.endsWith("eer")) && s.endsWith("ির")) {
+      s = s.substring(0, s.length() - 2) + "িয়ার";
+    }
+    if (lo.endsWith("board") && s.endsWith("বর্ড")) {
+      s = s.substring(0, s.length() - 4) + "বোর্ড";
+    }
+    if (lo.contains("oi") || lo.contains("oy")) {
+      s = s.replace("য়স", "য়েস").replace("য়ন্ট", "য়েন্ট");
+    }
+    s = s.replace("ক্স্চ", "ক্সচ")
+         .replace("ক্স্ট", "ক্সট")
+         .replace("ম্প্লি", "ম্পলি")
+         .replace("ন্জ", "ঞ্জ");
+    if (s.endsWith("জজ")) {
+      s = s.substring(0, s.length() - 2) + "জেস";
+    } else if (s.endsWith("সজ") && lo.endsWith("ses")) {
+      s = s.substring(0, s.length() - 2) + "সেস";
+    }
+    if (lo.endsWith("s")
+        && !lo.endsWith("ss")
+        && !lo.endsWith("se")
+        && !lo.endsWith("ze")
+        && !lo.endsWith("ge")
+        && !lo.endsWith("ays")
+        && !lo.endsWith("eys")
+        && !lo.endsWith("oys")
+        && s.endsWith("জ")
+        && s.length() >= 2) {
+      char prev = s.charAt(s.length() - 2);
+      if ("ডংনমলবগরভদটকপ".indexOf(prev) >= 0) {
+        s = s.substring(0, s.length() - 1) + "স";
+      }
+    }
+    return s;
   }
 }

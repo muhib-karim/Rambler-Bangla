@@ -1,14 +1,13 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.4.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.5.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.4.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **True 3-Keyboard Active-Mode Dictation** (no `Bangla (Latin)` required): `English (US)` = English/phonetic Latin, `বাংলা` = 100% Bangla Unicode (with loanwords), `abc → বাংলা` = clause-aware intra-sentence Mixed Bangla + English across both the Rambler LLM prompt (`GboardRamblerLiteScriptRuntime`) and post-ASR engine (`GboardRamblerScriptFix` / `GboardRamblerSentenceLang`).
-   - **Custom Adaptive Rambler Bangla (`র`) App Logo** bundled from `docs/assets/2-icon-512.png` (adaptive + monochrome + `mdpi`–`xxxhdpi`) and wired in `AndroidManifest.xml`.
-   - **Live `Hide launcher icon` toggle** (Issue #39) under **Rambler Enhancements → Keyboard appearance, clipboard & launcher**.
-   - Updated GitHub homepage, Pages site, Releases, Morphe manifest, and responded to Issues #19 & #39.
+1. **Completed:** Shipped **`Rambler Bangla v31.5.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **Pure Bangla Natural Spelling Overhaul & Enclitic Fix:** 70+ curated Bengali loanwords + 2,265-word Avro Tier-1 priority in Pure Bangla mode + systematic CMUdict cleanup (`ইংলিশ`, `আন্ডারস্ট্যান্ডস`, `ক্লিয়ারলি`, etc.) + hyphenated enclitic particle fix (`সব-i` → `সব-ই`).
+   - **SHA-256 Verified In-App GitHub Auto-Updater (`RamblerAutoUpdater`):** Live toggle + "Check for updates now" inside **Rambler Enhancements**, verifying `SHA256SUMS.txt` fail-closed before launching Android's native 1-tap `PackageInstaller` sheet.
+   - **Beginner-Friendly 2-Minute Setup Guide** on GitHub homepage (`README.md`) & GitHub Pages (`docs/index.html`).
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.
