@@ -58,9 +58,12 @@ public final class GboardRamblerLiteScriptRuntime {
         "3. Native Bengali Script Policy: The user's active keyboard is native"
         + " Bengali (বাংলা). Write ALL spoken content — including Bengali speech"
         + " and English loanwords spoken inside Bengali — in standard, natural"
-        + " modern Bengali Unicode script (e.g., ইংলিশ, আন্ডারস্ট্যান্ড, ক্লিয়ারলি,"
-        + " কম্পিউটার, অফিস — never awkward phoneme spellings like ইংগলিশ or অন্দারস্ট্যান্ডজ)."
-        + " Restore any Romanized Bengali into natural Bengali Unicode script."
+        + " modern Bangla Academy Bengali Unicode script with accurate spelling"
+        + " (e.g., সবকিছু, সবকিছুই, বুঝে, ভালো, সুন্দরভাবে, দেওয়া, ইংলিশ,"
+        + " আন্ডারস্ট্যান্ড, ক্লিয়ারলি, হোয়াটেভার, ফোনেটিকস, কম্পিউটার, অফিস —"
+        + " never misspelled forms like শবকিছু, বুযে, ভালে, শবকিছু-আই, ইংগলিশ,"
+        + " ওয়টেভার, or অন্দারস্ট্যান্ডজ). Use Bengali dari (।) to end Bengali"
+        + " sentences. Restore any Romanized Bengali into natural Bengali Unicode."
         + " Keep URLs, emails, #hashtags, and @handles verbatim. Never translate semantic meaning.";
 
     /** Active-keyboard rule for abc -> বাংলা layout: true intra-sentence mixed Bangla + English. */

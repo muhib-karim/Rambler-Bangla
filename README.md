@@ -35,7 +35,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v31.7.0 six-pillar feature overview poster" width="100%" />
+  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v31.8.0 six-pillar feature overview poster" width="100%" />
 </p>
 
 > **Quick Morphe Setup:** Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** or paste `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json` in Morphe Manager, then select official Gboard `18.5.4.993608717-release-arm64-v8a`.
@@ -47,7 +47,7 @@
 Ordinary users don't need any coding or command line. Follow these 4 quick steps:
 
 ### Step 1 — Install (Choose Either Option)
-- **Option A — Direct APK (Fastest):** Download `RamblerBangla-v31.7.0-gboard-18.5.4-arm64-v8a.apk` from the **[Latest Release](https://github.com/muhib-karim/Rambler-Bangla/releases/latest)** and install it. It installs **side-by-side** alongside stock Gboard (`Rambler Bangla`) with its own `র` logo.
+- **Option A — Direct APK (Fastest):** Download `RamblerBangla-v31.8.0-gboard-18.5.4-arm64-v8a.apk` from the **[Latest Release](https://github.com/muhib-karim/Rambler-Bangla/releases/latest)** and install it. It installs **side-by-side** alongside stock Gboard (`Rambler Bangla`) with its own `র` logo.
 - **Option B — 1-Click Morphe Manager:** Install [Morphe Manager](https://morphe.software), tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)**, pick official Gboard `18.5.4.993608717-release-arm64-v8a`, choose your patches, and tap **Patch**.
 
 ### Step 2 — Add Only These 3 Keyboards (No `Bangla (Latin)` Needed!)
@@ -62,12 +62,12 @@ Open **Rambler Bangla → Settings → Languages → Add keyboard** and keep **j
 Open **Rambler Bangla → Settings → Voice typing** and enable **Rambler+**. It activates immediately without waiting for Google rollout gates.
 
 ### Step 4 — Tap the Mic & Switch Keyboards Anytime
-Switch keyboards with the globe key or spacebar — **Rambler Bangla v31.7.0** automatically adjusts both the on-device Rambler AI prompt and the post-ASR engine to match whichever keyboard is active:
+Switch keyboards with the globe key or spacebar — **Rambler Bangla v31.8.0** automatically adjusts both the on-device Rambler AI prompt and the post-ASR engine to match whichever keyboard is active:
 
 | Active Keyboard | Dictation Mode | What You Speak → What You Get |
 | --- | --- | --- |
 | **`English (US)` — `QWERTY`** | **All English / Phonetic Latin** | Everything stays in English / phonetic Latin — even if you speak Bangla (`ami bhalo achi`), it never forces Bengali Unicode |
-| **`বাংলা (বাংলাদেশ)` — `বাংলা`** | **100% Pure Bangla** | Everything comes out in natural Bengali Unicode (`বাংলা লিখলে বাংলা বুঝে, ইংলিশ বললে ইংলিশ বুঝে. ইট আন্ডারস্ট্যান্ডস বাংলা, ইংলিশ ক্লিয়ারলি.`) — using curated natural Bangla spellings + 2,265 Avro pairs + cleaned CMUdict loanwords |
+| **`বাংলা (বাংলাদেশ)` — `বাংলা`** | **100% Pure Bangla** | Everything comes out in accurate Bangla Academy Unicode (`পুরা বাংলা বুঝে, ইংলিশ-ও বুঝে, সবকিছুই বুঝে। এবং পুরা ক্লিয়ারলি সবকিছু বুঝে সুন্দরভাবে লিখতে পারে।`) — backed by `GboardRamblerBanglaNormalizer`, curated Bengali/loanword dictionaries, 2,265 Avro pairs & Bengali dari (`।`) |
 | **`বাংলা (বাংলাদেশ)` — `abc → বাংলা`** | **True Mixed Bangla + English** | Spoken Bangla words & clauses come out in **বাংলা** while English words & clauses stay in **English** inside the **same sentence** (`তাহলে এখন কি বাংলা English লেখলে সব বুঝতে পারে? So it understands everything Bangla and English exactly as well. বাংলা-ও বুঝবে, সব-ই বুঝবে?`) |
 
 ### Step 5 — Settings Navigation Map (Where Everything Lives)
@@ -87,9 +87,9 @@ Switch keyboards with the globe key or spacebar — **Rambler Bangla v31.7.0** a
 
 Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali into Romanized Latin letters (`"ami bhalo achi"` instead of `"আমি ভালো আছি"`), mangles mixed Bangla + English sentences, hides **Rambler+** behind rollout gates on non-Pixel devices, removed the old "Hide app icon" option, and lacks SwiftKey-style personalized `@handle` predictions or clipboard drag-to-reorder.
 
-**Rambler Bangla v31.7.0** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
+**Rambler Bangla v31.8.0** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
 
-- **3-mode Bengali / Mixed / English voice & natural spelling engine:** Reads Gboard 18.5.4's active language + layout (`Lpev;` / `ImeDef`) so `English (US)` stays strictly English/phonetic Latin, `বাংলা` outputs 100% natural Bengali Unicode (curated loanword dictionary + 2,265 Avro pairs + cleaned CMUdict spellings), and `abc → বাংলা` delivers true intra-sentence Bangla + English code-switching (including hyphenated enclitics like `সব-ই`) — with unconditional **Rambler+** activation and protected spans (`#hashtags`, `@handles`, URLs, emails, times).
+- **3-mode Bengali / Mixed / English voice & foolproof Bangla orthography engine:** Reads Gboard 18.5.4's active language + layout (`Lpev;` / `ImeDef`) so `English (US)` stays strictly English/phonetic Latin, `বাংলা` outputs 100% accurate Bengali Unicode (post-LLM + post-ASR `GboardRamblerBanglaNormalizer`, 120+ exact Bengali/loanword spelling repairs, `-ই` enclitic join, 2,265 Avro pairs, cleaned CMUdict loanwords & Bengali dari `।`), and `abc → বাংলা` delivers true intra-sentence Bangla + English code-switching — with unconditional **Rambler+** activation and protected spans (`#hashtags`, `@handles`, URLs, emails, times).
 - **Custom Rambler Bangla Patches UI, About Auto-Updater & Zero Menu Clutter:** Original Deep Navy / Ocean / Amber **Patches** interface (bordered cards, amber-bar uppercase section headers, zero upstream circular icon badges) with every keyboard enhancement (`AMOLED Dark`, `@Mention & Email Strip`, `Hide launcher icon`, Appearance, Layout, Tools) under **Patches → Keyboard**, clipboard reorder + quick-paste under **Patches → Clipboard**, pure voice controls under **Rambler Enhancements**, and SHA-256 verified **App auto-updates** under **Settings → About**.
 - **Complete Gboard power-user ecosystem in one conflict-free `.mpp`:** Integrates all **7** patches from `abotmaker/gboard-rambler-enhancements` (v1.3.4), **3** verified Gboard 18.5.4 ports from `johninnld/nl-morphe-patches`, and all **46** patches from `jasonwu1994/Gboard-patches` (v4.5.0) — **60 selectable patches** engineered to share hooks without conflicts.
 
@@ -139,7 +139,7 @@ Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali in
 
 ## Included Patches
 
-Rambler Bangla v31.7.0 ships **60 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
+Rambler Bangla v31.8.0 ships **60 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
 
 ### 1. Rambler Bangla — Bengali-First Voice, Native `@Mention` Strip & Clipboard Reorder (4 patches)
 
@@ -508,6 +508,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 
 ### Released
 
+- **v31.8.0 (2026-11-28)**, tag [v31.8.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.8.0): **Foolproof Pure Bangla & Mixed Orthography Engine** — added `GboardRamblerBanglaNormalizer` running on 100% of Bengali commits (both post-LLM pure Bengali Unicode and post-ASR Romanized paths), fixing `-আই` → `-ই` enclitics (`সবকিছুই`), `শব*` → `সব*` (`সবকিছু`, preserving `শবদেহ`/`শব্দ`), `বুযে`/`বুজে` → `বুঝে`, `ভালে` → `ভালো`, `সুন্দর ভাবে` → `সুন্দরভাবে`, `ওয়টেভার` → `হোয়াটেভার`, `ফনেটিকস` → `ফোনেটিকস`, `রাইট নাউ` → `রাইট নাও`, double-nukta cleanup, and Pure Bangla Bengali dari (`।`).
 - **v31.7.0 (2026-11-28)**, tag [v31.7.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.7.0): **Custom Rambler Bangla Patches UI, Complete Keyboard Migration & Hardened About Auto-Updater** — gave the **Patches** tab its own original Deep Navy / Ocean / Amber visual identity (hero banner, bordered cards, amber-bar section headers, zero upstream circular icon badges), promoted **AMOLED Dark Keyboard**, **@Mention & Email Strip** (+ native email completion), and **Hide launcher icon** to direct 1-tap toggles under **Patches → Keyboard**, moved **Quick-paste direct clipboard chip** alongside **Drag-to-reorder clips** under **Patches → Clipboard**, kept **Rambler Enhancements** strictly voice-focused, and wired explicit `targetPackage` + `targetClass` on **Settings → About → App auto-updates**.
 - **v31.6.0 (2026-11-28)**, tag [v31.6.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.6.0): **Settings Reorganization** — initial move of **App updates** under **Settings → About** and 4-section **Patches** grouping.
 - **v31.5.0 (2026-11-28)**, tag [v31.5.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.5.0): **Pure Bangla Natural Spelling Overhaul** (70+ curated Bengali loanwords + 2,265 Avro Tier-1 priority + systematic CMUdict cleaner fixing `ইংলিশ`, `আন্ডারস্ট্যান্ডস`, `ক্লিয়ারলি` + hyphenated enclitic `সব-ই`), **SHA-256 Verified In-App GitHub Auto-Updater** (toggle + 1-tap `PackageInstaller` update), and **2-Minute Setup Guide**.
@@ -540,7 +541,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 | **CI & Verification** | GitHub Actions (`ci.yml`, `tests.yml`, `android-smoke.yml`): 88 Python tests, 22 static checks, 316 Gradle patch tests, Android 15 KVM ART+IME smoke test |
 
 ```text
-patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-31.7.0.mpp)
+patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-31.8.0.mpp)
 extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve)
 patches-bundle.json   Morphe Manager source manifest (auto-discovered by morphe.software/add-source)
 patches-list.json     Published 60-patch JSON catalog

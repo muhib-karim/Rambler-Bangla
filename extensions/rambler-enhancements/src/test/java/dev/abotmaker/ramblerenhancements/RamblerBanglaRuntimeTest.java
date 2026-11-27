@@ -97,6 +97,8 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertTrue("Expected Bengali Unicode, got: " + allBnLoan, containsBengali(allBnLoan));
         Assert.assertFalse("Loanword 'company' should convert in All Bangla mode: " + allBnLoan,
                 allBnLoan.toLowerCase().contains("company"));
+        Assert.assertTrue("Loanword 'company' must spell 'কোম্পানি': " + allBnLoan,
+                allBnLoan.contains("কোম্পানি"));
         Assert.assertFalse("Loanword 'office' should convert in All Bangla mode: " + allBnLoan,
                 allBnLoan.toLowerCase().contains("office"));
         String allBnPartial = GboardRamblerScriptFix.processVoice(
@@ -118,11 +120,11 @@ public class RamblerBanglaRuntimeTest {
 
         // MODE 2: Mixed Bangla + English (abc -> বাংলা) — Bangla clauses/words in বাংলা, English words/clauses in English
         GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
-        // Exact Screenshot regression: hyphenated Bengali enclitic 'সব-i' -> 'সব-ই'
+        // Exact Screenshot regression: hyphenated Bengali enclitic 'সব-i' -> 'সবই' (never 'সব-আই')
         String encliticMixed = GboardRamblerScriptFix.processVoice(
                 "তারপর কি বাংলার পর English বললে English-ও বুঝবে, বাংলা-ও বুঝবে, সব-i বুঝবে?");
-        Assert.assertTrue("Hyphenated 'সব-i' must convert to 'সব-ই': " + encliticMixed,
-                encliticMixed.contains("সব-ই"));
+        Assert.assertTrue("Hyphenated 'সব-i' must convert to 'সবই': " + encliticMixed,
+                encliticMixed.contains("সবই") && !encliticMixed.contains("সব-i") && !encliticMixed.contains("সব-আই"));
         Assert.assertTrue("English words must stay English: " + encliticMixed,
                 encliticMixed.contains("English-ও"));
         String greeting = GboardRamblerScriptFix.processVoice("ami bhalo achi, tumi kemon acho?");
@@ -378,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("31.7.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("31.8.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));
@@ -389,6 +391,58 @@ public class RamblerBanglaRuntimeTest {
         for (RamblerHiddenFlagOverrideRuntime.Entry e : RamblerHiddenFlagOverrideRuntime.voiceEntries()) {
             Assert.assertNotEquals("enable_system_clipboard_direct_paste_for_quick_paste", e.flagName);
             Assert.assertNotEquals("enable_email_provider_completion", e.flagName);
+        }
+    }
+
+    @Test
+    public void pureBanglaOrthographyNormalizerFixesAllScreenshotSpellings() {
+        GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+        GboardRamblerScriptFix.jvmLayoutKind = 1;
+        try {
+            // Exact Screenshot 1: Pure Bengali LLM output with spelling mistakes (zero Latin!)
+            String s1Llm = "পুরা বাংলা বুঝে, ইংলিশ-ও বুঝে, শবকিছু-আই বুঝে. "
+                    + "এবং পুরা ক্লিয়ারলি শবকিছু বুযে সুন্দর ভাবে লিখতে পারে. ভালে তো দেখতে দেয়া যায়.";
+            String out1 = GboardRamblerScriptFix.processVoice(s1Llm);
+            Assert.assertTrue("Expected সবকিছুই, got: " + out1, out1.contains("সবকিছুই বুঝে।"));
+            Assert.assertTrue("Expected সবকিছু বুঝে সুন্দরভাবে, got: " + out1, out1.contains("সবকিছু বুঝে সুন্দরভাবে"));
+            Assert.assertTrue("Expected ভালো তো, got: " + out1, out1.contains("ভালো তো দেখতে"));
+            Assert.assertTrue("Expected Bengali dari, got: " + out1, out1.endsWith("যায়।"));
+            Assert.assertFalse("Must not keep শবকিছু: " + out1, out1.contains("শবকিছু"));
+            Assert.assertFalse("Must not keep -আই: " + out1, out1.contains("-আই"));
+            Assert.assertFalse("Must not keep বুযে: " + out1, out1.contains("বুযে"));
+            Assert.assertFalse("Must not keep ভালে: " + out1, out1.contains("ভালে"));
+
+            // Exact Screenshot 1: Romanized ASR input path
+            String s1Rom = "pura bangla bujhe, english-o bujhe, shobkichu-i bujhe. "
+                    + "ebong pura clearly shobkichu buje shundor bhabe likhte pare. bhale to dekhte deya jay.";
+            String out1Rom = GboardRamblerScriptFix.processVoice(s1Rom);
+            Assert.assertTrue("Expected সবকিছুই, got: " + out1Rom, out1Rom.contains("সবকিছুই"));
+            Assert.assertTrue("Expected সবকিছু বুঝে সুন্দরভাবে, got: " + out1Rom, out1Rom.contains("সবকিছু বুঝে সুন্দরভাবে"));
+            Assert.assertTrue("Expected ভালো, got: " + out1Rom, out1Rom.contains("ভালো"));
+            Assert.assertFalse("Must not produce -আই: " + out1Rom, out1Rom.contains("-আই"));
+            Assert.assertFalse("Must not produce বুযে: " + out1Rom, out1Rom.contains("বুযে"));
+
+            // Exact Screenshot 2: Loanword & phonetic English-in-Bangla spellings
+            String s2Llm = "সো ওয়টেভার আই'ম সেইং ইন ইংলিশ, ইট শুড বি রিটেন ইন বাংলা ফনেটিকস অ্যাজ ওয়েল রাইট নাউ, রাইট?";
+            String out2 = GboardRamblerScriptFix.processVoice(s2Llm);
+            Assert.assertTrue("Expected হোয়াটেভার, got: " + out2, out2.contains("হোয়াটেভার"));
+            Assert.assertTrue("Expected ফোনেটিকস, got: " + out2, out2.contains("ফোনেটিকস"));
+            Assert.assertTrue("Expected রাইট নাও, got: " + out2, out2.contains("রাইট নাও"));
+
+            String s2Rom = "so whatever saying in english, it should be written in bangla phonetics as well right now, right?";
+            String out2Rom = GboardRamblerScriptFix.processVoice(s2Rom);
+            Assert.assertTrue("Expected হোয়াটেভার, got: " + out2Rom, out2Rom.contains("হোয়াটেভার"));
+            Assert.assertTrue("Expected ফোনেটিকস, got: " + out2Rom, out2Rom.contains("ফোনেটিকস"));
+            Assert.assertTrue("Expected রাইট নাও, got: " + out2Rom, out2Rom.contains("রাইট নাও"));
+
+            // Preserve valid words containing শব as a real prefix (শবদেহ, শব্দ) and preserve ellipsis (...)
+            String valid = "শবদেহ এবং শব্দ... ঠিক আছে.";
+            String outValid = GboardRamblerScriptFix.processVoice(valid);
+            Assert.assertTrue("Must preserve শবদেহ: " + outValid, outValid.contains("শবদেহ"));
+            Assert.assertTrue("Must preserve শব্দ: " + outValid, outValid.contains("শব্দ..."));
+            Assert.assertTrue("Must convert sentence period to dari: " + outValid, outValid.endsWith("আছে।"));
+        } finally {
+            GboardRamblerScriptFix.jvmLayoutKind = 0;
         }
     }
 
