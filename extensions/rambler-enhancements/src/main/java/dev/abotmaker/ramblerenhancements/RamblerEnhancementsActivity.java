@@ -128,6 +128,7 @@ public final class RamblerEnhancementsActivity extends Activity {
     public static final String SECTION_HISTORY = "history";
     public static final String SECTION_HISTORY_LIST = "history_list";
     public static final String SECTION_BACKUP = "backup";
+    public static final String SECTION_UPDATES = "updates";
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private LinearLayout contentContainer;
@@ -178,7 +179,22 @@ public final class RamblerEnhancementsActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        handleUpdateInstallIntent(intent);
+        if (intent != null && RamblerAutoUpdater.ACTION_INSTALL_RESULT.equals(intent.getAction())) {
+            handleUpdateInstallIntent(intent);
+            return;
+        }
+        String newSection = normalizeSection(
+                intent == null ? null : intent.getStringExtra(EXTRA_SECTION));
+        if ((newSection == null && activeSection != null)
+                || (newSection != null && !newSection.equals(activeSection))) {
+            activeSection = newSection;
+            setTitle(titleForSection(activeSection));
+            refreshUi();
+            if (SECTION_UPDATES.equals(activeSection)) {
+                autoUpdateCheckedThisSession = false;
+                maybeRunAutoUpdateCheck();
+            }
+        }
     }
 
     private void handleUpdateInstallIntent(Intent intent) {
@@ -206,7 +222,8 @@ public final class RamblerEnhancementsActivity extends Activity {
     }
 
     private void maybeRunAutoUpdateCheck() {
-        if (autoUpdateCheckedThisSession || activeSection != null) {
+        if (autoUpdateCheckedThisSession
+                || (activeSection != null && !SECTION_UPDATES.equals(activeSection))) {
             return;
         }
         autoUpdateCheckedThisSession = true;
@@ -455,7 +472,8 @@ public final class RamblerEnhancementsActivity extends Activity {
                 || SECTION_DICTIONARY.equals(section)
                 || SECTION_HISTORY.equals(section)
                 || SECTION_HISTORY_LIST.equals(section)
-                || SECTION_BACKUP.equals(section)) {
+                || SECTION_BACKUP.equals(section)
+                || SECTION_UPDATES.equals(section)) {
             return section;
         }
         return null;
@@ -489,6 +507,9 @@ public final class RamblerEnhancementsActivity extends Activity {
         }
         if (SECTION_BACKUP.equals(normalized)) {
             return "Backup & restore";
+        }
+        if (SECTION_UPDATES.equals(normalized)) {
+            return "App updates";
         }
         return "Rambler Enhancements";
     }
@@ -536,6 +557,8 @@ public final class RamblerEnhancementsActivity extends Activity {
             buildHistoryListSection();
         } else if (SECTION_BACKUP.equals(activeSection)) {
             buildBackupSection();
+        } else if (SECTION_UPDATES.equals(activeSection)) {
+            buildUpdatesSection();
         } else {
             buildHubScreen();
         }
@@ -698,48 +721,28 @@ public final class RamblerEnhancementsActivity extends Activity {
                     () -> openSection(SECTION_HISTORY));
         }
 
-        addSectionHeader("Keyboard appearance, clipboard & launcher");
-        if (RamblerDynamicConfig.FEATURE_AMOLED_DARK_KEYBOARD) {
-            boolean amoledOn = RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(this);
-            addToggleRow(
-                    "AMOLED Dark Keyboard (#000000)",
-                    "Turns Material You dark keyboard surfaces pure black. Off by default so stock dark gray contrast stays normal. Re-select your Theme or reopen Gboard to apply.",
-                    amoledOn,
-                    checked -> {
-                        RamblerEnhancementsSettings.writeAmoledDarkKeyboardEnabled(this, checked);
-                        showToast(checked
-                                ? "AMOLED Dark ON — re-select Dynamic Color in Theme or restart Gboard to apply."
-                                : "AMOLED Dark OFF — re-select Dynamic Color in Theme or restart Gboard to apply.");
-                        refreshUi();
-                    });
-        }
-        if (RamblerDynamicConfig.FEATURE_CLIPBOARD_REORDER) {
-            boolean reorderOn = RamblerEnhancementsSettings.readClipboardDragReorderEnabled(this);
-            addToggleRow(
-                    "Clipboard drag-to-reorder",
-                    "Tap & hold a clipboard card and drag to rearrange within Pinned or Recent (saved permanently). Tap & hold without moving still opens the Pin/Delete menu; swipe still deletes.",
-                    reorderOn,
-                    checked -> {
-                        RamblerEnhancementsSettings.writeClipboardDragReorderEnabled(this, checked);
-                        refreshUi();
-                    });
-        }
-        boolean hideLauncherOn = RamblerEnhancementsSettings.readHideLauncherIcon(this);
-        addToggleRow(
-                "Hide launcher icon",
-                "Hides the Rambler Bangla app icon from your home screen / app drawer (like old Gboard). You can still open Settings anytime via the keyboard's gear button or Android System → Keyboard settings.",
-                hideLauncherOn,
-                checked -> {
-                    boolean ok = RamblerEnhancementsSettings.setLauncherIconHidden(this, checked);
-                    showToast(ok
-                            ? (checked
-                                    ? "Launcher icon hidden. Open Settings via the keyboard gear button anytime."
-                                    : "Launcher icon restored in your app drawer.")
-                            : "Could not change launcher icon visibility on this device.");
-                    refreshUi();
-                });
+        addRow(
+                "Backup & restore (.json)",
+                "Export or import all settings, per-app rules, snippets, replace rules, and dictionary words.",
+                "JSON",
+                true,
+                () -> openSection(SECTION_BACKUP));
 
-        addSectionHeader("App updates (GitHub Releases)");
+        // In-app footer (upstream credits live in GitHub repository docs)
+        RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
+        TextView creditView = new TextView(this);
+        creditView.setText("Rambler Bangla v" + RamblerAutoUpdater.CURRENT_VERSION
+                + " — by muhib-karim (GPLv3)");
+        creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        creditView.setTextColor(pal.secondary);
+        LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        creditParams.topMargin = dp(10);
+        contentContainer.addView(creditView, creditParams);
+    }
+
+    private void buildUpdatesSection() {
+        addSectionHeader("GitHub Releases auto-updater");
         boolean autoUpdateOn = RamblerEnhancementsSettings.readAutoCheckUpdates(this);
         addToggleRow(
                 "Auto-check for updates",
@@ -782,23 +785,17 @@ public final class RamblerEnhancementsActivity extends Activity {
                     }
                 });
 
-        addRow(
-                "Backup & restore (.json)",
-                "Export or import all settings, per-app rules, snippets, replace rules, and dictionary words.",
-                "JSON",
-                true,
-                () -> openSection(SECTION_BACKUP));
-
-        // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
-        TextView creditView = new TextView(this);
-        creditView.setText("Rambler Bangla v31.5.0 — by muhib-karim (GPLv3)");
-        creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        creditView.setTextColor(pal.secondary);
-        LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(
+        TextView infoView = new TextView(this);
+        infoView.setText("Updates download exclusively from github.com/"
+                + RamblerAutoUpdater.REPO_SLUG
+                + " and verify SHA256SUMS.txt before handing off to Android's installer.");
+        infoView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        infoView.setTextColor(pal.secondary);
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        creditParams.topMargin = dp(10);
-        contentContainer.addView(creditView, creditParams);
+        infoParams.topMargin = dp(10);
+        contentContainer.addView(infoView, infoParams);
     }
 
     private void buildBanglaSection() {

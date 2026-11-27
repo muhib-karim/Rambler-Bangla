@@ -19,6 +19,10 @@ private val ABOUT_VERSION_TITLE_REFS = mapOf(
 )
 private const val ABOUT_PREFERENCE_CLASS =
     "com.google.android.libraries.inputmethod.settings.widget.ExtendedPreference"
+private const val ABOUT_APP_UPDATES_KEY = "gboard_about_app_updates"
+private const val ABOUT_APP_UPDATES_ACTION = "dev.abotmaker.ramblerenhancements.OPEN_SETTINGS"
+private const val ABOUT_APP_UPDATES_SECTION_EXTRA = "section"
+private const val ABOUT_APP_UPDATES_SECTION_VALUE = "updates"
 
 internal val gboardAboutPageResourcePatch = resourcePatch(
     description = "在關於頁加入 patch 資訊。"
@@ -81,6 +85,47 @@ internal fun applyGboardAboutPagePatch(aboutDocument: Document) {
         intentUrl = GBOARD_PATCH_REPOSITORY_URL
     )
     screen.insertAfter(patchVersionPreference, authorPreference)
+
+    val appUpdatesPreference = ensureAboutSectionPreference(
+        document = aboutDocument,
+        key = ABOUT_APP_UPDATES_KEY,
+        title = "App updates",
+        summary = "Auto-check GitHub Releases & install updates in-app (SHA-256 verified)",
+        action = ABOUT_APP_UPDATES_ACTION,
+        extraName = ABOUT_APP_UPDATES_SECTION_EXTRA,
+        extraValue = ABOUT_APP_UPDATES_SECTION_VALUE,
+    )
+    screen.insertAfter(appUpdatesPreference, patchVersionPreference)
+}
+
+private fun ensureAboutSectionPreference(
+    document: Document,
+    key: String,
+    title: String,
+    summary: String,
+    action: String,
+    extraName: String,
+    extraValue: String,
+): Element {
+    val preference = ensureAboutPreference(
+        document = document,
+        key = key,
+        title = title,
+        summary = summary,
+        intentUrl = null,
+    )
+    preference.setAndroidAttribute("selectable", "true")
+    val intent = preference.ensureIntent()
+    intent.setAndroidAttribute("action", action)
+    intent.removeAttributeNS(ANDROID_NS, "data")
+    intent.removeAttribute("android:data")
+    val existingExtra = intent.childElements("extra").firstOrNull {
+        it.androidAttribute("name") == extraName
+    }
+    val extra = existingExtra ?: document.createElement("extra").also(intent::appendChild)
+    extra.setAndroidAttribute("name", extraName)
+    extra.setAndroidAttribute("value", extraValue)
+    return preference
 }
 
 private fun ensureAboutPreference(

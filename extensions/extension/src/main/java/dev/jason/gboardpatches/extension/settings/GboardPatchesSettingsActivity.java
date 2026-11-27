@@ -4150,7 +4150,13 @@ public final class GboardPatchesSettingsActivity extends Activity
             String patchVersion,
             Runnable authorAction,
             Runnable patchRepositoryAction) {
-        List<GboardPatchesSettingsContract.Row> featureRows =
+        List<GboardPatchesSettingsContract.Row> keyboardRows =
+                new ArrayList<GboardPatchesSettingsContract.Row>();
+        List<GboardPatchesSettingsContract.Row> voiceRows =
+                new ArrayList<GboardPatchesSettingsContract.Row>();
+        List<GboardPatchesSettingsContract.Row> clipboardRows =
+                new ArrayList<GboardPatchesSettingsContract.Row>();
+        List<GboardPatchesSettingsContract.Row> systemRows =
                 new ArrayList<GboardPatchesSettingsContract.Row>();
         Context context = host == null ? null : host.getContext();
         for (GboardPatchesSettingsContract.Feature feature : rootFeatures) {
@@ -4160,15 +4166,37 @@ public final class GboardPatchesSettingsActivity extends Activity
                             feature.getEntrySummary(),
                             true,
                             () -> feature.openRootEntry(host));
+            GboardPatchesSettingsContract.RowDecoration decoration = null;
             if (feature.getEntryIcon() != GboardPatchesIcons.NONE) {
-                navigationRow.setDecoration(new GboardPatchesSettingsContract.RowDecoration()
-                        .leadingIcon(feature.getEntryIcon(), feature.getEntryTone()));
+                decoration = new GboardPatchesSettingsContract.RowDecoration()
+                        .leadingIcon(feature.getEntryIcon(), feature.getEntryTone());
             }
-            featureRows.add(navigationRow);
+            if (feature.showRootEntryToggle()) {
+                GboardFeatureEntryState state = GboardFeatureEntryState.inspect(feature, host);
+                if (state.getMasterToggle() != null) {
+                    if (decoration == null) {
+                        decoration = new GboardPatchesSettingsContract.RowDecoration();
+                    }
+                    decoration.entryToggle(state.getMasterToggle());
+                }
+            }
+            if (decoration != null) {
+                navigationRow.setDecoration(decoration);
+            }
+            String sectionKey = feature.getRootSectionKey();
+            if (GboardPatchesSettingsContract.ROOT_SECTION_VOICE_INPUT.equals(sectionKey)) {
+                voiceRows.add(navigationRow);
+            } else if (GboardPatchesSettingsContract.ROOT_SECTION_CLIPBOARD_SHARING.equals(sectionKey)) {
+                clipboardRows.add(navigationRow);
+            } else if (GboardPatchesSettingsContract.ROOT_SECTION_SYSTEM.equals(sectionKey)) {
+                systemRows.add(navigationRow);
+            } else {
+                keyboardRows.add(navigationRow);
+            }
         }
-        List<GboardPatchesSettingsContract.Row> preferenceRows =
+        List<GboardPatchesSettingsContract.Row> systemAndPreferenceRows =
                 new ArrayList<GboardPatchesSettingsContract.Row>();
-        preferenceRows.add(new GboardPatchesSettingsContract.SelectorRow(
+        systemAndPreferenceRows.add(new GboardPatchesSettingsContract.SelectorRow(
                 GboardSettingsText.get(context, R.string.gboard_patches_language_title),
                 GboardSettingsText.get(context, R.string.gboard_patches_language_summary),
                 currentLanguageLabel(context),
@@ -4176,6 +4204,29 @@ public final class GboardPatchesSettingsActivity extends Activity
                 () -> showLanguageDialog(host))
                 .setDecoration(new GboardPatchesSettingsContract.RowDecoration()
                         .leadingIcon(GboardPatchesIcons.TRANSLATE, "slate")));
+        systemAndPreferenceRows.addAll(systemRows);
+
+        List<GboardPatchesSettingsContract.Section> sections =
+                new ArrayList<GboardPatchesSettingsContract.Section>();
+        if (!keyboardRows.isEmpty()) {
+            sections.add(new GboardPatchesSettingsContract.Section(
+                    GboardSettingsText.get(context, R.string.gboard_patches_section_keyboard),
+                    keyboardRows));
+        }
+        if (!voiceRows.isEmpty()) {
+            sections.add(new GboardPatchesSettingsContract.Section(
+                    GboardSettingsText.get(context, R.string.gboard_patches_section_voice_input),
+                    voiceRows));
+        }
+        if (!clipboardRows.isEmpty()) {
+            sections.add(new GboardPatchesSettingsContract.Section(
+                    GboardSettingsText.get(context, R.string.gboard_patches_section_clipboard_sharing),
+                    clipboardRows));
+        }
+        sections.add(new GboardPatchesSettingsContract.Section(
+                GboardSettingsText.get(context, R.string.gboard_patches_section_system),
+                systemAndPreferenceRows));
+
         String rootTitle = GboardSettingsText.get(context, R.string.gboard_patches_activity_title);
         return new GboardPatchesSettingsContract.Screen(
                 rootTitle,
@@ -4183,15 +4234,7 @@ public final class GboardPatchesSettingsActivity extends Activity
                 rootTitle,
                 GboardSettingsText.get(context, R.string.gboard_patches_header_summary),
                 Collections.emptyList(),
-                Arrays.asList(
-                        new GboardPatchesSettingsContract.Section(
-                                GboardSettingsText.get(context,
-                                        R.string.gboard_patches_section_features),
-                                featureRows),
-                        new GboardPatchesSettingsContract.Section(
-                                GboardSettingsText.get(context,
-                                        R.string.gboard_patches_section_preferences),
-                                preferenceRows)));
+                sections);
     }
 
     private static void showLanguageDialog(GboardPatchesSettingsContract.FeatureHost host) {

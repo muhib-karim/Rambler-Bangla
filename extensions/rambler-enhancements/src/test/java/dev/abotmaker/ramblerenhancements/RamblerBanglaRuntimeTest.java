@@ -376,6 +376,15 @@ public class RamblerBanglaRuntimeTest {
                 + sha + "  RamblerBangla-v31.6.0-gboard-18.5.4-arm64-v8a.apk\n";
         Assert.assertEquals(sha, RamblerAutoUpdater.parseExpectedSha256(sums, info.apkName));
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
+
+        // About → App updates section routes directly to SECTION_UPDATES
+        Assert.assertEquals("31.6.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals(
+                RamblerEnhancementsActivity.SECTION_UPDATES,
+                RamblerEnhancementsActivity.normalizeSection("updates"));
+        Assert.assertEquals(
+                "App updates",
+                RamblerEnhancementsActivity.titleForSection("updates"));
     }
 
     private static boolean containsBengali(String s) {

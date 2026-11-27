@@ -2,6 +2,21 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.6.0] - 2026-11-28
+
+**Production Settings Redesign: App Auto-Updates under About, 4-Section Patches Tab & Moved Keyboard/Clipboard/Launcher Controls.**
+
+- **App Auto-Updates moved under Settings → About:**
+  - `GboardAboutPageResourcePatch` now adds **App updates** directly under **Settings → About** (right after Author & Patch Version), launching a dedicated **App updates** screen (`RamblerEnhancementsActivity`, `section="updates"`) with the **Auto-check for updates** toggle, **Check for updates now**, SHA-256 `SHA256SUMS.txt` verification, and 1-tap `PackageInstaller` updates.
+- **Redesigned 4-Section Patches Tab (Distinct Rambler Bangla Organization):**
+  - Replaced upstream's flat generic "Features" + "More settings" layout with 4 clean, purpose-built sections (all 100% searchable with regenerated `GboardSettingsSearchIndexData.java`):
+    1. **Keyboard:** *Appearance & Theme* (now including **AMOLED Dark Keyboard (#000000)** alongside Frosted Glass, Custom Theme, Rounded Keyboard, Spacebar Logo, Emoji Size), *Layout, Keys & Toolbar*, *Typing Tools & Gestures*, and a direct 1-tap **Hide launcher icon** toggle.
+    2. **Voice & Smart Input:** *AI & Voice Input* and *Dictionaries & Predictions*.
+    3. **Clipboard & Sharing:** *Clipboard* (now including **Drag-to-reorder clips** moved from Rambler Enhancements) and *FTP Server*.
+    4. **System & Preferences:** *Language*, *Settings Style*, *Backup & Restore*, and *Developer Options*.
+- **Focused Rambler Enhancements Tab:** Removed keyboard/launcher/updater controls from `RamblerEnhancementsActivity` so **Rambler Enhancements** stays cleanly dedicated to Rambler+ voice, Bangla script/phonetics, Hex waveforms, per-app rules, dictionary/contacts, snippets/replace, and dictation stats/history.
+- **Homepage & Navigation Map:** Updated `README.md`, `docs/index.html`, `docs/banner.svg`, `docs/feature-showcase.svg`, and Morphe manifests (`patches-bundle.json`, `patches-list.json`) with a clear Settings Navigation Map and complete GPL-3.0/MIT/MPL-2.0/BSD/§7c credits.
+
 ## [31.5.0] - 2026-11-28
 
 **Pure Bangla Natural Spelling Overhaul, Hyphenated Enclitic Fix, SHA-256 Verified In-App GitHub Auto-Updater & 2-Minute Setup Guide.**

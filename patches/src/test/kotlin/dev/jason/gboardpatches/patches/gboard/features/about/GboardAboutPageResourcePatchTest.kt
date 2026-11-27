@@ -33,7 +33,7 @@ class GboardAboutPageResourcePatchTest {
         applyGboardAboutPagePatch(document)
 
         val children = document.documentElement.childElements().toList()
-        assertEquals(6, children.size)
+        assertEquals(7, children.size)
         assertEquals(ABOUT_VERSION_KEY_REF, androidAttribute(children[3], "key"))
         assertTrue(originalVersion.isEqualNode(children[3]))
         assertAboutRow(
@@ -50,6 +50,15 @@ class GboardAboutPageResourcePatchTest {
             summary = GBOARD_PATCH_VERSION,
             intentUrl = GBOARD_PATCH_REPOSITORY_URL,
         )
+        assertAboutSectionRow(
+            element = children[6],
+            key = "gboard_about_app_updates",
+            title = "App updates",
+            summary = "Auto-check GitHub Releases & install updates in-app (SHA-256 verified)",
+            action = "dev.abotmaker.ramblerenhancements.OPEN_SETTINGS",
+            extraName = "section",
+            extraValue = "updates",
+        )
     }
 
     @Test
@@ -60,20 +69,24 @@ class GboardAboutPageResourcePatchTest {
         applyGboardAboutPagePatch(document)
 
         val children = document.documentElement.childElements().toList()
-        assertEquals(6, children.size)
+        assertEquals(7, children.size)
         assertEquals(1, children.count {
             androidAttribute(it, "key") == "gboard_about_author"
         })
         assertEquals(1, children.count {
             androidAttribute(it, "key") == "gboard_about_patch_version"
         })
+        assertEquals(1, children.count {
+            androidAttribute(it, "key") == "gboard_about_app_updates"
+        })
         assertEquals(
             listOf(
                 ABOUT_VERSION_KEY_REF,
                 "gboard_about_author",
                 "gboard_about_patch_version",
+                "gboard_about_app_updates",
             ),
-            children.takeLast(3).map { androidAttribute(it, "key") },
+            children.takeLast(4).map { androidAttribute(it, "key") },
         )
     }
 
@@ -86,10 +99,11 @@ class GboardAboutPageResourcePatchTest {
         applyGboardAboutPagePatch(document)
 
         val children = document.documentElement.childElements().toList()
-        assertEquals(6, children.size)
+        assertEquals(7, children.size)
         assertEquals(ABOUT_VERSION_SANITIZED_KEY_REF, androidAttribute(children[3], "key"))
         assertEquals("gboard_about_author", androidAttribute(children[4], "key"))
         assertEquals("gboard_about_patch_version", androidAttribute(children[5], "key"))
+        assertEquals("gboard_about_app_updates", androidAttribute(children[6], "key"))
     }
 
     @Test
@@ -102,10 +116,11 @@ class GboardAboutPageResourcePatchTest {
         applyGboardAboutPagePatch(document)
 
         val children = document.documentElement.childElements().toList()
-        assertEquals(6, children.size)
+        assertEquals(7, children.size)
         assertEquals(ABOUT_VERSION_KEY_REF, androidAttribute(children[3], "key"))
         assertEquals("gboard_about_author", androidAttribute(children[4], "key"))
         assertEquals("gboard_about_patch_version", androidAttribute(children[5], "key"))
+        assertEquals("gboard_about_app_updates", androidAttribute(children[6], "key"))
     }
 
     @Test
@@ -127,12 +142,13 @@ class GboardAboutPageResourcePatchTest {
         applyGboardAboutPagePatch(document)
 
         val children = screen.childElements().toList()
-        assertEquals(8, children.size)
+        assertEquals(9, children.size)
         assertTrue(children[3].isSameNode(titleDecoy))
         assertTrue(children[4].isSameNode(oldKeyDecoy))
         assertTrue(children[5].isSameNode(stockVersion))
         assertEquals("gboard_about_author", androidAttribute(children[6], "key"))
         assertEquals("gboard_about_patch_version", androidAttribute(children[7], "key"))
+        assertEquals("gboard_about_app_updates", androidAttribute(children[8], "key"))
     }
 
     @Test
@@ -231,6 +247,34 @@ class GboardAboutPageResourcePatchTest {
         assertEquals(1, intents.size)
         assertEquals("android.intent.action.VIEW", androidAttribute(intents.single(), "action"))
         assertEquals(intentUrl, androidAttribute(intents.single(), "data"))
+    }
+
+    private fun assertAboutSectionRow(
+        element: Element,
+        key: String,
+        title: String,
+        summary: String,
+        action: String,
+        extraName: String,
+        extraValue: String,
+    ) {
+        assertEquals(ABOUT_PREFERENCE_CLASS, element.tagName)
+        assertEquals(key, androidAttribute(element, "key"))
+        assertEquals(title, androidAttribute(element, "title"))
+        assertEquals(summary, androidAttribute(element, "summary"))
+        assertEquals("false", androidAttribute(element, "persistent"))
+        assertEquals("false", androidAttribute(element, "focusable"))
+        assertEquals("true", androidAttribute(element, "selectable"))
+        assertEquals("100", androidAttribute(element, "maxLines"))
+
+        val intents = element.childElements("intent").toList()
+        assertEquals(1, intents.size)
+        val intent = intents.single()
+        assertEquals(action, androidAttribute(intent, "action"))
+        val extras = intent.childElements("extra").toList()
+        assertEquals(1, extras.size)
+        assertEquals(extraName, androidAttribute(extras.single(), "name"))
+        assertEquals(extraValue, androidAttribute(extras.single(), "value"))
     }
 
     private fun parse(bytes: ByteArray): Document =
