@@ -33,6 +33,7 @@ public final class GboardPatchesIcons {
     public static final int MORE = 18;
     public static final int KEYBOARD = 19;
     public static final int CLIPBOARD_SELECT_UNPINNED = 20;
+    public static final int VISIBILITY_OFF = 21;
 
     private static final float VIEWPORT = 24f;
 
@@ -110,6 +111,8 @@ public final class GboardPatchesIcons {
                 return "M6,10a2,2 0,1 0,0 4a2,2 0,1 0,0 -4M12,10a2,2 0,1 0,0 4a2,2 0,1 0,0 -4M18,10a2,2 0,1 0,0 4a2,2 0,1 0,0 -4";
             case KEYBOARD:
                 return "M4,19q-0.825,0-1.4125-0.5875T2,17V7q0-0.825 0.5875-1.4125T4,5H20q0.825,0 1.4125,0.5875T22,7V17q0,0.825-0.5875,1.4125T20,19H4Zm0-2H20V7H4V17Zm4-1H16V14H8v2ZM5,13h2V11H5v2Zm3,0h2V11H8v2Zm3,0h2V11H11v2Zm3,0h2V11H14v2Zm3,0h2V11H17v2ZM5,10h2V8H5v2Zm3,0h2V8H8v2Zm3,0h2V8H11v2Zm3,0h2V8H14v2Zm3,0h2V8H17v2ZM4,17V7V17Z";
+            case VISIBILITY_OFF:
+                return "M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z";
             default:
                 return null;
         }

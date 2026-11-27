@@ -1,13 +1,13 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.5.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.6.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.5.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **Pure Bangla Natural Spelling Overhaul & Enclitic Fix:** 70+ curated Bengali loanwords + 2,265-word Avro Tier-1 priority in Pure Bangla mode + systematic CMUdict cleanup (`ইংলিশ`, `আন্ডারস্ট্যান্ডস`, `ক্লিয়ারলি`, etc.) + hyphenated enclitic particle fix (`সব-i` → `সব-ই`).
-   - **SHA-256 Verified In-App GitHub Auto-Updater (`RamblerAutoUpdater`):** Live toggle + "Check for updates now" inside **Rambler Enhancements**, verifying `SHA256SUMS.txt` fail-closed before launching Android's native 1-tap `PackageInstaller` sheet.
-   - **Beginner-Friendly 2-Minute Setup Guide** on GitHub homepage (`README.md`) & GitHub Pages (`docs/index.html`).
+1. **Completed:** Shipped **`Rambler Bangla v31.6.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **App Auto-Updates under Settings → About:** Added `gboard_about_app_updates` in `GboardAboutPageResourcePatch` opening `RamblerEnhancementsActivity` (`SECTION_UPDATES`) for SHA-256 verified 1-tap GitHub Releases updates.
+   - **Redesigned 4-Section Patches Tab & Moved Keyboard/Clipboard/Launcher Controls:** Reorganized `Patches` into **Keyboard** (*Appearance & Theme* with **AMOLED Dark Keyboard**, *Layout, Keys & Toolbar*, *Typing Tools & Gestures*, and 1-tap **Hide launcher icon**), **Voice & Smart Input**, **Clipboard & Sharing** (with **Drag-to-reorder clips** inside Clipboard + FTP Server), and **System & Preferences** — with regenerated `GboardSettingsSearchIndexData.java` and zero keyboard/updater clutter in **Rambler Enhancements**.
+   - **Production GitHub Homepage & Docs:** Updated `README.md`, `docs/index.html`, `docs/banner.svg`, `docs/feature-showcase.svg`, `patches-bundle.json`, and `patches-list.json` with a full Settings Navigation Map and complete GPL-3.0/MIT/MPL-2.0/BSD/§7c credits.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.
