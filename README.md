@@ -55,7 +55,7 @@ Gboard's on-device voice cleanup stage tends to rewrite Bengali dictation into L
 
 ## Included Patches
 
-Rambler Bangla v31.0.0 ships **59 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
+Rambler Bangla v31.2.0 ships **59 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
 
 ### Rambler Bangla (Bengali-First Voice, Phonetic Engine & Strip Tools)
 
@@ -74,7 +74,7 @@ Rambler Bangla v31.0.0 ships **59 selectable Morphe patches** in one unified `.m
 <details>
   <summary><code>At-Mention &amp; Email Strip Suggestions</code></summary>
 
-  SwiftKey-style `@handle` and email domain suggestion strip: automatically learns previously typed `@handles` (e.g. `@grok`, `@claude`) and email domains (e.g. `@gmail.com`) on-device, displays scrollable Material You tap-to-insert chips when typing `@` / `@prefix`, supports long-press to forget and Settings toggle/clear, enables Gboard's native `enable_email_provider_completion` flag, coexists cleanly with Simple Calculator and Manual Incognito, and stays strictly fail-closed in password/incognito fields.
+  SwiftKey-style, 100% personalized `@handle` and email domain suggestions injected **directly into Gboard's native suggestion strip** (`InputBundle` / `CandidateViewBuilder` / `LatinFixedCountCandidatesHolderView` — zero floating overlay, automatically matching AMOLED Dark, Material You, Frosted Glass, and Custom Themes). Learns typed and dictated `@handles` (e.g. `@grok`, `@claude`) and email domains (e.g. `@gmail.com`) on-device across space/punctuation, Send/Enter, field switch, and keyboard hide; ranks by frequency + recency; supports native drag-up-to-remove and Settings add/toggle/clear; coexists cleanly with Simple Calculator and Manual Incognito; and stays strictly fail-closed in password/incognito fields.
 </details>
 
 ### Dutch App Patches / `nl-morphe-patches` 18.5.4 Ports *(credit: [johninnld/nl-morphe-patches](https://gitlab.com/johninnld/nl-morphe-patches), GPL v3.0)*
@@ -539,7 +539,7 @@ tests/                run_tests.sh static suite, python/ unit tests, Java policy
 scripts/              bootstrap_tools.sh, verify_apk.sh, clip_e2e.py (emulator driver)
 rename/               side-by-side package rename tooling
 morphe-patch/         Morphe bytecode patch + RuntimeAbi snippet for the upstream tree
-patches/              Unified Morphe Patcher 2.1.0 Gradle module (59 patches -> patches-31.0.0.mpp)
+patches/              Unified Morphe Patcher 2.1.0 Gradle module (59 patches -> patches-31.2.0.mpp)
 extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve + Rambler Bangla runtime)
 docs/historical/      Historical V29.3 smali hook diff for the 18.3.1 patch layer's own classes
 data/loanspell/       loanword table, overrides and Java generator
