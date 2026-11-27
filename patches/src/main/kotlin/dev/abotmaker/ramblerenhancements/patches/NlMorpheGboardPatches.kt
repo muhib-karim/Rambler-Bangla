@@ -265,15 +265,19 @@ internal fun MutableMethod.applyAmoledDarkPalette(
     if (scratch < 0) {
         throw PatchException("FAIL-CLOSED: No local register available in $definingClass->$name")
     }
-    // Check that p0 and p1 are addressable by 4-bit iget-boolean/iput/invoke-static (p1 <= 15; else move).
-    val p1RegIndex = localCount + 1
+    // Check that p0 is addressable by 4-bit iget-boolean/iput (p0 <= 15; else move).
+    // IMPORTANT: Never read p1 (Context) before return-void — R8 reuses p1 for the int result
+    // of context.getColor(...) right before return-void in Gboard 18.5.4's Lrmt;-><init>, which
+    // triggers an ART VerifyError if p1 is passed as Context. Always use zero-arg
+    // isAmoledDarkKeyboardEnabled()Z instead.
+    val p0RegIndex = localCount
     val returnIndex = returns.single()
-    val snippet = if (p1RegIndex <= 15) {
+    val snippet = if (p0RegIndex <= 15) {
         buildString {
             appendLine("iget-boolean v$scratch, p0, $isLightField")
             appendLine("if-nez v$scratch, :amoled_dark_surface_done")
             appendLine(
-                "invoke-static {p1}, $SETTINGS_CLASS_TYPE->readAmoledDarkKeyboardEnabled(Landroid/content/Context;)Z",
+                "invoke-static {}, $SETTINGS_CLASS_TYPE->isAmoledDarkKeyboardEnabled()Z",
             )
             appendLine("move-result v$scratch")
             appendLine("if-eqz v$scratch, :amoled_dark_surface_done")
@@ -282,15 +286,14 @@ internal fun MutableMethod.applyAmoledDarkPalette(
         }
     } else {
         if (localCount < 2) {
-            throw PatchException("FAIL-CLOSED: Need 2 low local registers for high p0/p1 in $definingClass->$name")
+            throw PatchException("FAIL-CLOSED: Need 2 low local registers for high p0 in $definingClass->$name")
         }
         buildString {
             appendLine("move-object/from16 v0, p0")
             appendLine("iget-boolean v1, v0, $isLightField")
             appendLine("if-nez v1, :amoled_dark_surface_done")
-            appendLine("move-object/from16 v1, p1")
             appendLine(
-                "invoke-static {v1}, $SETTINGS_CLASS_TYPE->readAmoledDarkKeyboardEnabled(Landroid/content/Context;)Z",
+                "invoke-static {}, $SETTINGS_CLASS_TYPE->isAmoledDarkKeyboardEnabled()Z",
             )
             appendLine("move-result v1")
             appendLine("if-eqz v1, :amoled_dark_surface_done")

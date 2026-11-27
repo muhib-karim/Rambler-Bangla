@@ -1,13 +1,13 @@
 # Handoff — Rambler Bangla
 
-**Date:** 2026-11-27  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.3.0`)
+**Date:** 2026-11-28  
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v31.3.1`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v31.3.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`) adding:
+1. **Completed:** Shipped **`Rambler Bangla v31.3.1`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), fixing the `v31.3.0` ART `VerifyError` in `Lrmt;-><init>` (caused by R8 clobbering `p1` with `move-result p1` before `return-void`) by calling zero-arg `RamblerEnhancementsSettings.isAmoledDarkKeyboardEnabled()`, while delivering:
    - **Live in-app `AMOLED Dark Keyboard` toggle** (default **OFF** so stock Material You dark gray contrast stays normal unless the user turns AMOLED `#000000` ON in **Rambler Enhancements → Keyboard appearance & clipboard**).
    - **Persistent 4-direction `Clipboard Drag-to-Reorder`** (new 60th Morphe patch, default **ON**): tap & hold + drag clipboard cards within **Pinned** or **Recent** with persistent `ClipboardContentProvider` timestamp ordering (plus image clip file renames), while keeping stationary long-press Pin/Paste/Delete popup, swipe-to-delete with Undo, and Edit Mode intact.
-   - Maintainer-signed Release APK (`679cfdec...`) for seamless in-place upgrades over `v31.2.0`+.
+   - Maintainer-signed Release APK (`679cfdec...`) verified with real ART `cmd package compile -m verify -f` + live IME activation on Android 15 KVM emulator.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.
@@ -37,9 +37,9 @@
   - `extensions/rambler-enhancements/src/main/java/com/akshaykadam/pixelboard/extension/rambler/{GboardRamblerScriptFix,GboardRamblerLayoutPair}.java`
   - `extensions/extension/src/main/java/dev/jason/gboardpatches/extension/rambler/GboardRamblerStockPolicy.java`
 - **Docs & metadata:** `README.md`, `CHANGELOG.md`, `docs/index.html`, `docs/banner.svg`, `docs/feature-showcase.svg`, `docs/PROJECT_BRAIN.md`, `patches-bundle.json`, `patches-list.json`, `ATTRIBUTION.md`, `THIRD-PARTY-NOTICES.md`, `NOTICE`
-- **Release artifacts (`v31.3.0`, maintainer-signed cert `679cfdec...`):**
-  - `/sdcard/Download/RamblerBangla-v31.3.0-gboard-18.5.4-arm64-v8a.apk`
-  - `patches-31.3.0.mpp` on GitHub Release (`SHA-256: 8ed207a351a7d9683e9d2ddcfab278e2cdecd217f244618f99b5da376a971dcd`)
+- **Release artifacts (`v31.3.1`, maintainer-signed cert `679cfdec...`):**
+  - `/sdcard/Download/RamblerBangla-v31.3.1-gboard-18.5.4-arm64-v8a.apk`
+  - `patches-31.3.1.mpp` on GitHub Release
 
 ## Test Results (`v31.3.0`)
 - **Python unit tests & selftests:** **88/88** passed (1 skipped), `ci_gate_selftest.sh` **PASS**, `url_allowlist_selftest.sh` **PASS**.

@@ -560,7 +560,7 @@ public final class RamblerEnhancementsActivity extends Activity {
         // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
         TextView creditView = new TextView(this);
-        creditView.setText("Rambler Bangla v31.3.0 — by muhib-karim (GPLv3)");
+        creditView.setText("Rambler Bangla v31.3.1 — by muhib-karim (GPLv3)");
         creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         creditView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(

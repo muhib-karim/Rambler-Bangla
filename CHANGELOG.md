@@ -2,6 +2,12 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.3.1] - 2026-11-28
+
+**Hotfix: Fixed ART `VerifyError` crash on keyboard load in `Lrmt;-><init>` & Hardened ART/IME Emulator Verification.**
+
+- **Fixed keyboard not loading after `v31.3.0`:** In Gboard 18.5.4's `Lrmt;-><init>(Context, Z)V`, R8 reuses parameter register `p1` for an `int` color return value (`move-result p1`) right before `return-void`. Passing `p1` to `readAmoledDarkKeyboardEnabled(Context)` triggered an ART `VerifyError` when inflating the keyboard theme. Replaced with zero-arg `RamblerEnhancementsSettings.isAmoledDarkKeyboardEnabled()` (using `RamblerFlagRuntime.resolveContext()`), added a clobbered-`p1` unit test in `RamblerBanglaPatchTest`, added clean-decompilation JADX checks, and hardened `android-smoke.yml` with real ART `cmd package compile -m verify -f` + live IME activation check.
+
 ## [31.3.0] - 2026-11-27
 
 **Live `AMOLED Dark Keyboard` Toggle (Default OFF) & Persistent `Clipboard Drag-to-Reorder` (60 Morphe Patches).**
