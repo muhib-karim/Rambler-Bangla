@@ -7,9 +7,10 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
 
 ## Status
 
-- Branch `feat/v31-rambler-plus-nl-patches` upgrades Rambler Bangla to `v31.0.0`
-  (Morphe Patcher 2.1.0 targeting Gboard `18.5.4.993608717-release-arm64-v8a`)
-  with **59 selectable Morphe patches**:
+- `main` (`v31.2.0`, commit `f4f0123`) ships Rambler Bangla as a unified
+  Morphe Patcher 2.1.0 suite targeting Gboard `18.5.4.993608717-release-arm64-v8a`
+  with **59 selectable Morphe patches** and a persistent maintainer-signed
+  release APK (`679cfdec...` for in-place upgrades):
   - **3 Rambler Bangla patches**: `Rambler Bangla Lite Script Policy`
     (fail-closed SHA-256 fingerprint-guarded JetsonLite `fja.d` / `ezn.b` hooks,
     supporting both Gboard 18.5.4 `adcb7fd5...` and 18.3.1 `347a9484...` cleanup
@@ -17,8 +18,9 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
     `Rambler Bangla Phonetic & Multilingual Engine` (complete V29.3+/V29.5
     runtime + active Gboard locale handoff via `fhv.w()` + EN/BN pairing default
     ON + fail-closed sensitive/password/incognito bypass), and
-    `At-Mention & Email Strip Suggestions` (SwiftKey-style `@grok` / `@claude` /
-    `@gmail.com` suggestion strip + `enable_email_provider_completion`).
+    `At-Mention & Email Strip Suggestions` (100% personalized `@grok` / `@claude` /
+    `@gmail.com` learning injected directly into Gboard's native suggestion strip
+    via `pbh` / `pbo` / `owu` / `phr` with native theme matching & drag-up-to-remove).
   - **3 `nl-morphe-patches` Gboard 18.5.4 ports**: `AMOLED Dark Keyboard`
     (dynamic `Lrmt;` `#000000` dark surfaces), `Rambler Toolbar & Revert Extras`,
     and `Hidden Flags Override` (`okf.g(olk.OVERRIDE)` -> `okq.e()`).
@@ -44,6 +46,20 @@ you stop. Rules live in `AGENTS.md`; history lives in git and
    `THIRD-PARTY-NOTICES.md`.
 
 ## Session log
+
+- 2026-11-27 (v31.2.0): Replaced floating `@` overlay with true native Gboard
+  suggestion-strip integration (`pbh` / `pbo` / `owu` / `phr` candidate pipeline;
+  zero white box; inherits AMOLED/Material You/Frosted Glass/Custom themes +
+  native drag-up-to-remove), kept 100% personalized standalone `@` learning from
+  v31.1.0, signed via persistent maintainer certificate (`679cfdec...`), passed
+  CI (`#45901580767`), Static suite (`#45901580798`), and Android 15 KVM smoke
+  test (`#45902128012`), merged PR #33 (`f4f0123`), published `v31.2.0`, and
+  synced `README.md`, `docs/index.html`, `docs/PROJECT_BRAIN.md`, and `HANDOFF.md`.
+- 2026-11-27 (v31.1.0): Made `@` suggestions 100% personalized (no static
+  standalone defaults; learns on space/punctuation, Send/Enter, field switch,
+  hide, and voice dictation; manual add dialog in Settings), switched APK
+  release signing to persistent maintainer key (`679cfdec...`) via
+  `private-test-build.yml`, merged PR #32 (`efe1b6b`), and published `v31.1.0`.
 
 - 2026-11-27 (v31.0.0): Fixed Rambler+ activation root cause (`enable_agentic_dictation`
   unconditionally true in `GboardRamblerStockPolicy` + `RamblerFlagRuntime`), wired live
