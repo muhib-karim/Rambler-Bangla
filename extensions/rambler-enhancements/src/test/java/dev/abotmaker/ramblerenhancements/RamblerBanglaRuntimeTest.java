@@ -380,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("31.9.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("32.0.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));
@@ -448,14 +448,16 @@ public class RamblerBanglaRuntimeTest {
 
     @Test
     public void fullLanguageBanglaLexiconFixesUnseenSpellingsWithZeroFalsePositives() {
-        int count = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon.validWordCount();
-        Assert.assertTrue("Expected full ~190k Bengali lexicon loaded, got: " + count, count > 180000);
+        int count = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon.loadBlockingForTesting();
+        Assert.assertTrue("Expected lean ~89k Bengali lexicon loaded, got: " + count, count > 80000);
+        long loadMs = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon.getLoadMs();
+        Assert.assertTrue("Lexicon must record load time >= 0ms, got: " + loadMs + "ms", loadMs >= 0L);
 
         GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
         GboardRamblerScriptFix.jvmLayoutKind = 1;
         try {
             // Unseen words NOT in the 120-entry manual SPELLING_FIXES list, repaired automatically
-            // by the 190,405-word OpenBangla + bn_BD phonetic-skeleton + suffix engine:
+            // by the OpenBangla + bn_BD phonetic-skeleton + suffix engine:
             String unseen = "পরিক্ষা এবং বিস্ববিদ্যালয় এর ভবিস্যত প্রস্ন অবস্যই বৈসিস্ট্য পোষাক বাংলাদেস জিনীষ মানুস পৃথিবি সুনতে খুসি বেবহার সিক্ষক উপস্তিত.";
             String out = GboardRamblerScriptFix.processVoice(unseen);
             String[] expected = {
@@ -472,11 +474,52 @@ public class RamblerBanglaRuntimeTest {
             Assert.assertTrue("Expected অবশ্যই: " + inflected, inflected.contains("অবশ্যই"));
             Assert.assertTrue("Expected বিশ্ববিদ্যালয়গুলো: " + inflected, inflected.contains("বিশ্ববিদ্যালয়গুলো"));
 
+            // User screenshot #3 regressions: "বানান তা এখনো ভুল হৈতেচে।" -> "বানানটা এখনো ভুল হচ্ছে।"
+            String shot3Pure = GboardRamblerScriptFix.processVoice("বানান তা এখনো ভুল হৈতেচে।");
+            Assert.assertEquals("বানানটা এখনো ভুল হচ্ছে।", shot3Pure);
+            String shot3Rom = GboardRamblerScriptFix.processVoice("banan ta ekhono bhul hoitese.");
+            Assert.assertTrue("Expected হচ্ছে (never হৈতেচে): " + shot3Rom, shot3Rom.contains("হচ্ছে") && !shot3Rom.contains("হৈতেচে"));
+
             // Valid Bengali words must NEVER be falsely altered
             String validSentence = "দরকার অনেক পৃথিবী ব্যবহার শিক্ষক উপস্থিত জিনিস শুনতে শবদেহ শব্দ।";
             Assert.assertEquals(validSentence, GboardRamblerScriptFix.processVoice(validSentence));
+
+            // User screenshot #3 Mixed mode regressions: ASCII '-', en-dash '–', and non-breaking hyphen '‑'
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
+            GboardRamblerScriptFix.jvmLayoutKind = 2;
+            for (String dash : new String[] { "-", "\u2013", "\u2011" }) {
+                String shot3Mix = GboardRamblerScriptFix.processVoice(
+                        "বাংলা English সব" + dash + "i বলতেসি, তাহলে কাজ করতেসে না কেনো ঠিকমত? So it's supposed to understand and work perfectly, right?");
+                Assert.assertTrue("Expected সবই for dash '" + dash + "', got: " + shot3Mix,
+                        shot3Mix.contains("সবই") && !shot3Mix.contains("সব" + dash + "i"));
+                Assert.assertTrue("Expected ঠিকমতো: " + shot3Mix, shot3Mix.contains("ঠিকমতো"));
+                Assert.assertTrue("Expected English preserved: " + shot3Mix,
+                        shot3Mix.contains("English") && shot3Mix.endsWith("So it's supposed to understand and work perfectly, right?"));
+            }
+
+            // Live Gemini Rambler+ prompt injection matches active keyboard mode cleanly
+            RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC = true;
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+            GboardRamblerScriptFix.jvmLayoutKind = 1;
+            String purePrompt = RamblerCustomInstructionRules.buildActiveBanglaScriptInstruction(null);
+            Assert.assertNotNull(purePrompt);
+            Assert.assertTrue(purePrompt.contains("Bangla Academy"));
+            Assert.assertTrue(purePrompt.contains("NEVER output Romanized Banglish"));
+
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
+            GboardRamblerScriptFix.jvmLayoutKind = 2;
+            String mixedPrompt = RamblerCustomInstructionRules.buildActiveBanglaScriptInstruction(null);
+            Assert.assertNotNull(mixedPrompt);
+            Assert.assertTrue(mixedPrompt.contains("Mixed Bengali + English"));
+            Assert.assertTrue(mixedPrompt.contains("সবই"));
+
+            GboardRamblerScriptFix.setActiveGboardKeyboard("en-US", "qwerty");
+            GboardRamblerScriptFix.jvmLayoutKind = 3;
+            Assert.assertNull("English keyboard must not inject Bangla instruction",
+                    RamblerCustomInstructionRules.buildActiveBanglaScriptInstruction(null));
         } finally {
             GboardRamblerScriptFix.jvmLayoutKind = 0;
+            GboardRamblerScriptFix.setActiveGboardKeyboard(null, null);
         }
     }
 

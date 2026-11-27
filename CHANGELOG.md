@@ -2,6 +2,22 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [32.0.0] - 2026-11-28
+
+**Live Gemini Rambler+ Bangla Academy Script Prompt Injection, Zero-Delay Non-Blocking Lexicon, Bulletproof `সব-i` / `হৈতেচে` / `বানানটা` Fixes & ~3.9 MB Slimmer APK.**
+
+- **Live Gemini Rambler+ Active-Keyboard Bangla Script Injection (`RamblerCustomInstructionRules` + `RamblerTextPipeline`):**
+  - Refreshes the active Gboard keyboard (`বাংলা` vs `abc → বাংলা` vs `English (US)`) on **every single mic tap** (`captureSessionContext`), not just extension activation.
+  - Automatically injects a concise, Bangla Academy **language and script convention** directly into **Google's live Gemini Rambler+ `<custom_instruction>`** (`user_preferences` Bundle, merged cleanly with any user custom rules) whenever `বাংলা` or `abc → বাংলা` is active — so Gemini Rambler+ itself transcribes fluent, context-aware Bangla Academy Bengali (`বানানটা এখনো ভুল হচ্ছে।`, `সবই`, `ঠিকমতো`) directly from audio instead of emitting Romanized Banglish for Avro to guess. Leaves `English (US)` completely untouched.
+- **Zero-Delay Non-Blocking Bengali Lexicon (`GboardRamblerBanglaLexicon`):**
+  - Removed synchronous commit-thread blocking (`READY.await` / `loadNow` on commit) so voice dictation commits incur **0 ms delay**.
+  - Slimmed `GboardRamblerBanglaLexiconData` to a fast **89,556-word** spoken+core valid set (`29,423` frequency-ranked spoken words + core `bn_BD` roots), preloaded asynchronously at extension activation / mic tap in **< 60 ms** (~200 KB smaller).
+- **Bulletproof Post-Commit Safety Net Fixes:**
+  - Fixed `সব-i` in Mixed mode (`abc → বাংলা`) in both `GboardRamblerSentenceLang` (enclitic check now runs **before** `T_EN_GRAM` skip and handles all Unicode hyphens/dashes `-`, `‐`, `‑`, `–`, `—`, `−`) and `GboardRamblerBanglaNormalizer` (final failsafe for any stray `<Bengali><dash>i/o/e` → `সবই` / `বাংলা-ও`).
+  - Fixed broken Avro/ASR forms: `হৈতেচে`/`হৈতেছে`/`hoitese`/`hoiteche` → **`হচ্ছে`**, `ঠিকমত` → **`ঠিকমতো`**, and natural noun+`তা` → `টা` phrases (`বানান তা` → **`বানানটা`**, `কথা তা` → **`কথাটা`**, `জিনিস তা` → **`জিনিসটা`**, etc.).
+- **~3.9 MB Slimmer APK (Zero Features Lost):**
+  - Optimized all 34 `patches/src/main/resources/settings-previews` PNG/JPG/MP4 previews (`4.55 MB` → `0.89 MB`, **-3.66 MB**) plus the leaner Bengali lexicon (**-0.20 MB**) while keeping all 60 patches and every visual preview crisp and intact.
+
 ## [31.9.0] - 2026-11-28
 
 **Full-Language 190,405-Word Offline Bengali Orthography Engine + Android 14–16 In-App Auto-Updater Fix.**

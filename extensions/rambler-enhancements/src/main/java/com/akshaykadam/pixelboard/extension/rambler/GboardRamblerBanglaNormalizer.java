@@ -30,6 +30,20 @@ public final class GboardRamblerBanglaNormalizer {
         {"স্বাভাবিক ভাবে", "স্বাভাবিকভাবে"},
         {"সাধারণ ভাবে", "সাধারণভাবে"},
         {"রাইট নাউ", "রাইট নাও"},
+        {"বানান তা", "বানানটা"},
+        {"কথা তা", "কথাটা"},
+        {"জিনিস তা", "জিনিসটা"},
+        {"ব্যাপার তা", "ব্যাপারটা"},
+        {"কাজ তা", "কাজটা"},
+        {"নাম তা", "নামটা"},
+        {"সময় তা", "সময়টা"},
+        {"অ্যাপ তা", "অ্যাপটা"},
+        {"ফোন তা", "ফোনটা"},
+        {"আপডেট তা", "আপডেটটা"},
+        {"স্পেলিং তা", "স্পেলিংটা"},
+        {"জায়গা তা", "জায়গাটা"},
+        {"প্রশ্ন তা", "প্রশ্নটা"},
+        {"উত্তর তা", "উত্তরটা"},
     };
 
     static {
@@ -201,6 +215,12 @@ public final class GboardRamblerBanglaNormalizer {
         m.put("ঘুমাছে", "ঘুমাচ্ছে");
         m.put("খুশী", "খুশি");
         m.put("পোষাক", "পোশাক");
+        m.put("হৈতেচে", "হচ্ছে");
+        m.put("হৈতেছে", "হচ্ছে");
+        m.put("হইতেচে", "হচ্ছে");
+        m.put("হোইতেসে", "হচ্ছে");
+        m.put("হোইতেছে", "হচ্ছে");
+        m.put("ঠিকমত", "ঠিকমতো");
 
         SPELLING_FIXES = Collections.unmodifiableMap(m);
 
@@ -265,31 +285,52 @@ public final class GboardRamblerBanglaNormalizer {
                     word = GboardRamblerBanglaLexicon.correctWord(word);
                 }
 
-                // Check for hyphenated enclitic immediately following this Bengali word
-                if (end + 1 < len && text.charAt(end) == '-' && isBengaliWordChar(text.charAt(end + 1))) {
-                    int sufEnd = end + 2;
-                    while (sufEnd < len && isBengaliWordChar(text.charAt(sufEnd))) {
-                        sufEnd++;
-                    }
-                    String suffix = text.substring(end + 1, sufEnd);
-                    // Repair "<Bengali>-আই" -> "<Bengali>-ই" (from misconverted "-i")
-                    if ("\u0986\u0987".equals(suffix)) {
-                        suffix = "\u0987";
-                    } else {
-                        String fixedSuffix = SPELLING_FIXES.get(suffix);
-                        if (fixedSuffix != null) {
-                            suffix = fixedSuffix;
-                        } else {
-                            suffix = GboardRamblerBanglaLexicon.correctWord(suffix);
+                // Check for hyphenated enclitic immediately following this Bengali word (Bengali OR stray Latin -i/-o/-e)
+                if (end + 1 < len && isHyphenOrDash(text.charAt(end))) {
+                    char nextCh = text.charAt(end + 1);
+                    if (isBengaliWordChar(nextCh)) {
+                        int sufEnd = end + 2;
+                        while (sufEnd < len && isBengaliWordChar(text.charAt(sufEnd))) {
+                            sufEnd++;
                         }
+                        String suffix = text.substring(end + 1, sufEnd);
+                        // Repair "<Bengali>-আই" -> "<Bengali>-ই" (from misconverted "-i")
+                        if ("\u0986\u0987".equals(suffix)) {
+                            suffix = "\u0987";
+                        } else {
+                            String fixedSuffix = SPELLING_FIXES.get(suffix);
+                            if (fixedSuffix != null) {
+                                suffix = fixedSuffix;
+                            } else {
+                                suffix = GboardRamblerBanglaLexicon.correctWord(suffix);
+                            }
+                        }
+                        if ("\u0987".equals(suffix) && JOIN_ENCLITIC_I_BASES.contains(word)) {
+                            sb.append(word).append('\u0987');
+                        } else {
+                            sb.append(word).append('-').append(suffix);
+                        }
+                        i = sufEnd;
+                        continue;
+                    } else if ((nextCh == 'i' || nextCh == 'I' || nextCh == 'o' || nextCh == 'O'
+                            || nextCh == 'e' || nextCh == 'E')
+                            && (end + 2 >= len || !Character.isLetter(text.charAt(end + 2)))) {
+                        // Failsafe repair for stray Latin enclitic after Bengali (e.g. "সব-i" -> "সবই", "বাংলা-o" -> "বাংলা-ও")
+                        char lo = Character.toLowerCase(nextCh);
+                        if (lo == 'i') {
+                            if (JOIN_ENCLITIC_I_BASES.contains(word)) {
+                                sb.append(word).append('\u0987');
+                            } else {
+                                sb.append(word).append("-\u0987");
+                            }
+                        } else if (lo == 'o') {
+                            sb.append(word).append("-\u0993");
+                        } else {
+                            sb.append(word).append("-\u098f");
+                        }
+                        i = end + 2;
+                        continue;
                     }
-                    if ("\u0987".equals(suffix) && JOIN_ENCLITIC_I_BASES.contains(word)) {
-                        sb.append(word).append('\u0987');
-                    } else {
-                        sb.append(word).append('-').append(suffix);
-                    }
-                    i = sufEnd;
-                    continue;
                 }
 
                 sb.append(word);
@@ -366,6 +407,11 @@ public final class GboardRamblerBanglaNormalizer {
             }
         }
         return false;
+    }
+
+    private static boolean isHyphenOrDash(char c) {
+        return c == '-' || c == '\u2010' || c == '\u2011' || c == '\u2012'
+                || c == '\u2013' || c == '\u2014' || c == '\u2212';
     }
 
     private static boolean isBengaliWordChar(char c) {
