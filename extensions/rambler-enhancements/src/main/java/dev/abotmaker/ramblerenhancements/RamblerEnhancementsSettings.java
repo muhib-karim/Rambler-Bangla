@@ -584,6 +584,10 @@ public final class RamblerEnhancementsSettings {
                 normalizeSpacebarLongPressMode(mode));
     }
 
+    public static boolean isAmoledDarkKeyboardEnabled() {
+        return readAmoledDarkKeyboardEnabled(RamblerFlagRuntime.resolveContext());
+    }
+
     public static boolean readAmoledDarkKeyboardEnabled(Context context) {
         return readDedicatedBoolean(
                 context, PREF_KEY_AMOLED_DARK_KEYBOARD, DEFAULT_AMOLED_DARK_KEYBOARD);

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="540" viewBox="0 0 1280 540" role="img" aria-labelledby="title desc">
-  <title id="title">Rambler Bangla v31.3.0 — Feature Overview Poster</title>
-  <desc id="desc">Six-card visual summary of Rambler Bangla v31.3.0 features: Bengali-first Rambler+, Native @Mention Strip, Live AMOLED Toggle and Themes, Hex Waveforms and Productivity, Clipboard Drag-to-Reorder and Power Tools, and Fail-Closed Morphe Architecture.</desc>
+  <title id="title">Rambler Bangla v31.3.1 — Feature Overview Poster</title>
+  <desc id="desc">Six-card visual summary of Rambler Bangla v31.3.1 features: Bengali-first Rambler+, Native @Mention Strip, Live AMOLED Toggle and Themes, Hex Waveforms and Productivity, Clipboard Drag-to-Reorder and Power Tools, and Fail-Closed Morphe Architecture.</desc>
   <defs>
     <linearGradient id="canvas" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#07152B"/>
@@ -15,7 +15,7 @@
   <rect width="1280" height="540" rx="18" fill="url(#canvas)"/>
   <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
     <!-- Header -->
-    <text x="44" y="52" font-size="24" font-weight="700" fill="#FFFFFF">Everything Inside Rambler Bangla <tspan fill="#F6B13E">v31.3.0</tspan></text>
+    <text x="44" y="52" font-size="24" font-weight="700" fill="#FFFFFF">Everything Inside Rambler Bangla <tspan fill="#F6B13E">v31.3.1</tspan></text>
     <text x="44" y="78" font-size="14.5" fill="#9EC0E0">60 selectable Morphe patches for Gboard 18.5.4 — modular, conflict-free, fail-closed, and GPL-3.0 open source.</text>
 
     <!-- Row 1 -->

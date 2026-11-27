@@ -237,6 +237,7 @@ public class RamblerBanglaRuntimeTest {
         // AMOLED Dark Keyboard defaults OFF so stock Material You dark theme keeps layered contrast
         Assert.assertFalse(RamblerEnhancementsSettings.DEFAULT_AMOLED_DARK_KEYBOARD);
         Assert.assertFalse(RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(null));
+        Assert.assertFalse(RamblerEnhancementsSettings.isAmoledDarkKeyboardEnabled());
 
         // Clipboard drag-to-reorder defaults ON
         Assert.assertTrue(RamblerEnhancementsSettings.DEFAULT_CLIPBOARD_DRAG_REORDER);

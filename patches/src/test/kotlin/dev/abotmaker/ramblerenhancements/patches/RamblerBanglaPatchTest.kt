@@ -111,6 +111,7 @@ class RamblerBanglaPatchTest {
                 iput v0, p0, Lrmt;->Q:I
                 iput v0, p0, Lrmt;->R:I
                 iput v0, p0, Lrmt;->S:I
+                const/4 p1, 0x0
                 return-void
                 """.trimIndent(),
             )
@@ -122,7 +123,7 @@ class RamblerBanglaPatchTest {
         assertTrue(
             ctor.implementation!!.instructions.any { insn ->
                 ((insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)
-                    ?.reference?.toString().orEmpty()).contains("readAmoledDarkKeyboardEnabled")
+                    ?.reference?.toString().orEmpty()).contains("isAmoledDarkKeyboardEnabled()Z")
             },
         )
         // Second call must be idempotent

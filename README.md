@@ -35,7 +35,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v31.3.0 six-pillar feature overview poster" width="100%" />
+  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v31.3.1 six-pillar feature overview poster" width="100%" />
 </p>
 
 > **Quick Morphe Setup:** Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** or paste `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json` in Morphe Manager, then select official Gboard `18.5.4.993608717-release-arm64-v8a`. Full steps in [Install](#install).
@@ -46,7 +46,7 @@
 
 Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali into Romanized Latin letters (`"ami bhalo achi"` instead of `"আমি ভালো আছি"`), mangles mixed Bangla + English sentences, hides **Rambler+** behind rollout gates on non-Pixel devices, and lacks SwiftKey-style personalized `@handle` predictions on the suggestion strip.
 
-**Rambler Bangla v31.3.0** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
+**Rambler Bangla v31.3.1** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
 
 - **Bengali-first voice & phonetic engine:** SHA-256 fingerprint-guarded script policy + full V29.3+/V29.5 phonetic transliteration, live active Gboard locale handoff (`fhv.w()`), unconditional **Rambler+** activation, per-sentence multilingual EN/BN routing, 2,265 Avro-derived spelling pairs, CMUdict English loanword spellings (`company` → `কোম্পানি`), and protected spans (`#hashtags`, `@handles`, URLs, emails, times).
 - **100% personalized native `@Mention` suggestion strip & persistent Clipboard Drag-to-Reorder:** Learns your `@handles` (`@grok`, `@claude`) and email domains (`@gmail.com`) and injects them **straight into Gboard's own native suggestion strip** (zero floating overlay, full theme matching, native drag-up-to-remove), plus **tap-and-hold drag-to-reorder** on clipboard cards with persistent ordering and a **live AMOLED Dark Keyboard toggle** (default OFF for normal Material You dark contrast).
@@ -98,7 +98,7 @@ Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali in
 
 ## Included Patches
 
-Rambler Bangla v31.3.0 ships **60 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
+Rambler Bangla v31.3.1 ships **60 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
 
 ### 1. Rambler Bangla — Bengali-First Voice, Native `@Mention` Strip & Clipboard Reorder (4 patches)
 
@@ -274,13 +274,13 @@ Rambler Bangla is **ready out-of-the-box as a Morphe Patcher 2.1.0 patch source*
 
 ```bash
 java -jar morphe-cli.jar patch \
-  -p patches-31.3.0.mpp \
+  -p patches-31.3.1.mpp \
   -o RamblerBangla-gboard-18.5.4.apk \
   --keystore your-release.keystore \
   Gboard_18.5.4.993608717-release-arm64-v8a.apks
 ```
 
-> **Bundle metadata:** [`patches-bundle.json`](patches-bundle.json) (Morphe Manager source manifest) · [`patches-list.json`](patches-list.json) (full 60-patch JSON inventory) · [`patches-31.3.0.mpp`](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.0)
+> **Bundle metadata:** [`patches-bundle.json`](patches-bundle.json) (Morphe Manager source manifest) · [`patches-list.json`](patches-list.json) (full 60-patch JSON inventory) · [`patches-31.3.1.mpp`](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.1)
 
 ---
 
@@ -333,7 +333,7 @@ Requirements: JDK 21, Android SDK (`platforms;android-35`, `platforms;android-36
 git clone https://github.com/muhib-karim/Rambler-Bangla.git
 cd Rambler-Bangla
 
-# Build all 3 Android extensions (.rve), run unit tests, lint, 313 patch tests, and package patches-31.3.0.mpp
+# Build all 3 Android extensions (.rve), run unit tests, lint, 313 patch tests, and package patches-31.3.1.mpp
 ./gradlew --no-daemon \
   :extensions:extension:syncExtension \
   :extensions:calculator:testDebugUnitTest \
@@ -457,6 +457,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 
 ### Released
 
+- **v31.3.1 (2026-11-28)**, tag [v31.3.1](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.1): Hotfix fixing ART `VerifyError` in `Lrmt;-><init>` (zero-arg `isAmoledDarkKeyboardEnabled()` avoids R8-reused `p1`), plus hardened ART `dex2oat` verification & live IME smoke checks in `android-smoke.yml`.
 - **v31.3.0 (2026-11-27)**, tag [v31.3.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.0): Live in-app **`AMOLED Dark Keyboard`** toggle (default **OFF** so stock Material You dark gray contrast stays normal) and persistent 4-direction **`Clipboard Drag-to-Reorder`** (`fqi` `ItemTouchHelper` patch — 60 patches total — preserving stationary long-press Pin/Delete menu and swipe-to-delete with Undo).
 - **v31.2.0 (2026-11-27)**, tag [v31.2.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.2.0): True **native Gboard suggestion-strip integration** for `@` mentions (`pbh`/`pbo`/`owu`/`phr` candidate pipeline — zero floating overlay/white bar, automatic AMOLED/Material You/Frosted Glass/Custom Theme matching, native drag-up-to-remove), persistent maintainer signing, and full GPL-3.0/MIT/MPL-2.0/BSD/§7c licensing audit.
 - **v31.1.0 (2026-11-27)**, tag [v31.1.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.1.0): 100% personalized standalone `@` learning across space/punctuation, Send/Enter, field switch, keyboard hide, and voice dictation; manual `@mention` add dialog in Settings; persistent maintainer signing (`679cfdec...`).
@@ -484,7 +485,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 | **CI & Verification** | GitHub Actions (`ci.yml`, `tests.yml`, `android-smoke.yml`): 88 Python tests, 22 static checks, 313 Gradle patch tests, Android 15 KVM emulator |
 
 ```text
-patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-31.3.0.mpp)
+patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-31.3.1.mpp)
 extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve)
 patches-bundle.json   Morphe Manager source manifest (auto-discovered by morphe.software/add-source)
 patches-list.json     Published 60-patch JSON catalog
