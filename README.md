@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/banner.svg" alt="Rambler Bangla: Bengali-first voice typing & unified 59-patch Morphe suite for Gboard 18.5.4" width="100%"></p>
+<p align="center"><img src="docs/banner.svg" alt="Rambler Bangla: Bengali-first voice typing & unified 60-patch Morphe suite for Gboard 18.5.4" width="100%"></p>
 
-<h3 align="center">Dictate in Bangla. Get Bangla. A production-grade, 59-patch Morphe suite for Gboard 18.5.4.</h3>
+<h3 align="center">Dictate in Bangla. Get Bangla. A production-grade, 60-patch Morphe suite for Gboard 18.5.4.</h3>
 
 <p align="center">
   A fail-closed, fingerprint-guarded <b>Morphe 2.1</b> patch source combining Bengali-first <b>Rambler+</b> voice typing, phonetic Bangla normalization, and <b>100% personalized native Gboard <code>@mention</code> suggestions</b> with all features from
@@ -54,7 +54,7 @@ Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali in
 
 > **Source only, no APKs committed to git.** Every Morphe user patches an official Gboard APK they obtain themselves and signs with their own key (details in [Source only, no APKs](#source-only-no-apks) and [`docs/LICENSING-AUDIT.md`](docs/LICENSING-AUDIT.md)).
 
-> **Honest evidence.** Automated CI proves 88 Python unit tests, 22 static fixture checks, 313 Gradle patch tests, Android extension tests/lint, Morphe CLI 60/60 patching + JADX bytecode checks, and Android 15 hardware-KVM emulator boot/IME smoke tests. Live microphone ASR results come from the maintainer's own phone.
+> **Honest evidence.** Automated CI proves 88 Python unit tests, 22 static fixture checks, 314 Gradle patch tests, Android extension tests/lint, Morphe CLI 60/60 patching + strict JADX bytecode checks, and Android 15 hardware-KVM emulator ART `dex2oat` verification + live IME smoke tests. Live microphone ASR results come from the maintainer's own phone.
 
 ---
 
@@ -91,7 +91,7 @@ Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali in
 | **Live AMOLED Dark & Hidden Flags (`nl-morphe-patches`)** | Live-toggled pure `#000000` Material 3 AMOLED dark surfaces (`Lrmt;`, default OFF so stock dark gray contrast stays normal), floating Rambler toolbar overflow, keep-rewritten-on-revert, quick-paste direct chip, and live `OVERRIDE`-store hidden flags | Patch unit tests + JADX-verified `rmt.java` |
 | **Persistent Clipboard Drag-to-Reorder** | Tap & hold + drag clipboard cards in 4 directions to rearrange within Pinned or Recent (saved permanently to SQLite); stationary long-press still opens Pin/Delete menu, swipe still deletes with Undo, live Settings toggle | Runtime & Dexlib2 unit tests + JADX-verified `fqi.java` |
 | **Hex Waveforms & Rambler Power Tools (`abotmaker`)** | Hex Dot Scope / Android Wave animations, Per-App Custom Instructions, `MUSE_STATS` Personal Dictionary, Contact Names sync, Cursor-Aware & Append-Only editing, Smart Search Bars, Spacebar Long-Press Rambler, Snippets, Find & Replace, Stats & History | Extension unit tests + Android Lint + CI |
-| **46 Gboard Power Features (`jasonwu1994`)** | Frosted Glass blur, Custom ZIP / Rboard Themes, Rounded Panel, Key Shape, Clipboard Enhancements, Web Clipboard + image sync, LAN FTP, Inline Calculator, OCR Scan Text, AI Writing Tools, Bluetooth Mic, Editing Shortcuts, Swipeable JS Top Row, Backup & Restore | 313 `:patches:test` + extension tests + CI |
+| **46 Gboard Power Features (`jasonwu1994`)** | Frosted Glass blur, Custom ZIP / Rboard Themes, Rounded Panel, Key Shape, Clipboard Enhancements, Web Clipboard + image sync, LAN FTP, Inline Calculator, OCR Scan Text, AI Writing Tools, Bluetooth Mic, Editing Shortcuts, Swipeable JS Top Row, Backup & Restore | 314 `:patches:test` + extension tests + CI |
 | **Side-by-side install & in-place updates** | `Package Rename` defaults to `Rambler Bangla` (`com.aidev2024.ramblerbangla`) beside stock Gboard; persistent signing preserves all settings & learned mentions across upgrades | Android 15 KVM emulator smoke test (`android-smoke.yml`) · [`docs/SIDE-BY-SIDE.md`](docs/SIDE-BY-SIDE.md) |
 
 ---
@@ -431,7 +431,7 @@ This git repository is **source only and commits no APKs** (or Google binaries, 
 Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** (or add `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json`), pick official Gboard `18.5.4.993608717-release-arm64-v8a`, choose your patches, and tap **Patch**.
 
 **Can I toggle AMOLED Dark Keyboard ON or OFF without repatching?**
-Yes! Starting in `v31.3.0`, **AMOLED Dark Keyboard** defaults to **OFF** so Gboard's Material You dark theme keeps its normal layered dark-gray contrast. Open **Rambler Enhancements → Keyboard appearance & clipboard** to flip pure `#000000` AMOLED Dark ON or OFF anytime.
+Yes! Starting in `v31.3.1`, **AMOLED Dark Keyboard** defaults to **OFF** so Gboard's Material You dark theme keeps its normal layered dark-gray contrast. Open **Rambler Enhancements → Keyboard appearance & clipboard** to flip pure `#000000` AMOLED Dark ON or OFF anytime.
 
 **How does Clipboard Drag-to-Reorder work?**
 Open Gboard's Clipboard panel, **tap and hold** any item, and **drag** in any direction to rearrange within **Pinned** or **Recent** — the new order is saved permanently across reopens and reboots. Tapping and holding **without dragging** still opens Gboard's Pin/Paste/Delete menu, and swiping left/right still deletes with Undo.
@@ -457,8 +457,8 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 
 ### Released
 
-- **v31.3.1 (2026-11-28)**, tag [v31.3.1](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.1): Hotfix fixing ART `VerifyError` in `Lrmt;-><init>` (zero-arg `isAmoledDarkKeyboardEnabled()` avoids R8-reused `p1`), plus hardened ART `dex2oat` verification & live IME smoke checks in `android-smoke.yml`.
-- **v31.3.0 (2026-11-27)**, tag [v31.3.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.0): Live in-app **`AMOLED Dark Keyboard`** toggle (default **OFF** so stock Material You dark gray contrast stays normal) and persistent 4-direction **`Clipboard Drag-to-Reorder`** (`fqi` `ItemTouchHelper` patch — 60 patches total — preserving stationary long-press Pin/Delete menu and swipe-to-delete with Undo).
+- **v31.3.1 (2026-11-28)**, tag [v31.3.1](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.1): Hotfix fixing ART `VerifyError` in `Lrmt;-><init>` (zero-arg `isAmoledDarkKeyboardEnabled()` avoids R8-reused `p1`), delivering live **`AMOLED Dark Keyboard`** toggle (default **OFF**), persistent 4-direction **`Clipboard Drag-to-Reorder`**, and hardened ART `dex2oat` verification + live IME smoke checks in `android-smoke.yml`.
+- **v31.3.0 (2026-11-27, superseded by v31.3.1)**, tag [v31.3.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.3.0): Initial release of live **`AMOLED Dark Keyboard`** toggle and **`Clipboard Drag-to-Reorder`** (60 patches total); superseded by `v31.3.1` due to an ART `VerifyError` in `Lrmt;-><init>`.
 - **v31.2.0 (2026-11-27)**, tag [v31.2.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.2.0): True **native Gboard suggestion-strip integration** for `@` mentions (`pbh`/`pbo`/`owu`/`phr` candidate pipeline — zero floating overlay/white bar, automatic AMOLED/Material You/Frosted Glass/Custom Theme matching, native drag-up-to-remove), persistent maintainer signing, and full GPL-3.0/MIT/MPL-2.0/BSD/§7c licensing audit.
 - **v31.1.0 (2026-11-27)**, tag [v31.1.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.1.0): 100% personalized standalone `@` learning across space/punctuation, Send/Enter, field switch, keyboard hide, and voice dictation; manual `@mention` add dialog in Settings; persistent maintainer signing (`679cfdec...`).
 - **v31.0.0 (2026-11-27)**, tag [v31.0.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.0.0): Fixed Rambler+ activation bug, wired live Gboard locale (`fhv.w()`) into `GboardRamblerScriptFix`, integrated `johninnld/nl-morphe-patches` 18.5.4 features (`AMOLED Dark Keyboard`, `Rambler Toolbar & Revert Extras`, `Hidden Flags Override`), added `@Mention & Email Strip Suggestions` (59 patches total), and refreshed website & branding.
@@ -482,7 +482,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 | **Android Extensions (`.rve`)** | Java (`extensions/extension`, `extensions/calculator`, `extensions/rambler-enhancements`), Android SDK 35/36, Android Lint |
 | **Legacy 18.3.1 Standalone Patcher** | Python 3 (stdlib only), smali/baksmali 2.5.2, r8/d8 8.3.37, aapt2 8.3.0, apksig 8.3.0, androguard 4.1.4 |
 | **Linguistic Data** | Avro Keyboard phonetic dictionary (2,265 pairs, MPL-2.0) + CMU Pronouncing Dictionary (`data/loanspell/`, BSD) |
-| **CI & Verification** | GitHub Actions (`ci.yml`, `tests.yml`, `android-smoke.yml`): 88 Python tests, 22 static checks, 313 Gradle patch tests, Android 15 KVM emulator |
+| **CI & Verification** | GitHub Actions (`ci.yml`, `tests.yml`, `android-smoke.yml`): 88 Python tests, 22 static checks, 314 Gradle patch tests, Android 15 KVM ART+IME smoke test |
 
 ```text
 patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-31.3.1.mpp)
@@ -526,7 +526,7 @@ docs/                 GitHub Pages site (docs/index.html), banners, architecture
 
 ## Credits and licence
 
-Rambler Bangla combines, modifies (2026-11-27, per GNU GPL v3.0 §5a), and explicitly credits:
+Rambler Bangla combines, modifies (2026-11-27–2026-11-28, per GNU GPL v3.0 §5a), and explicitly credits:
 
 - **[Gboard Patches / GboardWu](https://github.com/jasonwu1994/Gboard-patches)** by Jason Wu (`@jasonwu1994`, GNU GPL v3.0, snapshot `aa6cb2bb`) — all 46 Gboard keyboard, clipboard, theme, Frosted Glass, Web Clipboard, LAN FTP, Calculator, Advanced Voice Typing, OCR, Backup & Restore, Package Rename, and Signature Bypass patches.
 - **[Gboard Rambler Enhancements](https://github.com/abotmaker/gboard-rambler-enhancements)** by `@abotmaker` (GNU GPL v3.0, v1.3.4 snapshot `5f7e50c2`) — all 7 Rambler enhancement patches (Hex waveforms, custom instructions, per-app rules, `MUSE_STATS` dictionary, contacts sync, cursor-aware & append-only editing, app context, and productivity tools).
