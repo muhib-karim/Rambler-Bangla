@@ -2,6 +2,19 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [31.4.0] - 2026-11-28
+
+**True 3-Keyboard Rambler Dictation Modes, Custom Rambler Bangla App Logo (`র`) & Live Hide Launcher Icon Toggle (Issue #39).**
+
+- **3-Keyboard Active-Mode Dictation Overhaul (no `Bangla (Latin)` keyboard required):**
+  - Reads Gboard 18.5.4's active `InputMethodEntry` (`Lpev;` → `ImeDef.stringId` + layout variant) alongside `fhv.w()` on `AgenticDictationExtension.onActivateInternal`, cleanly distinguishing `বাংলা (বাংলাদেশ) — বাংলা` (`bn-BD` / `ime_bengali_bangladesh`), `বাংলা (বাংলাদেশ) — abc → বাংলা` (`bn-XU` / `ime_bengali_india_transliteration`), `English (US)` (`en-US`), and optional `Bangla (Latin)` (`bn-XA`).
+  - Syncs the active keyboard mode directly into **both** the on-device Rambler LLM prompt (`GboardRamblerLiteScriptRuntime`) and the post-ASR engine (`GboardRamblerScriptFix` / `GboardRamblerSentenceLang`):
+    1. **`English (US)` — All English / Phonetic Latin:** Always stays in English / phonetic ASCII Latin even when speaking Bangla (`GboardRamblerLayoutPair` no longer silently hijacks `English (US)` into Bengali conversion).
+    2. **`বাংলা (বাংলাদেশ)` — `বাংলা` — 100% Bangla:** Always outputs Bengali Unicode script (including spoken English loanwords), even if a commit already contains partial Bengali characters (fixed `containsBengali()` early-bailout bug).
+    3. **`বাংলা (বাংলাদেশ)` — `abc → বাংলা` — True Mixed Bangla + English:** Clause-aware intra-sentence code-switching writes spoken Bangla words/clauses in **বাংলা** while preserving English words & clauses in **English** inside the same sentence (e.g., `"পুরা টা বাংলা আসতেসে, English এ আসে না, and then it should understand Bangla English altogether."`).
+- **Custom Rambler Bangla App Launcher Logo:** Bundled adaptive (`mipmap-anydpi-v26` + vertical `#2D6FA3`→`#0B1F3B` background + crisp `র` amber-underline foreground + monochrome themed icon) and legacy `mdpi`–`xxxhdpi` launcher icons generated from the project's brand logo (`docs/assets/2-icon-512.png`), wired in `AndroidManifest.xml` (`android:icon` and `android:roundIcon`).
+- **Live `Hide launcher icon` toggle (Issue #39):** Added a live switch under **Rambler Enhancements → Keyboard appearance, clipboard & launcher** that cleanly disables/enables `LauncherActivity` via `PackageManager.setComponentEnabledSetting` (restoring the classic Gboard app-icon hide feature while keeping Settings accessible from the keyboard's gear button and Android System → Keyboard settings).
+
 ## [31.3.1] - 2026-11-28
 
 **Hotfix: Fixed ART `VerifyError` crash on keyboard load in `Lrmt;-><init>` & Hardened ART/IME Emulator Verification.**

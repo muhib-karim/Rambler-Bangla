@@ -1,7 +1,9 @@
 package dev.abotmaker.ramblerenhancements;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -77,6 +79,10 @@ public final class RamblerEnhancementsSettings {
             "pref_rambler_amoled_dark_keyboard";
     public static final String PREF_KEY_CLIPBOARD_DRAG_REORDER =
             "pref_rambler_clipboard_drag_reorder";
+    public static final String PREF_KEY_HIDE_LAUNCHER_ICON =
+            "pref_rambler_hide_launcher_icon";
+    public static final String LAUNCHER_ACTIVITY_CLASS =
+            "com.google.android.libraries.inputmethod.launcher.LauncherActivity";
 
     private static final String[] LIVE_TOGGLE_KEYS = {
             PREF_KEY_USE_DICTIONARY_WORDS,
@@ -116,6 +122,7 @@ public final class RamblerEnhancementsSettings {
     public static final String DEFAULT_SPACEBAR_LONG_PRESS_MODE = SPACEBAR_MODE_HYBRID;
     public static final boolean DEFAULT_AMOLED_DARK_KEYBOARD = false;
     public static final boolean DEFAULT_CLIPBOARD_DRAG_REORDER = true;
+    public static final boolean DEFAULT_HIDE_LAUNCHER_ICON = false;
 
     private static final ThreadLocal<Boolean> IN_GBOARD_PREFS_LOOKUP = new ThreadLocal<Boolean>();
     private static volatile GboardPrefsBridge cachedGboardBridge;
@@ -604,6 +611,49 @@ public final class RamblerEnhancementsSettings {
 
     public static boolean writeClipboardDragReorderEnabled(Context context, boolean enabled) {
         return writeDedicatedBoolean(context, PREF_KEY_CLIPBOARD_DRAG_REORDER, enabled);
+    }
+
+    public static boolean readHideLauncherIcon(Context context) {
+        if (context != null) {
+            try {
+                PackageManager pm = context.getPackageManager();
+                if (pm != null) {
+                    ComponentName cn = new ComponentName(context.getPackageName(), LAUNCHER_ACTIVITY_CLASS);
+                    int state = pm.getComponentEnabledSetting(cn);
+                    if (state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                        return true;
+                    }
+                    if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                        return false;
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        return readDedicatedBoolean(
+                context, PREF_KEY_HIDE_LAUNCHER_ICON, DEFAULT_HIDE_LAUNCHER_ICON);
+    }
+
+    public static boolean setLauncherIconHidden(Context context, boolean hide) {
+        boolean saved = writeDedicatedBoolean(context, PREF_KEY_HIDE_LAUNCHER_ICON, hide);
+        if (context == null) {
+            return saved;
+        }
+        try {
+            PackageManager pm = context.getPackageManager();
+            if (pm != null) {
+                ComponentName cn = new ComponentName(context.getPackageName(), LAUNCHER_ACTIVITY_CLASS);
+                int newState = hide
+                        ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                        : PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+                pm.setComponentEnabledSetting(cn, newState, PackageManager.DONT_KILL_APP);
+                return true;
+            }
+        } catch (Throwable err) {
+            logWarningSafely("Failed to update launcher icon visibility", err);
+            return false;
+        }
+        return saved;
     }
 
     public static boolean writeTypingBaselineWpm(Context context, int wpm) {

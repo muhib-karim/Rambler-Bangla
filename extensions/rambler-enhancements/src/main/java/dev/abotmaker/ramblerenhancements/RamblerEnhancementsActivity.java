@@ -520,35 +520,46 @@ public final class RamblerEnhancementsActivity extends Activity {
                     () -> openSection(SECTION_HISTORY));
         }
 
-        if (RamblerDynamicConfig.FEATURE_AMOLED_DARK_KEYBOARD
-                || RamblerDynamicConfig.FEATURE_CLIPBOARD_REORDER) {
-            addSectionHeader("Keyboard appearance & clipboard");
-            if (RamblerDynamicConfig.FEATURE_AMOLED_DARK_KEYBOARD) {
-                boolean amoledOn = RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(this);
-                addToggleRow(
-                        "AMOLED Dark Keyboard (#000000)",
-                        "Turns Material You dark keyboard surfaces pure black. Off by default so stock dark gray contrast stays normal. Re-select your Theme or reopen Gboard to apply.",
-                        amoledOn,
-                        checked -> {
-                            RamblerEnhancementsSettings.writeAmoledDarkKeyboardEnabled(this, checked);
-                            showToast(checked
-                                    ? "AMOLED Dark ON — re-select Dynamic Color in Theme or restart Gboard to apply."
-                                    : "AMOLED Dark OFF — re-select Dynamic Color in Theme or restart Gboard to apply.");
-                            refreshUi();
-                        });
-            }
-            if (RamblerDynamicConfig.FEATURE_CLIPBOARD_REORDER) {
-                boolean reorderOn = RamblerEnhancementsSettings.readClipboardDragReorderEnabled(this);
-                addToggleRow(
-                        "Clipboard drag-to-reorder",
-                        "Tap & hold a clipboard card and drag to rearrange within Pinned or Recent (saved permanently). Tap & hold without moving still opens the Pin/Delete menu; swipe still deletes.",
-                        reorderOn,
-                        checked -> {
-                            RamblerEnhancementsSettings.writeClipboardDragReorderEnabled(this, checked);
-                            refreshUi();
-                        });
-            }
+        addSectionHeader("Keyboard appearance, clipboard & launcher");
+        if (RamblerDynamicConfig.FEATURE_AMOLED_DARK_KEYBOARD) {
+            boolean amoledOn = RamblerEnhancementsSettings.readAmoledDarkKeyboardEnabled(this);
+            addToggleRow(
+                    "AMOLED Dark Keyboard (#000000)",
+                    "Turns Material You dark keyboard surfaces pure black. Off by default so stock dark gray contrast stays normal. Re-select your Theme or reopen Gboard to apply.",
+                    amoledOn,
+                    checked -> {
+                        RamblerEnhancementsSettings.writeAmoledDarkKeyboardEnabled(this, checked);
+                        showToast(checked
+                                ? "AMOLED Dark ON — re-select Dynamic Color in Theme or restart Gboard to apply."
+                                : "AMOLED Dark OFF — re-select Dynamic Color in Theme or restart Gboard to apply.");
+                        refreshUi();
+                    });
         }
+        if (RamblerDynamicConfig.FEATURE_CLIPBOARD_REORDER) {
+            boolean reorderOn = RamblerEnhancementsSettings.readClipboardDragReorderEnabled(this);
+            addToggleRow(
+                    "Clipboard drag-to-reorder",
+                    "Tap & hold a clipboard card and drag to rearrange within Pinned or Recent (saved permanently). Tap & hold without moving still opens the Pin/Delete menu; swipe still deletes.",
+                    reorderOn,
+                    checked -> {
+                        RamblerEnhancementsSettings.writeClipboardDragReorderEnabled(this, checked);
+                        refreshUi();
+                    });
+        }
+        boolean hideLauncherOn = RamblerEnhancementsSettings.readHideLauncherIcon(this);
+        addToggleRow(
+                "Hide launcher icon",
+                "Hides the Rambler Bangla app icon from your home screen / app drawer (like old Gboard). You can still open Settings anytime via the keyboard's gear button or Android System → Keyboard settings.",
+                hideLauncherOn,
+                checked -> {
+                    boolean ok = RamblerEnhancementsSettings.setLauncherIconHidden(this, checked);
+                    showToast(ok
+                            ? (checked
+                                    ? "Launcher icon hidden. Open Settings via the keyboard gear button anytime."
+                                    : "Launcher icon restored in your app drawer.")
+                            : "Could not change launcher icon visibility on this device.");
+                    refreshUi();
+                });
 
         addRow(
                 "Backup & restore (.json)",
@@ -560,7 +571,7 @@ public final class RamblerEnhancementsActivity extends Activity {
         // In-app footer (upstream credits live in GitHub repository docs)
         RamblerWaveformDialogs.Palette pal = RamblerWaveformDialogs.palette(this);
         TextView creditView = new TextView(this);
-        creditView.setText("Rambler Bangla v31.3.1 — by muhib-karim (GPLv3)");
+        creditView.setText("Rambler Bangla v31.4.0 — by muhib-karim (GPLv3)");
         creditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         creditView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams creditParams = new LinearLayout.LayoutParams(
@@ -573,8 +584,8 @@ public final class RamblerEnhancementsActivity extends Activity {
         addSectionHeader("Bengali script & voice engine");
         boolean enabled = GboardRamblerScriptFixSettings.isEnabled(this);
         addToggleRow(
-                "Bangla script correction",
-                "Keep Bangla dictation in Bengali Unicode (bn-BD, bn-IN, bn-Beng), apply one-language-per-sentence multilingual routing and CMUdict loanword spellings, while preserving #hashtags, @handles, URLs, and emails.",
+                "Bangla script correction (3-keyboard modes)",
+                "বাংলা = 100% Bangla Unicode (with loanwords) · abc → বাংলা = Mixed Bangla + English inside the same sentence · English (US) = English / phonetic Latin only. Preserves #hashtags, @handles, URLs, and emails.",
                 enabled,
                 checked -> {
                     GboardRamblerScriptFixSettings.setEnabled(this, checked);
@@ -583,8 +594,8 @@ public final class RamblerEnhancementsActivity extends Activity {
 
         boolean pairOn = GboardRamblerLayoutPair.isToggleOn(this);
         addToggleRow(
-                "Treat EN + bn-Latn pair as multilingual",
-                "When Bangla (Latin) is enabled alongside English, run multilingual sentence detection on the English layout as well.",
+                "Also mix Bangla on English (US) keyboard",
+                "Off by default so English (US) stays 100% English / phonetic Latin even when you speak Bangla. Turn ON only if you want English (US) to also convert Bangla into Bengali script.",
                 pairOn,
                 checked -> {
                     GboardRamblerLayoutPair.setToggleOn(this, checked);
@@ -604,10 +615,11 @@ public final class RamblerEnhancementsActivity extends Activity {
                 });
 
         int converted = GboardRamblerScriptFixSettings.getConvertedCount(this);
-        String activeLayers = (RamblerDynamicConfig.FEATURE_BANGLA_LITE_SCRIPT
+        String activeLayers = "Active mode: " + GboardRamblerScriptFix.activeModeSummary() + "\n"
+                + (RamblerDynamicConfig.FEATURE_BANGLA_LITE_SCRIPT
                 ? "Lite prompt policy: ACTIVE\n" : "Lite prompt policy: not patched\n")
                 + (RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC
-                ? "Phonetic + Loanword + SentenceLang engine: ACTIVE\n" : "Phonetic engine: not patched\n")
+                ? "3-Mode Phonetic + Mixed + Loanword engine: ACTIVE\n" : "Phonetic engine: not patched\n")
                 + "Converted voice commits: " + converted;
         addRow("Active Bangla layers", activeLayers, enabled ? "Active" : "Paused", false, null);
 

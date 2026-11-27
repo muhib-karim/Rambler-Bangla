@@ -1246,8 +1246,16 @@ internal val ramblerSharedSettingsResourcePatch = resourcePatch(
 
         // 1. Register Activity in AndroidManifest.xml with exported=false + internal action
         //    so Android resolves it inside this exact Gboard/GboardWu package even after Package Rename.
+        val installBrandIcon = RamblerFeature.BANGLA_LITE_SCRIPT in selected ||
+            RamblerFeature.BANGLA_PHONETIC in selected
+        if (installBrandIcon) {
+            copyRamblerBanglaLauncherIconAssets()
+        }
         document("AndroidManifest.xml").use { manifestDoc ->
             registerSettingsActivity(manifestDoc)
+            if (installBrandIcon) {
+                applyRamblerBanglaLauncherIconManifest(manifestDoc)
+            }
             if (RamblerFeature.CUSTOM_INSTRUCTIONS in selected ||
                 RamblerFeature.PRODUCTIVITY_TOOLS in selected
             ) {
@@ -1575,6 +1583,42 @@ private fun Element.preferredCategoryTag(): String =
         .firstOrNull { it.tagName.endsWith("PreferenceCategory") }
         ?.tagName
         ?: "androidx.preference.PreferenceCategory"
+
+internal val RAMBLER_BANGLA_ICON_ASSET_PATHS = listOf(
+    "drawable/ic_rambler_bangla_bg.xml",
+    "drawable-nodpi/ic_rambler_bangla_fg.png",
+    "drawable-nodpi/ic_rambler_bangla_mono.png",
+    "mipmap-anydpi-v26/ic_rambler_bangla_launcher.xml",
+    "mipmap-mdpi/ic_rambler_bangla_launcher.png",
+    "mipmap-hdpi/ic_rambler_bangla_launcher.png",
+    "mipmap-xhdpi/ic_rambler_bangla_launcher.png",
+    "mipmap-xxhdpi/ic_rambler_bangla_launcher.png",
+    "mipmap-xxxhdpi/ic_rambler_bangla_launcher.png",
+)
+
+private const val RAMBLER_BANGLA_ICON_RESOURCE_ROOT = "rambler-bangla/icon"
+internal const val RAMBLER_BANGLA_LAUNCHER_ICON_REF = "@mipmap/ic_rambler_bangla_launcher"
+
+context(context: ResourcePatchContext)
+private fun copyRamblerBanglaLauncherIconAssets() = with(context) {
+    val loader = object {}.javaClass.classLoader
+    for (relPath in RAMBLER_BANGLA_ICON_ASSET_PATHS) {
+        val resourcePath = "$RAMBLER_BANGLA_ICON_RESOURCE_ROOT/$relPath"
+        val bytes = loader.getResourceAsStream(resourcePath)?.use { it.readBytes() }
+            ?: throw PatchException("Missing Rambler Bangla launcher icon resource: $resourcePath")
+        val targetFile = this["res/$relPath", false]
+        targetFile.parentFile?.mkdirs()
+        targetFile.outputStream().use { it.write(bytes) }
+    }
+}
+
+internal fun applyRamblerBanglaLauncherIconManifest(manifestDoc: Document) {
+    val manifest = manifestDoc.documentElement
+    val application = manifest.childElements("application").firstOrNull()
+        ?: throw PatchException("AndroidManifest.xml is missing <application>")
+    application.setAndroidAttr("icon", RAMBLER_BANGLA_LAUNCHER_ICON_REF)
+    application.setAndroidAttr("roundIcon", RAMBLER_BANGLA_LAUNCHER_ICON_REF)
+}
 
 internal fun registerSettingsActivity(manifestDoc: Document) {
     val manifest = manifestDoc.documentElement
