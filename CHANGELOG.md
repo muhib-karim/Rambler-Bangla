@@ -2,6 +2,17 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [32.3.0] - 2026-11-28
+
+**Language-Wide Missing-Hasanta Conjunct Repair, `-তেশি` Verbs, Contextual `এখান → এখন`, 25k Mixed Banglish & App Updates 20–30s Note.**
+
+- **Language-Wide Missing-Hasanta Conjunct & `নশ→ংশ` Repair (`GboardRamblerBanglaLexicon` + `GboardRamblerScriptFix`):**
+  - Made Level-3 skeleton ignore dropped conjunct hasantas (`্`) and normalize nasal+sibilant (`নস/নশ → ংস`) on OOV words (while 89,556 valid Bengali words exit untouched), plus added `"টুকু"` / `"তুকু"→"টুকু"` suffix repair (`হচছে`→**`হচ্ছে`**, `যাচছে`→**`যাচ্ছে`**, `খাচছে`→**`খাচ্ছে`**, `কিনতু`→**`কিন্তু`**, `আনশতুকু`→**`অংশটুকু`**) and expanded `JOIN_PAIRS` (`chchh`, `nt`, `nsh`, etc.) at the transliterator source.
+- **Colloquial `-তেশি / -তেশে / -তেশো` Verb Repair:** Added `শ` variants alongside `স` in `COLLOQUIAL_VERB_ENDINGS` (`বলতেশি`→**`বলতেছি`**, `করতেশি`→**`করতেছি`**, `লিখতেশি`→**`লিখতেছি`**).
+- **Contextual `এখান → এখন` & Natural Phrase Spacing (`GboardRamblerBanglaNormalizer`):** Converts standalone `এখান` before verbs/clauses to **`এখন`** (`এখান দেখি`→**`এখন দেখি`**, `এখান দেখা যাক`→**`এখন দেখা যাক`**) while preserving `এখান থেকে` / `এখান পর্যন্ত` / `এখানে`, plus repairs `মনচচে` / `মনেহ হচছে` → **`মনে হচ্ছে`**, `পুরো পুরি` → **`পুরোপুরি`**, and `বাংলা টা` → **`বাংলাটা`**.
+- **25,000-Word Banglish Dictionary in Mixed (`abc → বাংলা`) Mode:** Wired `GboardRamblerLoanSpell.banglish(lo)` into `GboardRamblerSentenceLang.classify()` so Romanized Banglish words inside English-heavy mixed clauses (`So, mix language to motamuti ভালোই কাজ করতেছে ja দেখতেছি.`) cleanly convert (`মোটামুটি`, `যা`) while keeping English Latin untouched.
+- **Clear 20–30s Install Timing Note on App Updates Screen:** Updated **Settings → About → App updates** footer and update dialogs (`RamblerEnhancementsActivity`) to let users know Android typically takes 20–30 seconds after tapping **Update** / **Install without scanning** to verify and finish updating the ~89 MB keyboard package.
+
 ## [32.2.0] - 2026-11-28
 
 **Zero Loanword Cold-Miss, Natural Bangladeshi Loanwords, True Multilingual Mixed Bangla+English & Faster `INSTALL_SCENARIO_FAST` OTA Installs.**

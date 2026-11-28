@@ -199,6 +199,38 @@ public class RamblerColdStartAndStressTest {
             String validBn = "আমি যদি বাংলা-ইংলিশ সবাই বুঝে এবং যেমনে বলব তেমনে বুঝতে পারে তাহলে তো ভালোই হয়। "
                     + "দরকার অনেক পৃথিবী ব্যবহার শিক্ষক উপস্থিত জিনিস শুনতে শবদেহ শব্দ।";
             Assert.assertEquals(validBn, GboardRamblerScriptFix.processVoice(validBn));
+            // 6. v32.3.0 REAL-PHONE DICTATION REGRESSIONS (hasanta conjuncts, -তেশি, এখান->এখন, অংশটুকু, বাংলাটা, পুরোপুরি, Mixed Banglish)
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+            GboardRamblerScriptFix.jvmLayoutKind = 1;
+            String v323Pure = GboardRamblerScriptFix.processVoice(
+                    "এখান দেখি পুরোটা বাংলায় বলতেছি। এখান দেখা যাক। বাংলাতে টাইপ করছি এই আনশতুকু। "
+                            + "মনচচে তো বাংলা পুরাপুরি বুঝতেছে এখন। মনেহ হচছে তো বাংলা পুরো পুরি বুঝতেছে এখন। এখান থেকে যাই।");
+            Assert.assertTrue("Expected এখন দেখি & এখন দেখা যাক: " + v323Pure,
+                    v323Pure.contains("এখন দেখি") && v323Pure.contains("এখন দেখা যাক"));
+            Assert.assertTrue("Expected এখান থেকে preserved: " + v323Pure, v323Pure.contains("এখান থেকে"));
+            Assert.assertTrue("Expected অংশটুকু: " + v323Pure, v323Pure.contains("অংশটুকু"));
+            Assert.assertTrue("Expected মনে হচ্ছে & পুরোপুরি: " + v323Pure,
+                    v323Pure.contains("মনে হচ্ছে তো বাংলা পুরাপুরি")
+                            && v323Pure.contains("মনে হচ্ছে তো বাংলা পুরোপুরি")
+                            && !v323Pure.contains("মনচচে") && !v323Pure.contains("হচছে") && !v323Pure.contains("মনেহ"));
+
+            // Language-wide unseen missing-hasanta conjuncts & -তেশি verb repairs
+            String v323Conj = GboardRamblerScriptFix.processVoice("যাচছে খাচছে কিনতু বলতেশি করতেশি লিখতেশি hochchhe.");
+            for (String exp : new String[] {"যাচ্ছে", "খাচ্ছে", "কিন্তু", "বলতেছি", "করতেছি", "লিখতেছি", "হচ্ছে"}) {
+                Assert.assertTrue("Expected conjunct/verb repair '" + exp + "' in: " + v323Conj, v323Conj.contains(exp));
+            }
+
+            // Mixed mode: 25k Banglish dictionary words + -তেশি + বাংলাটা inside English-heavy mixed sentences
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
+            GboardRamblerScriptFix.jvmLayoutKind = 2;
+            String v323Mix1 = GboardRamblerScriptFix.processVoice(
+                    "তারপর বাংলাতে convert করে দেখি. বাংলায় বলতেশি দেখি বাংলা টা পুরা লেখে নাকি.");
+            Assert.assertTrue("Expected বলতেছি & বাংলাটা & convert: " + v323Mix1,
+                    v323Mix1.contains("convert") && v323Mix1.contains("বলতেছি") && v323Mix1.contains("বাংলাটা"));
+            String v323Mix2 = GboardRamblerScriptFix.processVoice(
+                    "So, mix language to motamuti ভালোই কাজ করতেছে ja দেখতেছি.");
+            Assert.assertTrue("Expected মোটামুটি & যা & English Latin preserved: " + v323Mix2,
+                    v323Mix2.contains("So, mix language") && v323Mix2.contains("মোটামুটি") && v323Mix2.contains("যা দেখতেছি"));
         } finally {
             GboardRamblerScriptFix.jvmLayoutKind = 0;
             GboardRamblerScriptFix.setActiveGboardKeyboard(null, null);

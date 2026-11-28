@@ -43,6 +43,24 @@ public final class GboardRamblerBanglaNormalizer {
         {"স্পেলিং তা", "স্পেলিংটা"},
         {"জায়গা তা", "জায়গাটা"},
         {"প্রশ্ন তা", "প্রশ্নটা"},
+        {"বাংলা টা", "বাংলাটা"},
+        {"বাংলা তা", "বাংলাটা"},
+        {"কথা টা", "কথাটা"},
+        {"বানান টা", "বানানটা"},
+        {"কাজ টা", "কাজটা"},
+        {"জিনিস টা", "জিনিসটা"},
+        {"ব্যাপার টা", "ব্যাপারটা"},
+        {"সময় টা", "সময়টা"},
+        {"সব টা", "সবটা"},
+        {"পুরো টা", "পুরোটা"},
+        {"পুরা টা", "পুরাটা"},
+        {"পুরো পুরি", "পুরোপুরি"},
+        {"পুরা পুরি", "পুরাপুরি"},
+        {"মনেহ হচ্ছে", "মনে হচ্ছে"},
+        {"মনেহ হচছে", "মনে হচ্ছে"},
+        {"মনে হচছে", "মনে হচ্ছে"},
+        {"মনচচে", "মনে হচ্ছে"},
+        {"মনচছে", "মনে হচ্ছে"},
         {"উত্তর তা", "উত্তরটা"},
         {"এখান তো", "এখন তো"},
         {"মাছ অ্যাকিউরেট", "মাচ অ্যাকিউরেট"},
@@ -236,6 +254,11 @@ public final class GboardRamblerBanglaNormalizer {
         m.put("বেশিভাগ", "বেশিরভাগ");
         m.put("পরাতা", "পুরাটা");
         m.put("কলিরলি", "ক্লিয়ারলি");
+        m.put("হচছে", "হচ্ছে");
+        m.put("হচছি", "হচ্ছি");
+        m.put("মনেহ", "মনে");
+        m.put("আনশতুকু", "অংশটুকু");
+        m.put("অনশতুকু", "অংশটুকু");
 
         SPELLING_FIXES = Collections.unmodifiableMap(m);
 
@@ -361,11 +384,16 @@ public final class GboardRamblerBanglaNormalizer {
         }
         String out = sb.toString();
 
-        // 3. Natural compound adverb spacing ("সুন্দর ভাবে" -> "সুন্দরভাবে", etc.)
+        // 3. Natural compound adverb, enclitic & contextual spacing fixes
         for (String[] pair : PHRASE_FIXES) {
             if (out.contains(pair[0])) {
                 out = out.replace(pair[0], pair[1]);
             }
+        }
+        // Contextual এখান -> এখন whenever NOT followed by থেকে / পর্যন্ত / হতে / দিয়ে / কার
+        // (bare এখান never stands alone in Bengali; Rambler ASR frequently slips এখন -> এখান).
+        if (out.contains("এখান ")) {
+            out = fixStandaloneEkhanToEkhon(out);
         }
 
         // 4. Pure Bangla mode: sentence-ending ASCII '.' directly after Bengali char -> Bengali dari '।'
@@ -414,6 +442,46 @@ public final class GboardRamblerBanglaNormalizer {
                 }
             }
             sb.append(c);
+        }
+        return sb.toString();
+    }
+
+    private static String fixStandaloneEkhanToEkhon(String text) {
+        StringBuilder sb = new StringBuilder(text.length());
+        int n = text.length();
+        int i = 0;
+        while (i < n) {
+            int idx = text.indexOf("এখান", i);
+            if (idx < 0) {
+                sb.append(text, i, n);
+                break;
+            }
+            boolean leftBoundary = idx == 0 || !isBengaliWordChar(text.charAt(idx - 1));
+            int after = idx + 4;
+            boolean rightSpace = after < n && Character.isWhitespace(text.charAt(after));
+            if (leftBoundary && rightSpace) {
+                int nw = after + 1;
+                while (nw < n && Character.isWhitespace(text.charAt(nw))) {
+                    nw++;
+                }
+                int nwEnd = nw;
+                while (nwEnd < n && isBengaliWordChar(text.charAt(nwEnd))) {
+                    nwEnd++;
+                }
+                String nextWord = text.substring(nw, nwEnd);
+                if (!nextWord.isEmpty()
+                        && !"থেকে".equals(nextWord)
+                        && !"পর্যন্ত".equals(nextWord)
+                        && !"হতে".equals(nextWord)
+                        && !"দিয়ে".equals(nextWord)
+                        && !"কার".equals(nextWord)) {
+                    sb.append(text, i, idx).append("এখন");
+                    i = after;
+                    continue;
+                }
+            }
+            sb.append(text, i, after);
+            i = after;
         }
         return sb.toString();
     }
