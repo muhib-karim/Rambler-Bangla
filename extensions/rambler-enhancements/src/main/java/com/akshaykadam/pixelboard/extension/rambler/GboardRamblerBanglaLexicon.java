@@ -44,20 +44,36 @@ public final class GboardRamblerBanglaLexicon {
         "কে", "তে", "এর", "ই", "ও"
     };
 
+    private static final String[][] COLLOQUIAL_VERB_ENDINGS = {
+        {"তেসিলাম", "তেছিলাম"},
+        {"তেসিলা", "তেছিলা"},
+        {"তেসিলো", "তেছিলো"},
+        {"তেসিল", "তেছিল"},
+        {"তেসেন", "তেছেন"},
+        {"তেসি", "তেছি"},
+        {"তেসে", "তেছে"},
+        {"তেসো", "তেছো"},
+    };
+
     private static final class Snapshot {
         final byte[] validBlob;
         final int[] validOffsets; // length = count + 1
         final int validCount;
         final HashMap<String, String> l1Index;
         final HashMap<String, String> l2Index;
+        final HashMap<String, String> l3Index;
+        final HashMap<String, String> l4Index;
 
         Snapshot(byte[] validBlob, int[] validOffsets, int validCount,
-                HashMap<String, String> l1Index, HashMap<String, String> l2Index) {
+                HashMap<String, String> l1Index, HashMap<String, String> l2Index,
+                HashMap<String, String> l3Index, HashMap<String, String> l4Index) {
             this.validBlob = validBlob;
             this.validOffsets = validOffsets;
             this.validCount = validCount;
             this.l1Index = l1Index;
             this.l2Index = l2Index;
+            this.l3Index = l3Index;
+            this.l4Index = l4Index;
         }
     }
 
@@ -174,26 +190,78 @@ public final class GboardRamblerBanglaLexicon {
         if (word.length() < 2) {
             return word;
         }
-        if (containsUtf8(s, word.getBytes(StandardCharsets.UTF_8))) {
-            return word;
+        // Normalize illegal jofola (\u09CD\u09DF / \u09CD\u09AF\u09BC -> \u09CD\u09AF, e.g. ব্য়াপার -> ব্যাপার)
+        String clean = fixIllegalJofola(word);
+        if (containsUtf8(s, clean.getBytes(StandardCharsets.UTF_8))) {
+            return clean;
+        }
+        // Colloquial Bengali verb endings (-তেসি -> -তেছি, -তেসে -> -তেছে, etc.) on OOV verbs
+        for (String[] pair : COLLOQUIAL_VERB_ENDINGS) {
+            if (clean.length() > pair[0].length() + 1 && clean.endsWith(pair[0])) {
+                String cand = clean.substring(0, clean.length() - pair[0].length()) + pair[1];
+                if (containsUtf8(s, cand.getBytes(StandardCharsets.UTF_8))) {
+                    return cand;
+                }
+                clean = cand;
+                break;
+            }
+        }
+        // OOV word-final ৈ -> ই (Avro 'oi' diphthong artifact: সবৈ -> সবই, একৈ -> একই)
+        if (clean.length() >= 3 && clean.charAt(clean.length() - 1) == '\u09c8') {
+            String cand = clean.substring(0, clean.length() - 1) + '\u0987';
+            if (containsUtf8(s, cand.getBytes(StandardCharsets.UTF_8))) {
+                return cand;
+            }
         }
         // Level 1: strict homophone skeleton (শ/স/ষ, ন/ণ, ি/ী, ু/ূ, য/জ, ড়/ঢ়/র, ৎ/ত, ং/ঙ, ঁ)
-        String k1 = skeleton1(word);
+        String k1 = skeleton1(clean);
         String cand1 = s.l1Index.get(k1);
         if (cand1 != null) {
             return cand1;
         }
-        // Level 2: aspiration + ব্য/বে jofola + geminate skeleton (top 20K spoken words, dist <= 2)
-        if (word.length() >= 3) {
-            String k2 = skeleton2(word);
+        if (clean.length() >= 3) {
+            // Level 2: aspiration + ব্য/বে jofola + geminate skeleton (top 22K spoken words)
+            String k2 = skeleton2(clean);
             String cand2 = s.l2Index.get(k2);
             if (cand2 != null
-                    && Math.abs(cand2.length() - word.length()) <= 2
-                    && editDistanceAtMost2(word, cand2)) {
+                    && Math.abs(cand2.length() - clean.length()) <= 2
+                    && editDistanceAtMost(k1, skeleton1(cand2), 2)) {
                 return cand2;
             }
+            // Level 3: Romanized Banglish dental<->retroflex (ট/ঠ/ত/থ, ড/ঢ/দ/ধ), initial আ<->অ, ৈ/ৌ
+            // Fixes থিকমতো->ঠিকমতো, ফাতাফাতি->ফাটাফাটি, আবস্থা->অবস্থা, মোটামুতি->মোটামুটি, তারাতারি->তাড়াতাড়ি, কথিন->কঠিন, etc.
+            String k3 = skeleton3(clean);
+            String cand3 = s.l3Index.get(k3);
+            if (cand3 != null
+                    && Math.abs(cand3.length() - clean.length()) <= 2
+                    && editDistanceAtMost(k1, skeleton1(cand3), 2)) {
+                return cand3;
+            }
+            // Level 4: vowel-tolerant dental<->retroflex (drops া/ো/ু ambiguity, guarded by sk3 dist <= 1)
+            // Fixes একদাম->একদম, ফতাফাতি->ফাটাফাটি, পরাতা->পুরাটা across top 10K everyday spoken words.
+            String k4 = skeleton4(clean);
+            String cand4 = s.l4Index.get(k4);
+            if (cand4 != null
+                    && Math.abs(cand4.length() - clean.length()) <= 2
+                    && editDistanceAtMost(k3, skeleton3(cand4), 1)) {
+                return cand4;
+            }
         }
-        return word;
+        return clean;
+    }
+
+    static String fixIllegalJofola(String text) {
+        if (text == null || text.indexOf('\u09cd') < 0) {
+            return text;
+        }
+        String out = text;
+        if (out.indexOf("\u09cd\u09df") >= 0) {
+            out = out.replace("\u09cd\u09df", "\u09cd\u09af");
+        }
+        if (out.indexOf("\u09cd\u09af\u09bc") >= 0) {
+            out = out.replace("\u09cd\u09af\u09bc", "\u09cd\u09af");
+        }
+        return out;
     }
 
     static void loadNow() {
@@ -210,6 +278,8 @@ public final class GboardRamblerBanglaLexicon {
             try {
                 HashMap<String, String> l1 = new HashMap<String, String>(65536);
                 HashMap<String, String> l2 = new HashMap<String, String>(24576);
+                HashMap<String, String> l3 = new HashMap<String, String>(32768);
+                HashMap<String, String> l4 = new HashMap<String, String>(16384);
 
                 // 1. Load frequency-ranked spoken authoritative Bengali words first so the highest-
                 //    frequency everyday spoken word ALWAYS wins every phonetic-skeleton collision.
@@ -230,6 +300,18 @@ public final class GboardRamblerBanglaLexicon {
                             String k2 = skeleton2(w);
                             if (!l2.containsKey(k2)) {
                                 l2.put(k2, w);
+                            }
+                        }
+                        if (spokenIdx < 25000) {
+                            String k3 = skeleton3(w);
+                            if (!l3.containsKey(k3)) {
+                                l3.put(k3, w);
+                            }
+                        }
+                        if (spokenIdx < 10000) {
+                            String k4 = skeleton4(w);
+                            if (!l4.containsKey(k4)) {
+                                l4.put(k4, w);
                             }
                         }
                         spokenIdx++;
@@ -271,10 +353,11 @@ public final class GboardRamblerBanglaLexicon {
                 }
                 offsets[count] = blobOut.size();
 
-                snapshot = new Snapshot(blobOut.toByteArray(), offsets, count, l1, l2);
+                snapshot = new Snapshot(blobOut.toByteArray(), offsets, count, l1, l2, l3, l4);
                 loadMs = (System.nanoTime() - t0) / 1_000_000L;
             } catch (Throwable err) {
                 snapshot = new Snapshot(new byte[0], new int[] { 0 }, 0,
+                        new HashMap<String, String>(), new HashMap<String, String>(),
                         new HashMap<String, String>(), new HashMap<String, String>());
             } finally {
                 READY.countDown();
@@ -433,11 +516,55 @@ public final class GboardRamblerBanglaLexicon {
         }
     }
 
-    /** Fast banded Levenshtein check returning true iff edit distance(a, b) <= 2. */
-    private static boolean editDistanceAtMost2(String a, String b) {
+    /**
+     * Level-3 Romanized-Banglish Repair Skeleton: collapses dental vs retroflex ambiguity
+     * (ট/ঠ/ত/থ -> ত, ড/ঢ/দ/ধ -> দ), initial আ <-> অ, and Avro diphthongs (ৈ -> ই, ৌ -> উ).
+     */
+    static String skeleton3(String w) {
+        String s2 = skeleton2(w);
+        int n = s2.length();
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            char c = s2.charAt(i);
+            if (i == 0 && c == '\u0986') { // initial আ -> অ
+                sb.append('\u0985');
+            } else if (c == '\u099f' || c == '\u09a0' || c == '\u09a5') { // ট, ঠ, থ -> ত
+                sb.append('\u09a4');
+            } else if (c == '\u09a1' || c == '\u09a2' || c == '\u09a7') { // ড, ঢ, ধ -> দ
+                sb.append('\u09a6');
+            } else if (c == '\u09c8') { // ৈ -> ই
+                sb.append('\u0987');
+            } else if (c == '\u09cc') { // ৌ -> উ
+                sb.append('\u0989');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Level-4 Vowel-Tolerant Skeleton: strips Romanized a/o/u vowel-sign ambiguity (া, ো, ু) on top
+     * of skeleton3 to rescue OOV words like একদাম->একদম, ফতাফাতি->ফাটাফাটি, পরাতা->পুরাটা.
+     */
+    static String skeleton4(String w) {
+        String s3 = skeleton3(w);
+        int n = s3.length();
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            char c = s3.charAt(i);
+            if (c != '\u09be' && c != '\u09cb' && c != '\u09c1') { // skip া, ো, ু
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    /** Fast banded Levenshtein check returning true iff edit distance(a, b) <= maxDist. */
+    private static boolean editDistanceAtMost(String a, String b, int maxDist) {
         int la = a.length();
         int lb = b.length();
-        if (Math.abs(la - lb) > 2) {
+        if (Math.abs(la - lb) > maxDist) {
             return false;
         }
         int[] prev = new int[lb + 1];
@@ -457,14 +584,14 @@ public final class GboardRamblerBanglaLexicon {
                     rowMin = v;
                 }
             }
-            if (rowMin > 2) {
+            if (rowMin > maxDist) {
                 return false;
             }
             int[] tmp = prev;
             prev = curr;
             curr = tmp;
         }
-        return prev[lb] <= 2;
+        return prev[lb] <= maxDist;
     }
 
     /** Pure-Java Base64 decoder (zero Android API-level / Lint dependencies). */

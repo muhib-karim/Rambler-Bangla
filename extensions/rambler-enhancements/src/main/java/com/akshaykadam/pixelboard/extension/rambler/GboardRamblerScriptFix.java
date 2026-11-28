@@ -604,6 +604,25 @@ public final class GboardRamblerScriptFix {
         hashMap.put("thikana", "ঠিকানা");
         hashMap.put("thanda", "ঠান্ডা");
         hashMap.put("thikthak", "ঠিকঠাক");
+        hashMap.put("thikmoto", "ঠিকমতো");
+        hashMap.put("byapar", "ব্যাপার");
+        hashMap.put("bapar", "ব্যাপার");
+        hashMap.put("fatafati", "ফাটাফাটি");
+        hashMap.put("fotafati", "ফাটাফাটি");
+        hashMap.put("soboi", "সবই");
+        hashMap.put("shoboi", "সবই");
+        hashMap.put("abostha", "অবস্থা");
+        hashMap.put("obostha", "অবস্থা");
+        hashMap.put("ekdam", "একদম");
+        hashMap.put("ekdom", "একদম");
+        hashMap.put("beshirbhag", "বেশিরভাগ");
+        hashMap.put("beshibhag", "বেশিরভাগ");
+        hashMap.put("purata", "পুরাটা");
+        hashMap.put("purota", "পুরোটা");
+        hashMap.put("likhtesi", "লিখতেছি");
+        hashMap.put("likhtechi", "লিখতেছি");
+        hashMap.put("boltesi", "বলতেছি");
+        hashMap.put("kortesi", "করতেছি");
         hashMap.put("kalke", "কালকে");
         hashMap.put("kintu", "কিন্তু");
         hashMap.put("monta", "মনটা");
@@ -1331,10 +1350,12 @@ public final class GboardRamblerScriptFix {
                     if (matchConsonant == null) {
                         return null;
                     }
+                    boolean appendedHasanta = false;
                     if (z && str2 != null) {
                         if (!str2.equals("c") || !matchConsonant[0].equals("ch")) {
                             if (JOIN_PAIRS.contains(java.lang.String.valueOf(str2) + matchConsonant[0])) {
                                 sb.append(HASANTA);
+                                appendedHasanta = true;
                             }
                         } else {
                             sb.append("্ছ");
@@ -1343,7 +1364,12 @@ public final class GboardRamblerScriptFix {
                             str2 = "chh";
                         }
                     }
-                    sb.append(matchConsonant[1]);
+                    // Bengali jofola is ALWAYS ্ + য (\u09AF), NEVER ্ + য় (\u09DF) (fixes byapar -> ব্যাপার)
+                    java.lang.String consText = matchConsonant[1];
+                    if (appendedHasanta && ("\u09df".equals(consText) || "\u09af\u09bc".equals(consText))) {
+                        consText = "\u09af";
+                    }
+                    sb.append(consText);
                     str2 = matchConsonant[0];
                     i += str2.length();
                     z = true;

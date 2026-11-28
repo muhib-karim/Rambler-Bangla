@@ -380,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("32.0.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("32.1.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));
@@ -484,6 +484,38 @@ public class RamblerBanglaRuntimeTest {
             String validSentence = "দরকার অনেক পৃথিবী ব্যবহার শিক্ষক উপস্থিত জিনিস শুনতে শবদেহ শব্দ।";
             Assert.assertEquals(validSentence, GboardRamblerScriptFix.processVoice(validSentence));
 
+            // User v32.0.0 real-phone dictation regressions (L3 dental/retroflex, L4 vowel, jofola ্য়->্য, ৈ->ই, -তেসি->-তেছি)
+            String real1 = GboardRamblerScriptFix.processVoice(
+                    "এখান তো মনে হচ্ছে পুরা কথাই বুঝতেছে, একদাম কলিরলি বুঝতেছে। মজার ব্য়াপার, সবৈ থিকমতো বুঝতেছে।");
+            Assert.assertTrue("Expected এখন তো: " + real1, real1.contains("এখন তো"));
+            Assert.assertTrue("Expected একদম ক্লিয়ারলি: " + real1, real1.contains("একদম ক্লিয়ারলি"));
+            Assert.assertTrue("Expected ব্যাপার (not ব্য়াপার): " + real1, real1.contains("ব্যাপার") && !real1.contains("ব্য়াপার"));
+            Assert.assertTrue("Expected সবই ঠিকমতো: " + real1, real1.contains("সবই ঠিকমতো"));
+
+            String real2 = GboardRamblerScriptFix.processVoice(
+                    "বেশিভাগ বাংলা লিখতেসি মাছ অ্যাকিউরেট। প্রিটি অ্যাকিউরেট হলে তো ফাতাফাতি অবস্থা। ফতাফাতি। ফাতাফাতি আবস্থা।");
+            Assert.assertTrue("Expected বেশিরভাগ: " + real2, real2.contains("বেশিরভাগ"));
+            Assert.assertTrue("Expected লিখতেছি: " + real2, real2.contains("লিখতেছি"));
+            Assert.assertTrue("Expected মাচ অ্যাকিউরেট: " + real2, real2.contains("মাচ অ্যাকিউরেট"));
+            Assert.assertTrue("Expected ফাটাফাটি অবস্থা: " + real2, real2.contains("ফাটাফাটি অবস্থা"));
+            Assert.assertFalse("Must not keep ফাতাফাতি/ফতাফাতি/আবস্থা: " + real2,
+                    real2.contains("ফাতাফাতি") || real2.contains("ফতাফাতি") || real2.contains("আবস্থা"));
+
+            // Language-wide unseen L3/L4 dental<->retroflex, jofola, initial আ<->অ, and colloquial verb repairs
+            String unseenL3 = GboardRamblerScriptFix.processVoice(
+                    "মোটামুতি তারাতারি কথিন দুস্তু মিস্তি চেস্তা স্পস্ত অনুস্থান আনেক ব্য়বহার বলতেসি করতেসি বুঝতেসে।");
+            for (String exp : new String[] {
+                    "মোটামুটি", "তাড়াতাড়ি", "কঠিন", "দুষ্টু", "মিষ্টি",
+                    "চেষ্টা", "স্পষ্ট", "অনুষ্ঠান", "অনেক", "ব্যবহার", "বলতেছি", "করতেছি", "বুঝতেছে"
+            }) {
+                Assert.assertTrue("Expected L3/L4 repair '" + exp + "' in: " + unseenL3, unseenL3.contains(exp));
+            }
+            // Source-level Avro transliteration must emit valid ্য (not ্য়) for byapar
+            String romByapar = GboardRamblerScriptFix.processVoice("mojar byapar soboi thikmoto fatafati obostha.");
+            Assert.assertTrue("Expected ব্যাপার: " + romByapar, romByapar.contains("ব্যাপার") && !romByapar.contains("ব্য়াপার"));
+            Assert.assertTrue("Expected সবই ঠিকমতো ফাটাফাটি অবস্থা: " + romByapar,
+                    romByapar.contains("সবই") && romByapar.contains("ঠিকমতো") && romByapar.contains("ফাটাফাটি") && romByapar.contains("অবস্থা"));
+
             // User screenshot #3 Mixed mode regressions: ASCII '-', en-dash '–', and non-breaking hyphen '‑'
             GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
             GboardRamblerScriptFix.jvmLayoutKind = 2;
@@ -504,7 +536,7 @@ public class RamblerBanglaRuntimeTest {
             String purePrompt = RamblerCustomInstructionRules.buildActiveBanglaScriptInstruction(null);
             Assert.assertNotNull(purePrompt);
             Assert.assertTrue(purePrompt.contains("Bangla Academy"));
-            Assert.assertTrue(purePrompt.contains("NEVER output Romanized Banglish"));
+            Assert.assertTrue(purePrompt.contains("NEVER output any Romanized Banglish"));
 
             GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
             GboardRamblerScriptFix.jvmLayoutKind = 2;
