@@ -595,7 +595,7 @@ public final class GboardRamblerBanglaLexicon {
     }
 
     /** Pure-Java Base64 decoder (zero Android API-level / Lint dependencies). */
-    private static byte[] decodeBase64Chunks(String[] chunks) {
+    static byte[] decodeBase64Chunks(String[] chunks) {
         int totalLen = 0;
         for (String c : chunks) {
             totalLen += c.length();

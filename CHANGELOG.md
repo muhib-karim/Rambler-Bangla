@@ -2,6 +2,16 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [32.2.0] - 2026-11-28
+
+**Zero Loanword Cold-Miss, Natural Bangladeshi Loanwords, True Multilingual Mixed Bangla+English & Faster `INSTALL_SCENARIO_FAST` OTA Installs.**
+
+- **Eliminated Loanword Cold-Miss (`client` → `কলিএনত`, `everything` → `এভেরয়থিং`):** Preloaded `GboardRamblerLoanSpell.preload()` immediately on keyboard activation and every mic tap (`RamblerTextPipeline.syncActiveGboardKeyboard`), raised preload thread priority, and added a 150 ms bounded wait on `READY` (loads in ~15–25 ms) so the 17,841-entry loanword table never cold-misses into raw letter-by-letter Avro transliteration on first dictation after boot or update.
+- **Natural Bangladeshi English Loanwords Across All 17,841 Entries:** Added 9 systematic CMUdict phoneme repairs in `GboardRamblerLoanSpell.cleanCmuLoanSpelling()` (`up*` `অপ`→`আপ`, `-ted/-ded` `টিড/ডিড`→`টেড/ডেড`, `াইঅন্ট`→`ায়েন্ট`, `*body`→`বডি`, `*one`→`ওয়ান`, `ন্চওয়`→`নচুয়া`, `exp*`→`এক্সপ`, `multi*`→`মাল্টি`, `-nce`→`ন্স`) plus 60+ curated everyday workplace/tech loanwords (`client` → **`ক্লায়েন্ট`**, `everything` → **`এভরিথিং`**, `android` → **`অ্যান্ড্রয়েড`**, `fluency` → **`ফ্লুয়েন্সি`**, `multilingual` → **`মাল্টিলিঙ্গুয়াল`**, `updated` → **`আপডেটেড`**, `downloaded` → **`ডাউনলোডেড`**, `everybody` → **`এভরিবডি`**, `everyone` → **`এভরিওয়ান`**, `eventually` → **`ইভেনচুয়ালি`**).
+- **True Multilingual Mixed Bangla + English (`abc → বাংলা`) Even in English-Heavy Clauses:** Updated `GboardRamblerSentenceLang.emitSentence()` so mixed clauses where English words outnumber Bangla words (e.g., `Ajke kalke client meeting and everything.`) still convert definite Bengali words to Bengali Unicode while keeping all English words in English Latin (`আজকে কালকে client meeting and everything.`), while pure English clauses remain 100% untouched.
+- **Lexicon-Backed Hyphenated Case-Suffix Auto-Joiner:** Updated `GboardRamblerBanglaNormalizer` to join `<bengali>-<suffix>` (`কে`, `টা`, `টি`, `তে`, `এর`, `রা`, `গুলো`, `ই`, `ও`) whenever `word + suffix` is a valid Bengali word in the 89,556-word lexicon (`কাল-কে` → **`কালকে`**, `আজ-কে` → **`আজকে`**, `কাজ-টা` → **`কাজটা`**) while preserving compound hyphens like `বাংলা-ইংলিশ`.
+- **Faster In-App OTA Installation on All Android 12–16 Devices:** Added `PackageInstaller.SessionParams.setInstallScenario(PackageManager.INSTALL_SCENARIO_FAST)` (API 31+) so ART defers heavy synchronous `dex2oat` compilation of Gboard's 32.9 MB DEX to idle time after tapping **Update**, plus 4× larger 256 KB session staging buffer.
+
 ## [32.1.0] - 2026-11-28
 
 **Language-Wide L3/L4 Dental-Retroflex, Jofola (`্য় → ্য`), `ৈ → ই` & Colloquial Verb (`-তেসি → -তেছি`) Orthography Upgrade.**

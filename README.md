@@ -35,7 +35,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v32.1.0 six-pillar feature overview poster" width="100%" />
+  <img src="docs/feature-showcase.svg" alt="Rambler Bangla v32.2.0 six-pillar feature overview poster" width="100%" />
 </p>
 
 > **Quick Morphe Setup:** Tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)** or paste `https://raw.githubusercontent.com/muhib-karim/Rambler-Bangla/main/patches-bundle.json` in Morphe Manager, then select official Gboard `18.5.4.993608717-release-arm64-v8a`.
@@ -47,7 +47,7 @@
 Ordinary users don't need any coding or command line. Follow these 4 quick steps:
 
 ### Step 1 — Install (Choose Either Option)
-- **Option A — Direct APK (Fastest):** Download `RamblerBangla-v32.1.0-gboard-18.5.4-arm64-v8a.apk` from the **[Latest Release](https://github.com/muhib-karim/Rambler-Bangla/releases/latest)** and install it. It installs **side-by-side** alongside stock Gboard (`Rambler Bangla`) with its own `র` logo.
+- **Option A — Direct APK (Fastest):** Download `RamblerBangla-v32.2.0-gboard-18.5.4-arm64-v8a.apk` from the **[Latest Release](https://github.com/muhib-karim/Rambler-Bangla/releases/latest)** and install it. It installs **side-by-side** alongside stock Gboard (`Rambler Bangla`) with its own `র` logo.
 - **Option B — 1-Click Morphe Manager:** Install [Morphe Manager](https://morphe.software), tap **[Add Patch Source to Morphe](https://morphe.software/add-source?github=muhib-karim/Rambler-Bangla&name=Rambler%20Bangla&app=com.google.android.inputmethod.latin&appName=Gboard)**, pick official Gboard `18.5.4.993608717-release-arm64-v8a`, choose your patches, and tap **Patch**.
 
 ### Step 2 — Add Only These 3 Keyboards (No `Bangla (Latin)` Needed!)
@@ -62,7 +62,7 @@ Open **Rambler Bangla → Settings → Languages → Add keyboard** and keep **j
 Open **Rambler Bangla → Settings → Voice typing** and enable **Rambler+**. It activates immediately without waiting for Google rollout gates.
 
 ### Step 4 — Tap the Mic & Switch Keyboards Anytime
-Switch keyboards with the globe key or spacebar — **Rambler Bangla v32.1.0** automatically instructs Google's live Gemini Rambler+ engine and the 0 ms post-commit orthography net to match whichever keyboard is active:
+Switch keyboards with the globe key or spacebar — **Rambler Bangla v32.2.0** automatically instructs Google's live Gemini Rambler+ engine and the 0 ms post-commit orthography net to match whichever keyboard is active:
 
 | Active Keyboard | Dictation Mode | What You Speak → What You Get |
 | --- | --- | --- |
@@ -87,7 +87,7 @@ Switch keyboards with the globe key or spacebar — **Rambler Bangla v32.1.0** a
 
 Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali into Romanized Latin letters (`"ami bhalo achi"` instead of `"আমি ভালো আছি"`), mangles mixed Bangla + English sentences, hides **Rambler+** behind rollout gates on non-Pixel devices, removed the old "Hide app icon" option, and lacks SwiftKey-style personalized `@handle` predictions or clipboard drag-to-reorder.
 
-**Rambler Bangla v32.1.0** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
+**Rambler Bangla v32.2.0** solves all of these in one unified, fail-closed **Morphe 2.1.0** suite for **Gboard 18.5.4** (while keeping the original fail-closed **Gboard 18.3.1** Python smali patcher and 22-check synthetic CI suite intact):
 
 - **Live Gemini Rambler+ Bangla & Mixed Fluency + 0 ms Orthography Safety Net:** Refreshes Gboard 18.5.4's active language + layout (`Lpev;` / `ImeDef`) on every mic tap and injects Bangla Academy Unicode script rules straight into **Gemini Rambler+'s live `<custom_instruction>`** (keeping `English (US)` untouched), backed by a zero-delay non-blocking 89,556-word OpenBangla + LibreOffice `bn_BD` phonetic-skeleton safety net, agglutinative suffix repair, and protected spans (`#hashtags`, `@handles`, URLs, emails, times).
 - **Custom Rambler Bangla Patches UI, About Auto-Updater & Zero Menu Clutter:** Original Deep Navy / Ocean / Amber **Patches** interface (bordered cards, amber-bar uppercase section headers, zero upstream circular icon badges) with every keyboard enhancement (`AMOLED Dark`, `@Mention & Email Strip`, `Hide launcher icon`, Appearance, Layout, Tools) under **Patches → Keyboard**, clipboard reorder + quick-paste under **Patches → Clipboard**, pure voice controls under **Rambler Enhancements**, and SHA-256 verified **App auto-updates** under **Settings → About**.
@@ -139,7 +139,7 @@ Gboard's on-device **Rambler / Jetson** voice cleanup rewrites spoken Bengali in
 
 ## Included Patches
 
-Rambler Bangla v32.1.0 ships **60 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
+Rambler Bangla v32.2.0 ships **60 selectable Morphe patches** in one unified `.mpp` bundle targeting Gboard `18.5.4.993608717-release-arm64-v8a`:
 
 ### 1. Rambler Bangla — Bengali-First Voice, Native `@Mention` Strip & Clipboard Reorder (4 patches)
 
@@ -508,6 +508,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 
 ### Released
 
+- **v32.2.0 (2026-11-28)**, tag [v32.2.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v32.2.0): **Zero Loanword Cold-Miss, True Multilingual Mixed Bangla+English & Faster `INSTALL_SCENARIO_FAST` OTA Updates** — preloads `GboardRamblerLoanSpell` on keyboard activation & mic tap with a 150 ms warm wait (eliminating first-dictation cold-miss letter-by-letter transliteration like `client` → `কলিএনত` / `everything` → `এভেরয়থিং`), adds 9 systematic CMUdict phoneme repairs + 60+ natural Bangladeshi loanwords (`ক্লায়েন্ট`, `এভরিথিং`, `অ্যান্ড্রয়েড`, `ফ্লুয়েন্সি`, `মাল্টিলিঙ্গুয়াল`, `আপডেটেড`, `ডাউনলোডেড`), fixes English-heavy Mixed (`abc → বাংলা`) clauses (`Ajke kalke client meeting and everything.` → `আজকে কালকে client meeting and everything.`), auto-joins lexicon-valid hyphenated Bengali suffixes (`কাল-কে` → `কালকে`, preserving `বাংলা-ইংলিশ`), and enables Android 12+ `INSTALL_SCENARIO_FAST` + 256 KB staging buffer for faster in-app updates.
 - **v32.1.0 (2026-11-28)**, tag [v32.1.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v32.1.0): **Language-Wide L3/L4 Dental-Retroflex, Jofola & Colloquial Verb Repair** — fixes illegal `্য়` jofola at source & post-commit (`ব্য়াপার` → `ব্যাপার`), adds Level-3 dental↔retroflex (`ট/ঠ/ত/থ`, `ড/ঢ/দ/ধ`), initial `আ↔অ`, `ৈ→ই`, colloquial `-তেসি/-তেসে → -তেছি/-তেছে` verb repair, and Level-4 vowel-tolerant matching across 25,000+ spoken Bengali words (`ফাতাফাতি`/`ফতাফাতি` → `ফাটাফাটি`, `থিকমতো` → `ঠিকমতো`, `আবস্থা` → `অবস্থা`, `একদাম` → `একদম`, `সবৈ` → `সবই`, `লিখতেসি` → `লিখতেছি`, `বেশিরভাগ`, `ক্লিয়ারলি`, `মোটামুটি`, `তাড়াতাড়ি`, `কঠিন`) with zero false positives on valid Bengali words.
 - **v32.0.0 (2026-11-28)**, tag [v32.0.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v32.0.0): **Live Gemini Rambler+ Bangla Academy Prompting, 0 ms Zero-Delay Lexicon & ~3.9 MB Slimmer APK** — injects active-keyboard (`বাংলা` / `abc → বাংলা`) Bangla Academy Unicode script instructions directly into Gemini Rambler+'s live `<custom_instruction>` on every mic tap (merged cleanly with user rules; `English (US)` untouched), switches the 89,556-word Bengali lexicon to 100% non-blocking 0 ms commits (`< 60 ms` async preload), fixes `সব-i` (all Unicode dashes) / `হৈতেচে`→`হচ্ছে` / `বানান তা`→`বানানটা` / `ঠিকমত`→`ঠিকমতো`, and slims the APK by ~3.9 MB via preview asset optimization with all 60 patches intact.
 - **v31.9.0 (2026-11-28)**, tag [v31.9.0](https://github.com/muhib-karim/Rambler-Bangla/releases/tag/v31.9.0): **Full-Language 190,405-Word Offline Bengali Orthography Engine & Android 14–16 In-App Updater Fix** — bundled a compact 190,405-word Bengali lexicon (OpenBangla GPL-3.0 + LibreOffice `bn_BD` + HermitDave spoken frequency rankings) with Level-1 homophone snap (`শ/স/ষ`, `ণ/ন`, `ি/ী`, `ু/ূ`, `য/জ`, `ড়/ঢ়/র`, `ৎ/ত`), Level-2 aspiration/`ব্য`↔`বে`/geminate snap, and agglutinative suffix repair (zero false positives on valid words), plus fixed Android 14–16 `PackageInstaller` Background Activity Launch (BAL) suppression via async off-UI-thread staging, explicit foreground `BroadcastReceiver`, 10s watchdog, and 1-tap Save-to-Downloads fallback.
@@ -544,7 +545,7 @@ The patcher fails closed (`FAIL-CLOSED ABORT`) and writes no output rather than 
 | **CI & Verification** | GitHub Actions (`ci.yml`, `tests.yml`, `android-smoke.yml`): 88 Python tests, 22 static checks, 316 Gradle patch tests, Android 15 KVM ART+IME smoke test |
 
 ```text
-patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-32.1.0.mpp)
+patches/              Unified Morphe Patcher 2.1.0 Gradle module (60 patches -> patches-32.2.0.mpp)
 extensions/           Morphe Android extensions (gboard-patches.rve, calculator.rve, rambler-enhancements.rve)
 patches-bundle.json   Morphe Manager source manifest (auto-discovered by morphe.software/add-source)
 patches-list.json     Published 60-patch JSON catalog

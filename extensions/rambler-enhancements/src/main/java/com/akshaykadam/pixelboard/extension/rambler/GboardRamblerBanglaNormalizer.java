@@ -321,8 +321,11 @@ public final class GboardRamblerBanglaNormalizer {
                                 suffix = GboardRamblerBanglaLexicon.correctWord(suffix);
                             }
                         }
-                        if ("\u0987".equals(suffix) && JOIN_ENCLITIC_I_BASES.contains(word)) {
-                            sb.append(word).append('\u0987');
+                        if (("\u0987".equals(suffix) && JOIN_ENCLITIC_I_BASES.contains(word))
+                                || (isJoinableCaseSuffix(suffix)
+                                        && (GboardRamblerBanglaLexicon.isValid(word + suffix)
+                                                || isGuaranteedJoin(word, suffix)))) {
+                            sb.append(word).append(suffix);
                         } else {
                             sb.append(word).append('-').append(suffix);
                         }
@@ -428,6 +431,31 @@ public final class GboardRamblerBanglaNormalizer {
     private static boolean isHyphenOrDash(char c) {
         return c == '-' || c == '\u2010' || c == '\u2011' || c == '\u2012'
                 || c == '\u2013' || c == '\u2014' || c == '\u2212';
+    }
+
+    private static boolean isJoinableCaseSuffix(String suffix) {
+        return "কে".equals(suffix)
+                || "টা".equals(suffix)
+                || "টি".equals(suffix)
+                || "তে".equals(suffix)
+                || "এর".equals(suffix)
+                || "রা".equals(suffix)
+                || "গুলো".equals(suffix)
+                || "গুলা".equals(suffix)
+                || "ই".equals(suffix)
+                || "ও".equals(suffix);
+    }
+
+    private static boolean isGuaranteedJoin(String word, String suffix) {
+        if ("কে".equals(suffix)) {
+            return "কাল".equals(word) || "আজ".equals(word);
+        }
+        if ("টা".equals(suffix)) {
+            return "বানান".equals(word) || "কথা".equals(word) || "কাজ".equals(word)
+                    || "জিনিস".equals(word) || "পুরা".equals(word) || "পুরো".equals(word)
+                    || "এক".equals(word);
+        }
+        return false;
     }
 
     private static boolean isBengaliWordChar(char c) {

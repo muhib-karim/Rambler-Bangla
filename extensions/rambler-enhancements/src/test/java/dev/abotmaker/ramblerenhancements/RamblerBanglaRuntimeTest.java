@@ -380,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("32.1.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("32.2.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));
@@ -528,6 +528,36 @@ public class RamblerBanglaRuntimeTest {
                 Assert.assertTrue("Expected English preserved: " + shot3Mix,
                         shot3Mix.contains("English") && shot3Mix.endsWith("So it's supposed to understand and work perfectly, right?"));
             }
+
+            // User v32.1.0 real-phone dictation regressions: loanword cold-miss + hyphenated কাল-কে + English-heavy mixed
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+            GboardRamblerScriptFix.jvmLayoutKind = 1;
+            String v321Pure = GboardRamblerScriptFix.processVoice(
+                    "আমি যদি বাংলা-ইংলিশ সবাই বুঝে এবং যেমনে বলব তেমনে বুঝতে পারে তাহলে তো ভালোই হয়। আজকে কাল-কে client meeting and everything.");
+            Assert.assertTrue("Expected বাংলা-ইংলিশ preserved: " + v321Pure, v321Pure.contains("বাংলা-ইংলিশ"));
+            Assert.assertTrue("Expected কালকে (not কাল-কে): " + v321Pure, v321Pure.contains("কালকে") && !v321Pure.contains("কাল-কে"));
+            Assert.assertTrue("Expected ক্লায়েন্ট মিটিং অ্যান্ড এভরিথিং (never কলিএনত/এভেরয়থিং): " + v321Pure,
+                    v321Pure.contains("ক্লায়েন্ট মিটিং অ্যান্ড এভরিথিং")
+                            && !v321Pure.contains("কলিএনত") && !v321Pure.contains("এভেরয়থিং"));
+
+            String v321Loans = GboardRamblerScriptFix.processVoice(
+                    "android fluency updated downloaded clients everybody everyone eventually multilingual.");
+            for (String exp : new String[] {
+                    "অ্যান্ড্রয়েড", "ফ্লুয়েন্সি", "আপডেটেড", "ডাউনলোডেড",
+                    "ক্লায়েন্টস", "এভরিবডি", "এভরিওয়ান", "ইভেনচুয়ালি", "মাল্টিলিঙ্গুয়াল"
+            }) {
+                Assert.assertTrue("Expected natural loanword '" + exp + "' in: " + v321Loans, v321Loans.contains(exp));
+            }
+
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
+            GboardRamblerScriptFix.jvmLayoutKind = 2;
+            String v321Mix = GboardRamblerScriptFix.processVoice("Ajke kalke client meeting and everything.");
+            Assert.assertTrue("Expected আজকে কালকে + English Latin preserved in English-heavy mixed clause: " + v321Mix,
+                    v321Mix.contains("আজকে") && v321Mix.contains("কালকে") && v321Mix.contains("client meeting and everything"));
+            String v321MixBn = GboardRamblerScriptFix.processVoice("আজকে কাল-কে client meeting and everything.");
+            Assert.assertEquals("আজকে কালকে client meeting and everything.", v321MixBn);
+            String v321MixEn = GboardRamblerScriptFix.processVoice("Today we have a client meeting and everything.");
+            Assert.assertEquals("Today we have a client meeting and everything.", v321MixEn);
 
             // Live Gemini Rambler+ prompt injection matches active keyboard mode cleanly
             RamblerDynamicConfig.FEATURE_BANGLA_PHONETIC = true;
