@@ -212,6 +212,7 @@ public final class RamblerTextPipeline {
                 GboardRamblerScriptFix.setActiveGboardKeyboard(localeTag, layoutDescriptor);
             }
             com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon.preload();
+            com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLoanSpell.preload();
         } catch (Throwable ignored) {
         }
     }

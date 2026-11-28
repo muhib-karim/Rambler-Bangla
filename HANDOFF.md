@@ -1,12 +1,12 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.1.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.2.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v32.1.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **Language-Wide L3/L4 Dental-Retroflex, Jofola & Colloquial Verb Orthography Engine:** Fixed illegal `্য় → ্য` jofola at source & post-commit (`ব্য়াপার → ব্যাপার`), added Level-3 dental↔retroflex + initial `আ↔অ` + `ৈ→ই`, Level-4 vowel-tolerant matching, and colloquial `-তেসি/-তেসে → -তেছি/-তেছে` verb repair (`ফাটাফাটি`, `ঠিকমতো`, `একদম`, `অবস্থা`, `সবই`, `লিখতেছি`, `বেশিরভাগ`, `ক্লিয়ারলি`, etc.) with 0 ms delay and zero false positives across 89,556 valid words.
-   - **Live Gemini Rambler+ Bangla Academy Script Prompting & ~3.9 MB Slimmer APK:** Strengthened live `<custom_instruction>` Bangla prompt for colloquial speech while keeping the lean ~89.4 MB APK and all-Android BAL-safe in-app OTA updater.
+1. **Completed:** Shipped **`Rambler Bangla v32.2.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **Zero Loanword Cold-Miss & Natural Loanword Engine:** Fixed `GboardRamblerLoanSpell` cold-miss on first dictation (`client → কলিএনত`, `everything → এভেরয়থিং` now `ক্লায়েন্ট`, `এভরিথিং`), added 9 systematic CMUdict repairs + 60+ curated Bangladeshi loanwords, and added lexicon-backed hyphenated case-suffix joining (`কাল-কে → কালকে`, preserving `বাংলা-ইংলিশ`).
+   - **True English-Heavy Mixed Bangla+English & Faster OTA Installs:** `abc → বাংলা` now converts Bengali tokens even in English-heavy clauses (`Ajke kalke client meeting and everything.` → `আজকে কালকে client meeting and everything.`), and `RamblerAutoUpdater` uses `INSTALL_SCENARIO_FAST` (API 31+) + 256 KB staging buffer to speed up Android post-confirm updates across all Android 12–16 devices.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

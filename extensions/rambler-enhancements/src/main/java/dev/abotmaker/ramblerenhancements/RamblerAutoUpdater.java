@@ -13,6 +13,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -53,7 +54,7 @@ import java.util.regex.Pattern;
  */
 public final class RamblerAutoUpdater {
     private static final String TAG = "RamblerUpdater";
-    public static final String CURRENT_VERSION = "32.1.0";
+    public static final String CURRENT_VERSION = "32.2.0";
     public static final String REPO_SLUG = "muhib-karim/Rambler-Bangla";
     public static final String RELEASE_API_URL =
             "https://api.github.com/repos/" + REPO_SLUG + "/releases/latest";
@@ -476,12 +477,13 @@ public final class RamblerAutoUpdater {
                 params.setSize(totalBytes);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_REQUIRED);
+                    params.setInstallScenario(PackageManager.INSTALL_SCENARIO_FAST);
                 }
                 int sessionId = installer.createSession(params);
                 session = installer.openSession(sessionId);
-                try (InputStream in = new BufferedInputStream(new FileInputStream(verifiedApk));
+                try (InputStream in = new BufferedInputStream(new FileInputStream(verifiedApk), 256 * 1024);
                      OutputStream out = session.openWrite("base.apk", 0L, totalBytes)) {
-                    byte[] buf = new byte[64 * 1024];
+                    byte[] buf = new byte[256 * 1024];
                     long written = 0L;
                     int lastPct = -1;
                     int n;

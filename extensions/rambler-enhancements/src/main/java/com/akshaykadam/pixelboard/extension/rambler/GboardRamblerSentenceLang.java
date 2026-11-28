@@ -287,15 +287,25 @@ final class GboardRamblerSentenceLang {
     for (int x = a; x < b; x++) {
       String t = tok.get(x);
       int c = cls[x - a];
-      if (!bangla || c == T_PROT || !latin(t.charAt(0))) { out.append(t); continue; }
-      // Hyphenated Bengali enclitic particles after Bengali words (e.g. "সব-i" -> "সব-ই", "বাংলা-o" -> "বাংলা-ও")
-      // MUST run before T_EN_GRAM skip because "i" is classified as EN_GRAM in English!
+      if (c == T_PROT || !latin(t.charAt(0))) { out.append(t); continue; }
+      // Hyphenated Bengali enclitic particles after Bengali words (e.g. "সব-i" -> "সব-ই", "কাল-ke" -> "কাল-কে")
+      // MUST run before any English skip because "i" is classified as EN_GRAM in English!
       if (isBanglaHyphenEnclitic(tok, a, x)) {
         String encl = renderBanglaEnclitic(t.toLowerCase(Locale.US));
         if (encl != null) {
           out.append(encl);
           continue;
         }
+      }
+      if (!bangla) {
+        // English-heavy mixed Bangla + English clause (nb >= 1, e.g. "Ajke kalke client meeting and everything"):
+        // Still convert definite Bengali tokens (T_BN_GRAM / T_BN) to Bengali Unicode while keeping all English Latin!
+        if (nb >= 1 && (c == T_BN_GRAM || c == T_BN)) {
+          out.append(render(t, english));
+        } else {
+          out.append(t);
+        }
+        continue;
       }
       // True Mixed Bangla + English (abc -> বাংলা): keep clear English words in English Latin
       // inside a Bangla clause while converting Bangla/Romanized words to Bengali Unicode.

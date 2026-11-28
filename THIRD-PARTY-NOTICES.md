@@ -183,6 +183,10 @@ community keyboard themes from the Rboard Theme repository (`GboardThemesV3`):
 - **LibreOffice `bn_BD` Hunspell Dictionary** (`LibreOffice/dictionaries`) — **GNU GPL v2.0+ / LGPL / MPL**
   (https://github.com/LibreOffice/dictionaries/tree/master/bn_BD) — Bangladesh Bangla Academy
   dictionary roots compiled into `GboardRamblerBanglaLexiconData.java` (`v31.9.0`).
-- **HermitDave FrequencyWords (`bn_full.txt`)** (`hermitdave/FrequencyWords`) — **MIT / CC-BY-SA**
-  (https://github.com/hermitdave/FrequencyWords) — spoken Bengali frequency rankings for
-  phonetic-skeleton candidate ranking (`v31.9.0`).
+- **HermitDave FrequencyWords (`bn_full.txt`, `en_50k.txt`)** (`hermitdave/FrequencyWords`) — **MIT / CC-BY-SA**
+  (https://github.com/hermitdave/FrequencyWords) — spoken Bengali & English frequency rankings for
+  phonetic-skeleton candidate ranking (`v31.9.0+`) and top-25k loanwords (`v32.2.0`).
+- **AI4Bharat Aksharantar (`ben`)** (`ai4bharat/Aksharantar`) — **CC-BY-4.0**
+  (https://huggingface.co/datasets/ai4bharat/Aksharantar) — human-verified Roman-to-Bengali
+  transliteration dataset compiled into `GboardRamblerLoanTableData.java` and
+  `GboardRamblerBanglishData.java` (`v32.2.0`).

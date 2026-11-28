@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="title desc">
   <title id="title">Rambler Bangla — Unified 60-Patch Morphe Suite for Gboard 18.5.4</title>
-  <desc id="desc">Banner: Rambler Bangla v32.1.0, Bengali-first 3-mode voice typing with live Gemini Rambler+ Bangla Academy script prompting, zero-delay L1-L4 Bengali orthography engine, and 60-patch Morphe suite for Gboard 18.5.4.</desc>
+  <desc id="desc">Banner: Rambler Bangla v32.2.0, Bengali-first 3-mode voice typing with live Gemini Rambler+ Bangla Academy script prompting, zero-delay L1-L4 Bengali orthography engine, and 60-patch Morphe suite for Gboard 18.5.4.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#061224"/>
@@ -35,7 +35,7 @@
   <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
     <rect x="76" y="40" width="372" height="32" rx="16" fill="#10304F" stroke="#2D6FA3" stroke-width="1.2"/>
     <circle cx="98" cy="56" r="4.5" fill="#9BE0B0"/>
-    <text x="114" y="61" font-size="13" font-weight="600" fill="#B3C9E2" letter-spacing="0.6">v32.1.0  ·  MORPHE 2.1  ·  60 PATCHES</text>
+    <text x="114" y="61" font-size="13" font-weight="600" fill="#B3C9E2" letter-spacing="0.6">v32.2.0  ·  MORPHE 2.1  ·  60 PATCHES</text>
 
     <!-- main wordmark -->
     <text x="76" y="146" font-size="68" font-weight="700" fill="#FFFFFF" letter-spacing="-1.2">Rambler <tspan fill="#F6B13E">Bangla</tspan></text>

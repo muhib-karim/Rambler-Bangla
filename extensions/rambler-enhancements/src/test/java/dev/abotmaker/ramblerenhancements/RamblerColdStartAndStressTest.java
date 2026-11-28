@@ -1,0 +1,207 @@
+package dev.abotmaker.ramblerenhancements;
+
+import com.akshaykadam.pixelboard.extension.rambler.GboardRamblerBanglaLexicon;
+import com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLoanSpell;
+import com.akshaykadam.pixelboard.extension.rambler.GboardRamblerScriptFix;
+import com.akshaykadam.pixelboard.extension.rambler.GboardRamblerScriptFixSettings;
+import org.junit.Assert;
+import org.junit.Test;
+
+/**
+ * Hard cold-start and broad real-speech quality gate for Rambler Bangla v32.2.0+.
+ * Runs BEFORE any manual dictionary preload in its own test class to prove that
+ * first dictation after boot/update never cold-misses into Avro letter-by-letter garbage.
+ */
+public class RamblerColdStartAndStressTest {
+
+    @Test
+    public void coldStartAndBroadRealSpeechGate() {
+        try {
+            // 1. TRUE COLD START: NO prior preload() or loadBlockingForTesting()!
+            // Simulates the exact first dictation right after updating the APK on a phone.
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+            GboardRamblerScriptFix.jvmLayoutKind = 1;
+
+            String coldFirst = GboardRamblerScriptFix.processVoice(
+                    "আমি যদি বাংলা-ইংলিশ সবাই বুঝে এবং যেমনে বলব তেমনে বুঝতে পারে তাহলে তো ভালোই হয়। "
+                            + "আজকে কাল-কে client meeting and everything.");
+            Assert.assertTrue("Cold-start must preserve বাংলা-ইংলিশ: " + coldFirst,
+                    coldFirst.contains("বাংলা-ইংলিশ"));
+            Assert.assertTrue("Cold-start must join কাল-কে -> কালকে: " + coldFirst,
+                    coldFirst.contains("কালকে") && !coldFirst.contains("কাল-কে"));
+            Assert.assertTrue("Cold-start must NEVER emit Avro garbage কলিএনত/এভেরয়থিং: " + coldFirst,
+                    coldFirst.contains("ক্লায়েন্ট মিটিং অ্যান্ড এভরিথিং")
+                            && !coldFirst.contains("কলিএনত")
+                            && !coldFirst.contains("এভেরয়থিং"));
+
+            // Verify both Aksharantar compressed tables loaded cleanly
+            Assert.assertTrue("Expected >= 22000 Aksharantar+CMU loanwords, got " + GboardRamblerLoanSpell.loanTableSize(),
+                    GboardRamblerLoanSpell.loanTableSize() >= 22000);
+            Assert.assertTrue("Expected >= 24000 Shift-free Banglish words, got " + GboardRamblerLoanSpell.banglishTableSize(),
+                    GboardRamblerLoanSpell.banglishTableSize() >= 24000);
+
+            // Warm lexicon for full L1-L4 + hyphen checks
+            Assert.assertTrue(GboardRamblerBanglaLexicon.loadBlockingForTesting() >= 85000);
+
+            // 2. BROAD 60-WORD ENGLISH LOANWORD STRESS TEST (Pure Bangla mode)
+            String[][] loanChecks = {
+                {"client", "ক্লায়েন্ট"},
+                {"clients", "ক্লায়েন্টস"},
+                {"everything", "এভরিথিং"},
+                {"everyone", "এভরিওয়ান"},
+                {"everybody", "এভরিবডি"},
+                {"everyday", "এভরিডে"},
+                {"anything", "এনিথিং"},
+                {"something", "সামথিং"},
+                {"nothing", "নাথিং"},
+                {"android", "অ্যান্ড্রয়েড"},
+                {"fluency", "ফ্লুয়েন্সি"},
+                {"fluent", "ফ্লুয়েন্ট"},
+                {"accuracy", "অ্যাকিউরেসি"},
+                {"accurate", "অ্যাকিউরেট"},
+                {"mobile", "মোবাইল"},
+                {"software", "সফটওয়্যার"},
+                {"network", "নেটওয়ার্ক"},
+                {"business", "বিজনেস"},
+                {"multilingual", "মাল্টিলিঙ্গুয়াল"},
+                {"management", "ম্যানেজমেন্ট"},
+                {"experience", "এক্সপেরিয়েন্স"},
+                {"performance", "পারফরম্যান্স"},
+                {"difference", "ডিফারেন্স"},
+                {"decision", "ডিসিশন"},
+                {"discussion", "ডিসকাশন"},
+                {"popup", "পপ-আপ"},
+                {"annoying", "অ্যানয়িং"},
+                {"automatically", "অটোমেটিক্যালি"},
+                {"basically", "বেসিক্যালি"},
+                {"literally", "লিটারালি"},
+                {"immediately", "ইমিডিয়েটলি"},
+                {"probably", "প্রবাবলি"},
+                {"technology", "টেকনোলজি"},
+                {"normal", "নরমাল"},
+                {"natural", "ন্যাচারাল"},
+                {"perfect", "পারফেক্ট"},
+                {"implement", "ইমপ্লিমেন্ট"},
+                {"installed", "ইনস্টলড"},
+                {"updated", "আপডেটেড"},
+                {"downloaded", "ডাউনলোডেড"},
+                {"deadline", "ডেডলাইন"},
+                {"feedback", "ফিডব্যাক"},
+                {"delivery", "ডেলিভারি"},
+                {"presentation", "প্রেজেন্টেশন"},
+                {"notification", "নোটিফিকেশন"},
+                {"conversation", "কনভারসেশন"},
+                {"application", "অ্যাপ্লিকেশন"},
+                {"development", "ডেভেলপমেন্ট"},
+                {"environment", "এনভায়রনমেন্ট"},
+                {"international", "ইন্টারন্যাশনাল"},
+                {"professional", "প্রফেশনাল"},
+                {"communication", "কমিউনিকেশন"},
+                {"solution", "সল্যুশন"},
+                {"keyboard", "কিবোর্ড"},
+                {"instant", "ইনস্ট্যান্ট"},
+                {"resolve", "রিজলভ"},
+                {"eventually", "ইভেনচুয়ালি"},
+                {"browser", "ব্রাউজার"},
+                {"schedule", "শিডিউল"},
+                {"sentence", "সেন্টেন্স"},
+                {"meeting", "মিটিং"},
+                {"whatever", "হোয়াটেভার"},
+                {"phonetics", "ফোনেটিকস"},
+                {"understand", "আন্ডারস্ট্যান্ড"},
+                {"understands", "আন্ডারস্ট্যান্ডস"},
+                {"company", "কোম্পানি"},
+                {"clearly", "ক্লিয়ারলি"},
+                {"whatsapp", "হোয়াটসঅ্যাপ"},
+                {"youtube", "ইউটিউব"},
+                {"facebook", "ফেসবুক"},
+                {"instagram", "ইনস্টাগ্রাম"},
+                {"google", "গুগল"},
+                {"samsung", "স্যামসাং"},
+                {"email", "ইমেইল"},
+                {"password", "পাসওয়ার্ড"},
+                {"message", "মেসেজ"},
+                {"account", "অ্যাকাউন্ট"},
+                {"tomorrow", "টুমরো"},
+            };
+            StringBuilder failures = new StringBuilder();
+            for (String[] pair : loanChecks) {
+                String out = GboardRamblerScriptFix.processVoice("আমাদের " + pair[0] + " ভালো.");
+                if (!out.contains(pair[1])) {
+                    failures.append("LOAN[").append(pair[0]).append("]: exp=").append(pair[1])
+                            .append(" got=").append(out).append('\n');
+                }
+            }
+
+            // 3. SHIFT-FREE COLLOQUIAL BANGLISH STRESS TEST (30+ real Bangladeshi words)
+            String[][] banglishChecks = {
+                {"fatafati", "ফাটাফাটি"},
+                {"byapar", "ব্যাপার"},
+                {"kalke", "কালকে"},
+                {"ajke", "আজকে"},
+                {"soboi", "সবই"},
+                {"ekdom", "একদম"},
+                {"beshirbhag", "বেশিরভাগ"},
+                {"valo", "ভালো"},
+                {"taratari", "তাড়াতাড়ি"},
+                {"motamuti", "মোটামুটি"},
+                {"purota", "পুরোটা"},
+                {"purata", "পুরাটা"},
+                {"mishti", "মিষ্টি"},
+                {"bolbo", "বলব"},
+                {"bujhte", "বুঝতে"},
+                {"likhte", "লিখতে"},
+                {"korte", "করতে"},
+                {"bolte", "বলতে"},
+                {"amader", "আমাদের"},
+                {"tomader", "তোমাদের"},
+                {"apnader", "আপনাদের"},
+                {"kemon", "কেমন"},
+                {"thikmoto", "ঠিকমতো"},
+                {"obostha", "অবস্থা"},
+                {"shobkichui", "সবকিছুই"},
+                {"dhonnobad", "ধন্যবাদ"},
+                {"likhtesi", "লিখতেছি"},
+                {"boltesi", "বলতেছি"},
+                {"kortesi", "করতেছি"},
+                {"bujhtese", "বুঝতেছে"},
+            };
+            for (String[] pair : banglishChecks) {
+                String out = GboardRamblerScriptFix.processVoice(pair[0] + " ভালো.");
+                if (!out.contains(pair[1])) {
+                    failures.append("BANGLISH[").append(pair[0]).append("]: exp=").append(pair[1])
+                            .append(" got=").append(out).append('\n');
+                }
+            }
+            Assert.assertEquals("Stress test failures:\n" + failures, 0, failures.length());
+
+            // 4. MULTILINGUAL MIXED (abc -> বাংলা) STRESS TEST
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-XU", "ime_bengali_india_transliteration");
+            GboardRamblerScriptFix.jvmLayoutKind = 2;
+
+            String mix1 = GboardRamblerScriptFix.processVoice("Ajke kalke client meeting and everything.");
+            Assert.assertEquals("আজকে কালকে client meeting and everything.", mix1);
+
+            String mix2 = GboardRamblerScriptFix.processVoice("আজকে কাল-কে client meeting and everything.");
+            Assert.assertEquals("আজকে কালকে client meeting and everything.", mix2);
+
+            String mix3 = GboardRamblerScriptFix.processVoice("Amader client meeting ache, so please update everything.");
+            Assert.assertTrue("Expected আমাদের + আছে + English Latin preserved: " + mix3,
+                    mix3.contains("আমাদের") && mix3.contains("client meeting")
+                            && mix3.contains("আছে") && mix3.contains("so please update everything."));
+
+            String pureEn = GboardRamblerScriptFix.processVoice("Today we have a client meeting and everything.");
+            Assert.assertEquals("Today we have a client meeting and everything.", pureEn);
+
+            // 5. ZERO FALSE POSITIVES ON VALID BENGALI
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+            GboardRamblerScriptFix.jvmLayoutKind = 1;
+            String validBn = "আমি যদি বাংলা-ইংলিশ সবাই বুঝে এবং যেমনে বলব তেমনে বুঝতে পারে তাহলে তো ভালোই হয়। "
+                    + "দরকার অনেক পৃথিবী ব্যবহার শিক্ষক উপস্থিত জিনিস শুনতে শবদেহ শব্দ।";
+            Assert.assertEquals(validBn, GboardRamblerScriptFix.processVoice(validBn));
+        } finally {
+            GboardRamblerScriptFix.jvmLayoutKind = 0;
+            GboardRamblerScriptFix.setActiveGboardKeyboard(null, null);
+        }
+    }
+}

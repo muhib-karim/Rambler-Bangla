@@ -70,9 +70,14 @@ MPL-2.0, and BSD):
 - **LibreOffice `bn_BD` Hunspell Dictionary** (`LibreOffice/dictionaries`, **GNU GPL v2.0+ / LGPL / MPL**) —
   https://github.com/LibreOffice/dictionaries/tree/master/bn_BD — 79,224 Bangladesh Bangla Academy
   root entries combined into the 190,405-word offline valid Bengali lexicon.
-- **HermitDave FrequencyWords (`bn_full.txt`)** (`hermitdave/FrequencyWords`, **MIT / CC-BY-SA**) —
-  https://github.com/hermitdave/FrequencyWords — OpenSubtitles spoken Bengali frequency rankings
-  used to rank phonetic-skeleton spell-correction candidates (`v31.9.0`).
+- **HermitDave FrequencyWords (`bn_full.txt`, `en_50k.txt`)** (`hermitdave/FrequencyWords`, **MIT / CC-BY-SA**) —
+  https://github.com/hermitdave/FrequencyWords — OpenSubtitles spoken Bengali & English frequency rankings
+  used to rank phonetic-skeleton spell-correction candidates (`v31.9.0+`) and top-25k loanwords (`v32.2.0`).
+- **AI4Bharat Aksharantar (`ben`)** (`ai4bharat/Aksharantar`, **CC-BY-4.0**) —
+  https://huggingface.co/datasets/ai4bharat/Aksharantar — human-verified Roman-to-Bengali transliteration
+  pairs compiled by `scripts/build_bangla_loan_and_phonetic.py` into `GboardRamblerLoanTableData.java`
+  (23,149 English→Bengali loanwords) and `GboardRamblerBanglishData.java` (25,000 Shift-free Banglish
+  words strictly validated against OpenBangla + `bn_BD`, `v32.2.0`).
 
 ## Licensing & Non-Affiliation
 

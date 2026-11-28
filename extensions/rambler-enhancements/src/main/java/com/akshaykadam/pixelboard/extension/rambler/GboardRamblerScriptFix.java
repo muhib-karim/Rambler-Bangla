@@ -739,7 +739,12 @@ public final class GboardRamblerScriptFix {
         CONSONANTS = new java.lang.String[][]{new java.lang.String[]{"kSh", "ক্ষ"}, new java.lang.String[]{"chh", "ছ"}, new java.lang.String[]{"Ng", "ঙ"}, new java.lang.String[]{"kh", "খ"}, new java.lang.String[]{"k", "ক"}, new java.lang.String[]{"gh", "ঘ"}, new java.lang.String[]{"g", "গ"}, new java.lang.String[]{"sh", "শ"}, new java.lang.String[]{"ch", "চ"}, new java.lang.String[]{"jh", "ঝ"}, new java.lang.String[]{"j", "য"}, new java.lang.String[]{"NY", "ঞ"}, new java.lang.String[]{"Th", "ঠ"}, new java.lang.String[]{"T", "ট"}, new java.lang.String[]{"Dh", "ঢ"}, new java.lang.String[]{"D", "ড"}, new java.lang.String[]{"N", "ণ"}, new java.lang.String[]{"th", "থ"}, new java.lang.String[]{"t", "ত"}, new java.lang.String[]{"dh", "ধ"}, new java.lang.String[]{"d", "দ"}, new java.lang.String[]{"n", "ন"}, new java.lang.String[]{"ph", "ফ"}, new java.lang.String[]{"p", "প"}, new java.lang.String[]{"f", "ফ"}, new java.lang.String[]{"bh", "ভ"}, new java.lang.String[]{"b", "ব"}, new java.lang.String[]{"v", "ভ"}, new java.lang.String[]{"m", "ম"}, new java.lang.String[]{"z", "জ"}, new java.lang.String[]{"r", "র"}, new java.lang.String[]{"l", "ল"}, new java.lang.String[]{"Sh", "ষ"}, new java.lang.String[]{"S", "শ"}, new java.lang.String[]{"s", "স"}, new java.lang.String[]{"h", "হ"}, new java.lang.String[]{"Rh", "ঢ়"}, new java.lang.String[]{"R", "ড়"}, new java.lang.String[]{"Y", "য়"}, new java.lang.String[]{"y", "য়"}, new java.lang.String[]{"q", "ক"}, new java.lang.String[]{"w", "ও"}};
         URL_SPAN = java.util.regex.Pattern.compile("https?://\\S+|\\S+@\\S+\\.[A-Za-z]{2,}|(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}(?:[/?#]\\S*)?");
         jvmLayoutKind = 0;
-        PHRASE_JOINS = new java.lang.String[][]{new java.lang.String[]{"kal ke", "kalke"}};
+        PHRASE_JOINS = new java.lang.String[][]{
+                new java.lang.String[]{"kal ke", "kalke"},
+                new java.lang.String[]{"kal-ke", "kalke"},
+                new java.lang.String[]{"aj ke", "ajke"},
+                new java.lang.String[]{"aj-ke", "ajke"}
+        };
         lastVoiceEngine = null;
     }
 
@@ -1273,13 +1278,17 @@ public final class GboardRamblerScriptFix {
 
     static java.lang.String convertTokenOrig(java.lang.String str, java.lang.String str2) {
         java.lang.String str3 = EXCEPTIONS.get(str2);
-        if (str3 == null) {
-            if (JHA_WORDS.contains(str2)) {
-                str = str.replace('j', 'z').replace('J', 'Z');
-            }
-            return transliterate(str);
+        if (str3 != null) {
+            return str3;
         }
-        return str3;
+        java.lang.String bnDict = com.akshaykadam.pixelboard.extension.rambler.GboardRamblerLoanSpell.banglish(str2);
+        if (bnDict != null) {
+            return bnDict;
+        }
+        if (JHA_WORDS.contains(str2)) {
+            str = str.replace('j', 'z').replace('J', 'Z');
+        }
+        return transliterate(str);
     }
 
     private static java.lang.String transliterate(java.lang.String str) {
