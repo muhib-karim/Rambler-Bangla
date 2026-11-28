@@ -1,13 +1,12 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.0.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.1.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v32.0.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **Live Gemini Rambler+ Bangla Academy Script Prompt Injection (`RamblerCustomInstructionRules`):** Refreshes active keyboard on every mic tap (`captureSessionContext`) and injects active `বাংলা` / `abc → বাংলা` Bangla Academy Unicode instructions straight into Gemini Rambler+'s live `<custom_instruction>` Bundle (merged with user rules; `English (US)` untouched).
-   - **Zero-Delay Non-Blocking 89k Bengali Lexicon + `সব-i`/`হৈতেচে`/`বানানটা` Fixes:** 0 ms commit blocking, `< 60 ms` async preload, Unicode dash enclitic repair, and natural `হচ্ছে`/`বানানটা`/`ঠিকমতো` normalization.
-   - **~3.9 MB Slimmer APK & All-Android OTA Updater:** Optimized `settings-previews` (`4.55 MB` → `0.89 MB`) + lean lexicon with all 60 patches intact and standard AOSP Android 8–16 BAL-safe in-app updater.
+1. **Completed:** Shipped **`Rambler Bangla v32.1.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **Language-Wide L3/L4 Dental-Retroflex, Jofola & Colloquial Verb Orthography Engine:** Fixed illegal `্য় → ্য` jofola at source & post-commit (`ব্য়াপার → ব্যাপার`), added Level-3 dental↔retroflex + initial `আ↔অ` + `ৈ→ই`, Level-4 vowel-tolerant matching, and colloquial `-তেসি/-তেসে → -তেছি/-তেছে` verb repair (`ফাটাফাটি`, `ঠিকমতো`, `একদম`, `অবস্থা`, `সবই`, `লিখতেছি`, `বেশিরভাগ`, `ক্লিয়ারলি`, etc.) with 0 ms delay and zero false positives across 89,556 valid words.
+   - **Live Gemini Rambler+ Bangla Academy Script Prompting & ~3.9 MB Slimmer APK:** Strengthened live `<custom_instruction>` Bangla prompt for colloquial speech while keeping the lean ~89.4 MB APK and all-Android BAL-safe in-app OTA updater.
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

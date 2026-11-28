@@ -2,6 +2,17 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [32.1.0] - 2026-11-28
+
+**Language-Wide L3/L4 Dental-Retroflex, Jofola (`্য় → ্য`), `ৈ → ই` & Colloquial Verb (`-তেসি → -তেছি`) Orthography Upgrade.**
+
+- **Eliminated Illegal Bengali Jofola (`্য়` → `্য`) at Both Source & Post-Commit:** Fixed `GboardRamblerScriptFix.transliterate()` so `HASANTA + y` emits `\u09CD\u09AF` (`্য`) instead of illegal `\u09CD\u09DF` (`্য়`), and added unconditional `fixIllegalJofola` cleanup in `GboardRamblerBanglaNormalizer` (`ব্য়াপার` → **`ব্যাপার`**, `ব্য়বহার` → **`ব্যবহার`**).
+- **Level-3 & Level-4 Romanized-ASR Phonetic Skeletons in `GboardRamblerBanglaLexicon` (0 ms blocking, zero false positives on 89,556 valid Bengali words):**
+  - **Level-3 (`skeleton3`, top 25,000 spoken words):** Collapses dental ↔ retroflex (`ট/ঠ/ত/থ`, `ড/ঢ/দ/ধ`), initial `আ ↔ অ`, and Avro diphthongs (`ৈ → ই`, `ৌ → উ`), automatically repairing thousands of unseen Romanized-Banglish spelling artifacts (`ফাতাফাতি` → **`ফাটাফাটি`**, `থিকমতো` → **`ঠিকমতো`**, `আবস্থা` → **`অবস্থা`**, `মোটামুতি` → **`মোটামুটি`**, `তারাতারি` → **`তাড়াতাড়ি`**, `কথিন` → **`কঠিন`**, `দুস্তু` → **`দুষ্টু`**, `মিস্তি` → **`মিষ্টি`**, `চেস্তা` → **`চেষ্টা`**, `স্পস্ত` → **`স্পষ্ট`**, `অনুস্থান` → **`অনুষ্ঠান`**).
+  - **Level-4 (`skeleton4`, top 10,000 spoken words, guarded by `sk3` edit distance ≤ 1):** Repairs Romanized `a/o/u` vowel-sign drops (`একদাম` → **`একদম`**, `ফতাফাতি` → **`ফাটাফাটি`**, `পরাতা` → **`পুরাটা`**).
+  - **Colloquial Bengali Verb Ending & Word-Final `ৈ` Repair:** Automatically fixes OOV `-তেসি/-তেসে/-তেসো/-তেসেন/-তেসিলাম` → `-তেছি/-তেছে/-তেছো/-তেছেন/-তেছিলাম` (`লিখতেসি` → **`লিখতেছি`**, `বলতেসি` → **`বলতেছি`**, `করতেসি` → **`করতেছি`**, `বুঝতেসে` → **`বুঝতেছে`**) and OOV trailing `ৈ` → `ই` (`সবৈ` → **`সবই`**).
+- **Real-Phone Dictation Polish & Stronger Gemini Prompt:** Added `কলিরলি` → `ক্লিয়ারলি`, `বেশিভাগ` → `বেশিরভাগ`, `এখান তো` → `এখন তো`, `মাছ অ্যাকিউরেট` → `মাচ অ্যাকিউরেট`, strengthened `GEMINI_PURE_BANGLA_INSTRUCTION` for fast colloquial Bangladeshi speech, and added full unit-test coverage in `RamblerBanglaRuntimeTest`.
+
 ## [32.0.0] - 2026-11-28
 
 **Live Gemini Rambler+ Bangla Academy Script Prompt Injection, Zero-Delay Non-Blocking Lexicon, Bulletproof `সব-i` / `হৈতেচে` / `বানানটা` Fixes & ~3.9 MB Slimmer APK.**

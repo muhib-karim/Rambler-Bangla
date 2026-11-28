@@ -302,11 +302,12 @@ public final class RamblerCustomInstructionRules {
 
     public static final String GEMINI_PURE_BANGLA_INSTRUCTION =
             "Language and script convention: Active keyboard is native Bengali (বাংলা). "
-                    + "Transcribe ALL spoken Bengali fluently in standard modern Bangla Academy Bengali Unicode script "
-                    + "with accurate spelling and Bengali dari (।) (e.g., বানানটা, হচ্ছে, সবকিছুই, বুঝে, ভালো, সুন্দরভাবে, ঠিকমতো, করছি, বলছি). "
+                    + "Transcribe EVERY spoken Bengali word directly in standard modern Bangla Academy Bengali Unicode script "
+                    + "with accurate spelling and Bengali dari (।) — including fast colloquial Bangladeshi speech "
+                    + "(e.g., বানানটা, হচ্ছে, সবই, সবকিছুই, ব্যাপার, একদম, ঠিকমতো, ফাটাফাটি, অবস্থা, বেশিরভাগ, লিখতেছি, বুঝে, ভালো, সুন্দরভাবে, পুরোটা). "
                     + "Transliterate spoken English loanwords naturally into Bengali Unicode "
-                    + "(e.g., ইংলিশ, ক্লিয়ারলি, হোয়াটেভার, ফোনেটিকস, আন্ডারস্ট্যান্ড, কোম্পানি). "
-                    + "NEVER output Romanized Banglish or Latin suffixes like -i. "
+                    + "(e.g., ইংলিশ, ক্লিয়ারলি, প্রিটি, অ্যাকিউরেট, হোয়াটেভার, ফোনেটিকস, আন্ডারস্ট্যান্ড, কোম্পানি). "
+                    + "NEVER output any Romanized Banglish words, broken jofola (ব্য়াপার), or Latin suffixes like -i. "
                     + "Preserve URLs, emails, #hashtags, and @handles verbatim.";
 
     public static final String GEMINI_MIXED_BANGLA_INSTRUCTION =

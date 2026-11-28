@@ -44,6 +44,8 @@ public final class GboardRamblerBanglaNormalizer {
         {"জায়গা তা", "জায়গাটা"},
         {"প্রশ্ন তা", "প্রশ্নটা"},
         {"উত্তর তা", "উত্তরটা"},
+        {"এখান তো", "এখন তো"},
+        {"মাছ অ্যাকিউরেট", "মাচ অ্যাকিউরেট"},
     };
 
     static {
@@ -221,6 +223,19 @@ public final class GboardRamblerBanglaNormalizer {
         m.put("হোইতেসে", "হচ্ছে");
         m.put("হোইতেছে", "হচ্ছে");
         m.put("ঠিকমত", "ঠিকমতো");
+        m.put("থিকমতো", "ঠিকমতো");
+        m.put("থিকমত", "ঠিকমতো");
+        m.put("ফাতাফাতি", "ফাটাফাটি");
+        m.put("ফতাফাতি", "ফাটাফাটি");
+        m.put("আবস্থা", "অবস্থা");
+        m.put("একদাম", "একদম");
+        m.put("সবৈ", "সবই");
+        m.put("লিখতেসি", "লিখতেছি");
+        m.put("বলতেসি", "বলতেছি");
+        m.put("করতেসি", "করতেছি");
+        m.put("বেশিভাগ", "বেশিরভাগ");
+        m.put("পরাতা", "পুরাটা");
+        m.put("কলিরলি", "ক্লিয়ারলি");
 
         SPELLING_FIXES = Collections.unmodifiableMap(m);
 
@@ -263,9 +278,10 @@ public final class GboardRamblerBanglaNormalizer {
             return input;
         }
 
-        // 1. NFC normalization + strip accidental double nukta (\u09bc\u09bc or precomposed + \u09bc)
+        // 1. NFC normalization + strip accidental double nukta + repair illegal jofola (্য় -> ্য)
         String text = Normalizer.normalize(input, Normalizer.Form.NFC);
         text = stripDoubleNukta(text);
+        text = GboardRamblerBanglaLexicon.fixIllegalJofola(text);
 
         // 2. Token-level exact Bengali spelling & hyphenated -আই / -ই enclitic repair
         StringBuilder sb = new StringBuilder(text.length() + 8);
