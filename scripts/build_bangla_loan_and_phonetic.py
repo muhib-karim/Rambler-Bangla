@@ -206,12 +206,65 @@ def main():
                     wt = 5 if src in ("Dakshina", "Aksharantar", "Human") else (3 if "Wiki" in src else 1)
                     ak_raw[rom][nat] += wt
 
-    def score_en(en: str, nat: str, raw_wt: int) -> int:
+    def bn_init_group(s: str) -> str:
+        if not s:
+            return ""
+        c = s[0]
+        if c in "কখগঘ":
+            return "K"
+        if c in "চছজঝয":
+            return "C"
+        if c in "টঠডঢতথদধ":
+            return "T"
+        if c in "পফবভ":
+            return "P"
+        if c in "নণ":
+            return "N"
+        if c in "ম":
+            return "M"
+        if c in "রড়ঢ়":
+            return "R"
+        if c in "ল":
+            return "L"
+        if c in "শষস":
+            return "S"
+        if c in "হ":
+            return "H"
+        if c in "অআইঈউঊএঐওঔয়":
+            return "V"
+        return c
+
+    def score_en(en: str, nat: str, raw_wt: int, cmu_cand: str | None) -> int:
         s = raw_wt * 10
+        # Small tie-breaker only (large bonuses caused Bengali homographs like ঠেসে/বলল/বেশী/একই to hijack English words!)
         if nat in valid_bn:
-            s += 22
-        if nat in bn_rank:
-            s += max(4, 26 - bn_rank[nat] // 2500)
+            s += 5
+        # Strict phonetic sanity against English spelling & CMUdict pronunciation
+        if en.startswith("th") and nat[0] in ("ট", "ঠ", "ড", "ঢ"):
+            if en not in ("thakur", "thames", "thom", "thomson", "thomas", "thailand", "thai"):
+                s -= 140
+        if en.startswith("sh") and nat[0] not in ("শ", "স", "ষ"):
+            s -= 120
+        if en.startswith(("ph", "f")) and nat[0] not in ("ফ", "প", "ভ", "এ"):
+            s -= 120
+        if en.startswith("v") and nat[0] not in ("ভ", "ব"):
+            s -= 120
+        if en.startswith("wh") and nat[0] not in ("হ", "ও", "উ"):
+            s -= 120
+        if en.startswith("z") and nat[0] not in ("জ", "য", "ঝ"):
+            s -= 120
+        # Reject Bengali chandrabindu (ঁ) in English loanwords (e.g. সূঁচ, হাঁফ, তাঁর)
+        if "\u0981" in nat:
+            s -= 100
+        # Cross-check initial consonant group against CMUdict when available (kills translations like will->বলল, each->একই, who->ভিওএ)
+        if cmu_cand:
+            g_nat = bn_init_group(nat)
+            g_cmu = bn_init_group(cmu_cand)
+            if g_nat != g_cmu:
+                # Allow H<->V for wh-/h- words (what->হোয়াট/ওয়াট) and C<->S for soft c/s
+                allowed = ({g_nat, g_cmu} in ({"H", "V"}, {"C", "S"}))
+                if not allowed:
+                    s -= 130
         # Morphological integrity: reject dropped/extra suffixes
         if not en.endswith("s") and (nat.endswith("স") or nat.endswith("সেস") or nat.endswith("গুলো")):
             if not en.endswith(("ce", "se", "ss", "x", "sh", "ch", "us", "is", "as", "os")):
@@ -244,9 +297,8 @@ def main():
 
     # 1. Build 25,000+ English -> Natural Bengali Loanword Table
     # Priority for each English word:
-    #   (a) High-confidence Aksharantar human-verified pair (score >= 15)
-    #   (b) Avro Tier-1 (for clean English words)
-    #   (c) Systematically cleaned CMUdict (17,841 words)
+    #   (a) High-confidence Aksharantar human-verified pair passing CMU phonetic sanity (score >= 15)
+    #   (b) Systematically cleaned CMUdict (17,841 words)
     all_en_targets = set(cmu_table.keys())
     top_en_25k = [w for w, _ in sorted(en_rank.items(), key=lambda kv: kv[1]) if len(w) >= 2][:25000]
     all_en_targets.update(top_en_25k)
@@ -270,17 +322,23 @@ def main():
     for w in sorted(all_en_targets):
         if w in bn_block or len(w) < 2:
             continue
-        chosen = None
-        if w in ak_raw:
-            best_nat, best_sc = max(((n, score_en(w, n, wt)) for n, wt in ak_raw[w].items()), key=lambda kv: kv[1])
-            if best_sc >= 10:
-                chosen = best_nat
-                ak_used += 1
-        if chosen is None and w in cmu_table:
+        cmu_cand = None
+        if w in cmu_table:
             cand = clean_cmu(w, cmu_table[w])
             if is_clean_bn(cand):
-                chosen = cand
-                cmu_used += 1
+                cmu_cand = cand
+        chosen = None
+        if w in ak_raw:
+            best_nat, best_sc = max(
+                ((n, score_en(w, n, wt, cmu_cand)) for n, wt in ak_raw[w].items()),
+                key=lambda kv: kv[1],
+            )
+            if best_sc >= 15:
+                chosen = best_nat
+                ak_used += 1
+        if chosen is None and cmu_cand is not None:
+            chosen = cmu_cand
+            cmu_used += 1
         if chosen is not None:
             loan_final[w] = chosen
 

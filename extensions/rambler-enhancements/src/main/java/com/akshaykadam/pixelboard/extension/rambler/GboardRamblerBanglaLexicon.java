@@ -235,13 +235,38 @@ public final class GboardRamblerBanglaLexicon {
                 return cand;
             }
         }
+        // Generalized OOV trailing-ো (-o) strip across all 190,405 valid Bengali words
+        // Repairs ASR phonetic vowel-ending drift (e.g. চৈত্রো -> চৈত্র, মাত্রো -> মাত্র) while
+        // preserving all valid -ো words (ভালো, করো, বড়ো, etc., already matched above).
+        if (clean.length() >= 3 && clean.charAt(clean.length() - 1) == '\u09cb') {
+            String stripped = clean.substring(0, clean.length() - 1);
+            if (containsUtf8(s, stripped.getBytes(StandardCharsets.UTF_8))) {
+                return stripped;
+            }
+            String strippedL1 = s.l1Index.get(skeleton1(stripped));
+            if (strippedL1 != null) {
+                return strippedL1;
+            }
+        }
         // Level 1: strict homophone skeleton (শ/স/ষ, ন/ণ, ি/ী, ু/ূ, য/জ, ড়/ঢ়/র, ৎ/ত, ং/ঙ, ঁ)
         String k1 = skeleton1(clean);
         String cand1 = s.l1Index.get(k1);
         if (cand1 != null) {
             return cand1;
         }
+        // Full 190,405-word single-char homophone repair (covers formal & literary words absent
+        // from top-29K spoken index, e.g. পৌশ -> পৌষ, শ্রাবন -> শ্রাবণ, আশ্বীন -> আশ্বিন)
+        String fullHomophone = repairSingleHomophoneInValid(s, clean);
+        if (fullHomophone != null) {
+            return fullHomophone;
+        }
+        // Full 190,405-word single missing-hasanta conjunct repair (e.g. ফালগুন -> ফাল্গুন,
+        // কারতিক -> কার্তিক, চৈতর -> চৈত্র, কিনতু -> কিন্তু, পর্যনত -> পর্যন্ত)
         if (clean.length() >= 3) {
+            String conjunct = repairMissingHasantaInValid(s, clean);
+            if (conjunct != null) {
+                return conjunct;
+            }
             // Level 2: aspiration + ব্য/বে jofola + geminate skeleton (top 22K spoken words)
             String k2 = skeleton2(clean);
             String cand2 = s.l2Index.get(k2);
@@ -270,6 +295,68 @@ public final class GboardRamblerBanglaLexicon {
             }
         }
         return clean;
+    }
+
+    private static String repairSingleHomophoneInValid(Snapshot s, String word) {
+        int n = word.length();
+        char[] buf = word.toCharArray();
+        for (int i = 0; i < n; i++) {
+            char orig = buf[i];
+            char[] alts = homophoneAlternatives(orig);
+            if (alts == null) {
+                continue;
+            }
+            for (char alt : alts) {
+                buf[i] = alt;
+                String cand = new String(buf);
+                if (containsUtf8(s, cand.getBytes(StandardCharsets.UTF_8))) {
+                    return cand;
+                }
+            }
+            buf[i] = orig;
+        }
+        return null;
+    }
+
+    private static char[] homophoneAlternatives(char c) {
+        switch (c) {
+            case '\u09b6': return new char[] {'\u09b8', '\u09b7'}; // শ -> স, ষ
+            case '\u09b8': return new char[] {'\u09b6', '\u09b7'}; // স -> শ, ষ
+            case '\u09b7': return new char[] {'\u09b6', '\u09b8'}; // ষ -> শ, স
+            case '\u09a8': return new char[] {'\u09a3'};           // ন -> ণ
+            case '\u09a3': return new char[] {'\u09a8'};           // ণ -> ন
+            case '\u09bf': return new char[] {'\u09c0'};           // ি -> ী
+            case '\u09c0': return new char[] {'\u09bf'};           // ী -> ি
+            case '\u09c1': return new char[] {'\u09c2'};           // ু -> ূ
+            case '\u09c2': return new char[] {'\u09c1'};           // ূ -> ু
+            case '\u099c': return new char[] {'\u09af'};           // জ -> য
+            case '\u09af': return new char[] {'\u099c'};           // য -> জ
+            case '\u09b0': return new char[] {'\u09dc', '\u09dd'}; // র -> ড়, ঢ়
+            case '\u09dc': return new char[] {'\u09b0', '\u09dd'}; // ড় -> র, ঢ়
+            case '\u09dd': return new char[] {'\u09b0', '\u09dc'}; // ঢ় -> র, ড়
+            case '\u09a4': return new char[] {'\u09ce'};           // ত -> ৎ
+            case '\u09ce': return new char[] {'\u09a4'};           // ৎ -> ত
+            default: return null;
+        }
+    }
+
+    private static String repairMissingHasantaInValid(Snapshot s, String word) {
+        int n = word.length();
+        for (int i = 0; i + 1 < n; i++) {
+            char c1 = word.charAt(i);
+            char c2 = word.charAt(i + 1);
+            if (isBengaliConsonant(c1) && isBengaliConsonant(c2)) {
+                String cand = word.substring(0, i + 1) + '\u09cd' + word.substring(i + 1);
+                if (containsUtf8(s, cand.getBytes(StandardCharsets.UTF_8))) {
+                    return cand;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean isBengaliConsonant(char c) {
+        return (c >= '\u0995' && c <= '\u09b9') || (c >= '\u09dc' && c <= '\u09df');
     }
 
     static String fixIllegalJofola(String text) {

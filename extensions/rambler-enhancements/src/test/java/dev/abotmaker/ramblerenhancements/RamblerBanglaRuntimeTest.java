@@ -221,11 +221,11 @@ public class RamblerBanglaRuntimeTest {
 
     @Test
     public void atMentionStoreLearnsRanksFiltersAndRespectsEmailContext() {
-        // 1. Completed token extraction (handles + email domains, ignores partial tail)
+        // 1. Completed token extraction (handles + full emails + email domains, ignores partial tail)
         java.util.List<String> extracted = RamblerAtMentionStore.extractCompletedTokens(
                 "ask @grok and @claude, then email muhib@gmail.com or @partial");
         Assert.assertEquals(
-                java.util.Arrays.asList("@grok", "@claude", "@gmail.com"),
+                java.util.Arrays.asList("@grok", "@claude", "muhib@gmail.com", "@gmail.com"),
                 extracted);
 
         // 2. Active prefix extraction
@@ -380,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("32.3.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("32.4.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));

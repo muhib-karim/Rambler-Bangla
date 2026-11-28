@@ -97,6 +97,7 @@ public final class GboardSettingsGroupingTest {
 
         assertInOrder(registrySource,
                 "new GboardAmoledDarkKeyboardSettingsFeature(context)",
+                "new GboardSwiftKeySettingsFeature(context)",
                 "new GboardKeyboardAppearanceSettingsGroupFeature(context)",
                 "new GboardKeyboardLayoutSettingsGroupFeature(context)",
                 "new GboardKeyboardToolsSettingsGroupFeature(context)",

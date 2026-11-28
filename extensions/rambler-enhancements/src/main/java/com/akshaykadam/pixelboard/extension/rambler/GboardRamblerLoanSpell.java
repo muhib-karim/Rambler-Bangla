@@ -353,7 +353,49 @@ public final class GboardRamblerLoanSpell {
       "search", "সার্চ",
       "eventually", "ইভেনচুয়ালি",
       "climate", "ক্লাইমেট",
-      "clicked", "ক্লিকড");
+      "clicked", "ক্লিকড",
+      "these", "দিজ",
+      "those", "দোজ",
+      "them", "দেম",
+      "such", "সাচ",
+      "each", "ইচ",
+      "another", "অ্যানাদার",
+      "same", "সেম",
+      "even", "ইভেন",
+      "often", "অফেন",
+      "sometimes", "সামটাইমস",
+      "why", "হোয়াই",
+      "who", "হু",
+      "whose", "হুজ",
+      "will", "উইল",
+      "might", "মাইট",
+      "more", "মোর",
+      "short", "শর্ট",
+      "sure", "শিওর",
+      "real", "রিয়েল",
+      "half", "হাফ",
+      "year", "ইয়ার",
+      "vow", "ভাউ",
+      "wrong", "রং",
+      "lot", "লট");
+
+  private static final HashSet<String> CURATED_OUTPUTS = buildCuratedOutputs();
+
+  private static HashSet<String> buildCuratedOutputs() {
+    HashSet<String> set = new HashSet<>(OVERRIDE.size() + CURATED_BANGLA_LOANS.size() + 16);
+    set.addAll(OVERRIDE.values());
+    set.addAll(CURATED_BANGLA_LOANS.values());
+    return set;
+  }
+
+  /**
+   * Returns true if {@code word} is a known curated English-in-Bangla loanword output
+   * (e.g. {@code দিজ}, {@code দোজ}, {@code হুজ}, {@code ইচ}, {@code অপশনস}), so the
+   * Bengali native lexicon never snaps valid loanwords to unrelated Bengali words.
+   */
+  public static boolean isCuratedLoanOutput(String word) {
+    return word != null && CURATED_OUTPUTS.contains(word);
+  }
 
   private static volatile HashMap<String, String> table;
   private static volatile HashMap<String, String> banglishTable;
