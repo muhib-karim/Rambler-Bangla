@@ -2,6 +2,22 @@
 
 All notable changes to Rambler Bangla. Dates are AEST/AEDT.
 
+## [32.4.0] - 2026-11-28
+
+**SwiftKey Mode, Instant Full-Email & 1-Digit Prefix Personalized Strip, and Systemic Bangla Loanword & Orthography Overhaul.**
+
+- **New SwiftKey Mode (`Patches → Keyboard → SwiftKey Mode`, `GboardSwiftKeyRuntime` + `GboardSwiftKeySettings` + `GboardSwiftKeySettingsFeature`):**
+  - **In-Place Shift-to-Capitalize Word at Cursor:** When the cursor is touching any cased word (`hello|` or `he|llo`) with no selection, cycles `hello` → `Hello` → `HELLO` → `hello` directly in place without highlighting and without turning on Caps Lock (keeps Caps Lock normal after spaces and preserves Shift+Backspace forward delete & mid-word Shift chords). Defaults to **Double-tap Shift** with **Single-tap Shift** selectable inside Settings.
+  - **Smart Space Trim Before Punctuation:** Typing `,` `.` `?` `!` `;` `:` right after a trailing space (`hello |`) pulls punctuation cleanly back to `hello,` — working harmoniously with Gboard's native **Auto-space after punctuation**.
+  - **Custom Text Expansion Shortcuts (`RamblerSwiftKeyShortcutsStore`):** Map any short trigger (including symbols or numbers like `!email`, `@@`, `addr`, `ph`) to full phrases/emails/addresses surfaced directly on Gboard's native suggestion strip (1 tap to insert).
+  - **Reversible 1-Tap SwiftKey Keyboard Preset:** Enables Gboard's native Number Row, Long-Press Symbols, snappy 200 ms long-press delay, Auto-space after punctuation, Double-space period, and Undo auto-correct on backspace plus Swipe-Down Dismiss, Shift+Backspace Forward Delete, and Extended Clipboard — snapshotting every touched preference so toggling OFF restores prior settings cleanly.
+- **Instant Full-Email & 1-Digit Prefix Personalization (`RamblerAtMentionStore` + `RamblerAtMentionStripRuntime`):**
+  - Extends **@Mention, Email & Digit Strip** to auto-learn completed full email addresses (`11name@gmail.com`) and digit-starting alphanumeric IDs (`24x7support`) alongside `@handles` and `@domains`, triggering native strip suggestions from the **very 1st digit** (`1` → `11name@gmail.com`) and on dotted email prefixes (`name.k` → `name.k@gmail.com`) without touching normal prose suggestions.
+  - Strictly fail-closed on password, PIN/OTP (`TYPE_CLASS_NUMBER` / `TYPE_CLASS_PHONE`), and incognito fields, and filters out bare numbers, OTPs, and number+unit pairs (`10mb`, `5pm`, `2nd`, `2026`).
+- **Systemic Bangla Loanword Phonetic Audit & Full-Lexicon Orthography Overhaul (`scripts/build_bangla_loan_and_phonetic.py` + `GboardRamblerBanglaLexicon` + `GboardRamblerBanglaNormalizer` + `GboardRamblerLoanSpell`):**
+  - Cross-checked all AI4Bharat Aksharantar English→Bengali candidates against CMUdict initial consonant groups & English phonetic rules, purging 2,540 noisy Banglish homograph hijacks (`these→ঠেসে`, `will→বলল`, `who→ভিওএ`, `whose→বেশী`, `each→একই`, `vow→হবো`) into a clean **20,609-entry** loanword table + curated function-word overrides (`these→দিজ`, `those→দোজ`, `them→দেম`, `such→সাচ`, `each→ইচ`, `another→অ্যানাদার`, `same→সেম`, `sure→শিওর`, `real→রিয়েল`, `year→ইয়ার`).
+  - Added generalized OOV trailing-`ো` stripping (`চৈত্রো→চৈত্র`), full-lexicon single-char homophone repair (`পৌশ→পৌষ`, `শ্রাবন→শ্রাবণ`), and full-lexicon single missing-hasanta conjunct repair (`ফালগুন→ফাল্গুন`, `কারতিক→কার্তিক`) across the entire offline Bengali lexicon with zero extra heap, plus all 12 Bengali calendar months + `মাস`, `আগের চে→আগের চেয়ে`, and `কিবোর্ড এ→কিবোর্ডে`.
+
 ## [32.3.0] - 2026-11-28
 
 **Language-Wide Missing-Hasanta Conjunct Repair, `-তেশি` Verbs, Contextual `এখান → এখন`, 25k Mixed Banglish & App Updates 20–30s Note.**

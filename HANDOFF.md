@@ -1,12 +1,14 @@
 # Handoff — Rambler Bangla
 
 **Date:** 2026-11-28  
-**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.3.0`)
+**Repo:** `/root/workspace/rambler-work/Rambler-Bangla` (`origin/main`, tag `v32.4.0`)
 
 ## Current Objective
-1. **Completed:** Shipped **`Rambler Bangla v32.3.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
-   - **Language-Wide Missing-Hasanta Conjunct Repair & `-তেশি` Verbs:** Hasanta-tolerant & nasal+sibilant Level-3 repair + expanded `JOIN_PAIRS` (`হচছে→হচ্ছে`, `যাচছে→যাচ্ছে`, `কিনতু→কিন্তু`, `আনশতুকু→অংশটুকু`, `বলতেশি→বলতেছি`), contextual `এখান→এখন` (preserving `এখান থেকে`), `মনে হচ্ছে` / `পুরোপুরি` / `বাংলাটা`, and 25k Banglish lookup wired into Mixed `abc → বাংলা` classification.
-   - **App Updates 20–30s Install Notice:** Added clear background-install timing guidance on **Settings → About → App updates** and update dialogs alongside `INSTALL_SCENARIO_FAST`.
+1. **Completed:** Shipped **`Rambler Bangla v32.4.0`** (60-patch unified Morphe suite for Gboard `18.5.4.993608717-release-arm64-v8a`), delivering:
+   - **SwiftKey Mode (`Patches → Keyboard → SwiftKey Mode`):** In-place Shift-to-Capitalize word at cursor (Double-tap default / Single-tap selectable), smart space trim before punctuation, custom text-expansion shortcuts on the native strip, and reversible 1-tap SwiftKey Preset (Number Row, Long-Press Symbols, 200 ms long-press, Auto-space, Double-space period, Undo auto-correct, Swipe-dismiss, Shift+Delete, Extended Clipboard).
+   - **Instant `@Mention`, Full-Email & 1-Digit Personalized Strip:** Typing `1` immediately suggests learned full emails/IDs like `11name@gmail.com` on Gboard's native strip, with strict password/PIN/OTP/incognito fail-closed protection.
+   - **Systemic Bangla Loanword & Orthography Overhaul:** CMU phonetic cross-check purging 2,540 noisy Aksharantar homograph hijacks (`these→দিজ`, `those→দোজ`, `will→উইল`, `who→হু`, `whose→হুজ`), plus generalized trailing-`ো`, full-lexicon homophone (`পৌশ→পৌষ`), missing-hasanta (`ফালগুন→ফাল্গুন`), 12 Bengali months + `মাস`, `আগের চে→আগের চেয়ে`, and `কিবোর্ড এ→কিবোর্ডে`.
+2. **Next (`v33.0.0`):** Offline AI Voice Mode (`sherpa-onnx` built-in engine + distinct offline mic icon + 1-tap on-demand downloads for NVIDIA Parakeet TDT v3 & AI4Bharat IndicConformer Bengali + optional Whisper Large-v3-Turbo).
 2. **Awaiting user approval before applying:**
    - Proposed `AGENTS.md` cleanup and on-demand `.agents/skills/` split.
    - Recommended script/tool consolidation (`scripts/`, `.github/scripts/`) and concise log-file output modes.

@@ -1,9 +1,9 @@
 # Attribution and licensing
 
-Rambler Bangla v31.9.0 is a unified **GNU GPL v3.0** Morphe patch suite for Gboard 18.5.4+.
+Rambler Bangla v32.4.0 is a unified **GNU GPL v3.0** Morphe patch suite for Gboard 18.5.4+.
 It builds on, integrates, modifies, and explicitly credits the following open-source projects
 in full compliance with their respective source licenses (GNU GPL v3.0 Sections 5a/5b/7c, MIT,
-MPL-2.0, and BSD):
+MPL-2.0, CC-BY-4.0, CC-BY-SA, and BSD):
 
 ## Core Upstream Patch Suites
 
@@ -76,8 +76,9 @@ MPL-2.0, and BSD):
 - **AI4Bharat Aksharantar (`ben`)** (`ai4bharat/Aksharantar`, **CC-BY-4.0**) —
   https://huggingface.co/datasets/ai4bharat/Aksharantar — human-verified Roman-to-Bengali transliteration
   pairs compiled by `scripts/build_bangla_loan_and_phonetic.py` into `GboardRamblerLoanTableData.java`
-  (23,149 English→Bengali loanwords) and `GboardRamblerBanglishData.java` (25,000 Shift-free Banglish
-  words strictly validated against OpenBangla + `bn_BD`, `v32.2.0`).
+  (20,609 CMU-validated English→Bengali loanwords after v32.4.0 phonetic audit) and
+  `GboardRamblerBanglishData.java` (25,000 Shift-free Banglish words strictly validated against
+  OpenBangla + `bn_BD`, `v32.2.0+`).
 
 ## Licensing & Non-Affiliation
 

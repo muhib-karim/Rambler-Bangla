@@ -21,6 +21,7 @@ import dev.jason.gboardpatches.extension.keyboard.GboardLauncherIconSettingsFeat
 import dev.jason.gboardpatches.extension.lanftp.settings.GboardLanFtpSettingsFeature;
 import dev.jason.gboardpatches.extension.languagemodels.GboardLanguageModelSettingsFeature;
 import dev.jason.gboardpatches.extension.settingshomepage.GboardSettingsHomepageSettingsFeature;
+import dev.jason.gboardpatches.extension.swiftkey.GboardSwiftKeySettingsFeature;
 
 public final class GboardPatchesSettingsFeatureRegistry {
     private static final String TAG = "GboardPatches";
@@ -42,6 +43,7 @@ public final class GboardPatchesSettingsFeatureRegistry {
         return Collections.unmodifiableList(Arrays.asList(
                 // Keyboard
                 new GboardAmoledDarkKeyboardSettingsFeature(context),
+                new GboardSwiftKeySettingsFeature(context),
                 new GboardKeyboardAppearanceSettingsGroupFeature(context),
                 new GboardKeyboardLayoutSettingsGroupFeature(context),
                 new GboardKeyboardToolsSettingsGroupFeature(context),

@@ -34,9 +34,9 @@ public class RamblerColdStartAndStressTest {
                             && !coldFirst.contains("কলিএনত")
                             && !coldFirst.contains("এভেরয়থিং"));
 
-            // Verify both Aksharantar compressed tables loaded cleanly
-            Assert.assertTrue("Expected >= 22000 Aksharantar+CMU loanwords, got " + GboardRamblerLoanSpell.loanTableSize(),
-                    GboardRamblerLoanSpell.loanTableSize() >= 22000);
+            // Verify both Aksharantar compressed tables loaded cleanly (v32.4.0 phonetic-audited)
+            Assert.assertTrue("Expected >= 20000 Aksharantar+CMU loanwords, got " + GboardRamblerLoanSpell.loanTableSize(),
+                    GboardRamblerLoanSpell.loanTableSize() >= 20000);
             Assert.assertTrue("Expected >= 24000 Shift-free Banglish words, got " + GboardRamblerLoanSpell.banglishTableSize(),
                     GboardRamblerLoanSpell.banglishTableSize() >= 24000);
 
@@ -231,6 +231,35 @@ public class RamblerColdStartAndStressTest {
                     "So, mix language to motamuti ভালোই কাজ করতেছে ja দেখতেছি.");
             Assert.assertTrue("Expected মোটামুটি & যা & English Latin preserved: " + v323Mix2,
                     v323Mix2.contains("So, mix language") && v323Mix2.contains("মোটামুটি") && v323Mix2.contains("যা দেখতেছি"));
+
+            // 7. v32.4.0 SYSTEMIC BANGLA ORTHOGRAPHY & LOANWORD AUDIT REGRESSIONS
+            GboardRamblerScriptFix.setActiveGboardKeyboard("bn-BD", "ime_bengali_bangladesh");
+            GboardRamblerScriptFix.jvmLayoutKind = 1;
+            String v324Pure = GboardRamblerScriptFix.processVoice(
+                    "এবার তো মনে হচ্ছে আগের চে বেটার। বাংলা কিবোর্ড এ পৌশ মাশ, ফালগুন মাশ, চৈত্রো মাশ। "
+                            + "So these options and those words will show who whose each another.");
+            Assert.assertTrue("Expected আগের চেয়ে বেটার: " + v324Pure, v324Pure.contains("আগের চেয়ে বেটার"));
+            Assert.assertTrue("Expected কিবোর্ডে: " + v324Pure, v324Pure.contains("কিবোর্ডে"));
+            Assert.assertTrue("Expected পৌষ মাস, ফাল্গুন মাস, চৈত্র মাস: " + v324Pure,
+                    v324Pure.contains("পৌষ মাস")
+                            && v324Pure.contains("ফাল্গুন মাস")
+                            && v324Pure.contains("চৈত্র মাস"));
+            Assert.assertTrue("Expected দিজ অপশনস & দোজ (never ঠেসে/থোস/বলল/বেশী/একই): " + v324Pure,
+                    v324Pure.contains("দিজ অপশনস")
+                            && v324Pure.contains("দোজ")
+                            && v324Pure.contains("উইল")
+                            && v324Pure.contains("হু")
+                            && v324Pure.contains("হুজ")
+                            && !v324Pure.contains("ঠেসে")
+                            && !v324Pure.contains("বলল")
+                            && !v324Pure.contains("বেশী"));
+
+            // Generalized 190K-lexicon trailing-ো strip, homophone & missing-hasanta repairs
+            Assert.assertEquals("চৈত্র", GboardRamblerBanglaLexicon.correctWord("চৈত্রো"));
+            Assert.assertEquals("পৌষ", GboardRamblerBanglaLexicon.correctWord("পৌশ"));
+            Assert.assertEquals("ফাল্গুন", GboardRamblerBanglaLexicon.correctWord("ফালগুন"));
+            Assert.assertEquals("শ্রাবণ", GboardRamblerBanglaLexicon.correctWord("শ্রাবন"));
+            Assert.assertEquals("কার্তিক", GboardRamblerBanglaLexicon.correctWord("কারতিক"));
         } finally {
             GboardRamblerScriptFix.jvmLayoutKind = 0;
             GboardRamblerScriptFix.setActiveGboardKeyboard(null, null);
