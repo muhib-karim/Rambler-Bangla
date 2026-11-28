@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  */
 public final class RamblerAutoUpdater {
     private static final String TAG = "RamblerUpdater";
-    public static final String CURRENT_VERSION = "32.2.0";
+    public static final String CURRENT_VERSION = "32.3.0";
     public static final String REPO_SLUG = "muhib-karim/Rambler-Bangla";
     public static final String RELEASE_API_URL =
             "https://api.github.com/repos/" + REPO_SLUG + "/releases/latest";

@@ -380,7 +380,7 @@ public class RamblerBanglaRuntimeTest {
         Assert.assertNull(RamblerAutoUpdater.parseExpectedSha256(sums, "missing.apk"));
 
         // About → App auto-updates section routes directly to SECTION_UPDATES
-        Assert.assertEquals("32.2.0", RamblerAutoUpdater.CURRENT_VERSION);
+        Assert.assertEquals("32.3.0", RamblerAutoUpdater.CURRENT_VERSION);
         Assert.assertEquals(
                 RamblerEnhancementsActivity.SECTION_UPDATES,
                 RamblerEnhancementsActivity.normalizeSection("updates"));

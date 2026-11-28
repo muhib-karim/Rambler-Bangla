@@ -28,7 +28,7 @@ final class GboardRamblerSentenceLang {
   static final HashSet<String> BN_GRAM = set(
       "e", "o", "te", "er", "ke", "ta", "ti", "ra", "re", "der", "gulo", "gula", "tai", "tao",
       "ami", "amar", "amake", "amra", "amader", "tumi", "tomar", "tomake", "tomra", "tomader", "apni", "apnar", "apnake",
-      "tara", "tader", "ora", "oder", "ki", "na", "nai", "nei", "ar", "kintu", "tahole", "keno", "kothay",
+      "tara", "tader", "ora", "oder", "ja", "je", "jar", "jara", "jemon", "temon", "ki", "na", "nai", "nei", "ar", "kintu", "tahole", "keno", "kothay",
       "kemon", "ekta", "ekti", "ei", "oi", "eta", "ota", "sheta", "ekhon", "tokhon", "ekhane", "okhane", "jodi", "karon", "jonno",
       "theke", "moddhe", "sathe", "shathe", "hobe", "hoy", "hoyeche", "hocche", "holo", "chilo", "ache", "achi", "acho", "achen",
       "koro", "kori", "korbo", "korchi", "korcho", "korche", "korechi", "korecho", "kore", "korte", "dao", "dibo", "dite", "jabo",
@@ -194,6 +194,22 @@ final class GboardRamblerSentenceLang {
     return c >= '\u0980' && c <= '\u09FF';
   }
 
+  static boolean hasBengaliNeighbor(ArrayList<String> tok, int a, int b, int pos) {
+    for (int k = pos - 1; k >= a; k--) {
+      String t = tok.get(k);
+      if (t.isEmpty() || Character.isWhitespace(t.charAt(0))) continue;
+      if (isBengaliChar(t.charAt(0))) return true;
+      break;
+    }
+    for (int k = pos + 1; k < b; k++) {
+      String t = tok.get(k);
+      if (t.isEmpty() || Character.isWhitespace(t.charAt(0))) continue;
+      if (isBengaliChar(t.charAt(0))) return true;
+      break;
+    }
+    return false;
+  }
+
   static void mark(boolean[] p, Matcher m, int n) {
     while (m.find()) for (int x = m.start(); x < m.end() && x < n; x++) p[x] = true;
   }
@@ -217,6 +233,7 @@ final class GboardRamblerSentenceLang {
     int ap = lo.indexOf('\''); if (ap < 0) ap = lo.indexOf('\u2019');
     if (ap > 0 && english.contains(lo.substring(0, ap))) return T_EN;
     if (bool(H.INFLECTION, lo)) return T_EN;
+    if (GboardRamblerLoanSpell.banglish(lo) != null) return T_BN;
     if (GboardRamblerScriptFix.convertToken(lo, lo) == null) return T_UNK;
     if (BN_SUFFIX.matcher(lo).matches() || BN_DIGRAPH.matcher(lo).find()) return T_BN;
     return T_UNK;
@@ -241,10 +258,11 @@ final class GboardRamblerSentenceLang {
       if (c != T_NEUTRAL && c != T_PROT) first = false;
       cls[x - a] = c;
     }
-    // Resolve context words from their nearest word neighbours (non-context).
+    // Resolve context words from their nearest word neighbours (non-context), including already-Bengali Unicode tokens.
     for (int x = 0; x < cls.length; x++) {
       if (cls[x] != T_CTX) continue;
-      boolean near = bnEvidence(cls, prev(cls, x)) || bnEvidence(cls, next(cls, x));
+      boolean near = bnEvidence(cls, prev(cls, x)) || bnEvidence(cls, next(cls, x))
+          || hasBengaliNeighbor(tok, a, b, a + x);
       String lo = tok.get(a + x).toLowerCase(Locale.US);
       cls[x] = near ? T_BN_GRAM : (english.contains(lo) && lo.length() > 1 ? T_EN_WEAK : T_NEUTRAL);
     }

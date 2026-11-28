@@ -384,6 +384,7 @@ public final class RamblerEnhancementsActivity extends Activity {
                 : "APK";
         String msg = "Installed: v" + RamblerAutoUpdater.CURRENT_VERSION
                 + "\nLatest: " + info.tagName + " (" + sizeLabel + ", SHA-256 verified)\n\n"
+                + "Tip: After tapping Update (or 'Install without scanning'), Android typically takes 20–30 seconds to verify and install this ~89 MB keyboard package in the background. Please wait — it will finish automatically.\n\n"
                 + info.notesPreview;
         AlertDialog.Builder b = new AlertDialog.Builder(this)
                 .setTitle("Update available: " + info.tagName)
@@ -465,7 +466,7 @@ public final class RamblerEnhancementsActivity extends Activity {
                             @Override
                             public void onCommitted(int sessionId) {
                                 if (!isFinishing() && !isDestroyed()) {
-                                    statusView.setText("Opening Android Update confirmation...");
+                                    statusView.setText("Opening Android Update confirmation...\n\nAfter tapping Update, please allow ~20–30 seconds for Android to finish updating the keyboard.");
                                     // Safety watchdog: never leave user stuck on a spinner if an OEM delays/drops callback
                                     mainHandler.postDelayed(() -> {
                                         if (activeUpdateProgressDialog == progressDialog
@@ -950,7 +951,8 @@ public final class RamblerEnhancementsActivity extends Activity {
         TextView infoView = new TextView(this);
         infoView.setText("Updates download exclusively from github.com/"
                 + RamblerAutoUpdater.REPO_SLUG
-                + " and verify SHA256SUMS.txt before handing off to Android's installer.");
+                + " and verify SHA256SUMS.txt before handing off to Android's installer.\n\n"
+                + "Note: Because Rambler Bangla is an ~89 MB full keyboard package, Android typically takes 20–30 seconds after you tap Update (and 'Install without scanning' if prompted) to verify and complete the update in the background. Please wait — your keyboard will refresh automatically.");
         infoView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         infoView.setTextColor(pal.secondary);
         LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(

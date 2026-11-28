@@ -39,20 +39,28 @@ public final class GboardRamblerBanglaLexicon {
 
     private static final String[] SUFFIXES = {
         "গুলোতে", "গুলোই", "গুলোর", "গুলোকে", "গুলাতে", "গুলাই", "গুলার",
-        "গুলো", "গুলা", "দেরকে", "দেরই", "দের", "টাকে", "টাতে", "টার", "টাও", "টাই",
+        "গুলো", "গুলা", "টুকু", "তুকু", "দেরকে", "দেরই", "দের", "টাকে", "টাতে", "টার", "টাও", "টাই",
         "টিকে", "টিতে", "টির", "টিও", "টিই", "টা", "টি", "কেও", "কেই", "তেও", "তেই",
         "কে", "তে", "এর", "ই", "ও"
     };
 
     private static final String[][] COLLOQUIAL_VERB_ENDINGS = {
         {"তেসিলাম", "তেছিলাম"},
+        {"তেশিলাম", "তেছিলাম"},
         {"তেসিলা", "তেছিলা"},
+        {"তেশিলা", "তেছিলা"},
         {"তেসিলো", "তেছিলো"},
+        {"তেশিলো", "তেছিলো"},
         {"তেসিল", "তেছিল"},
+        {"তেশিল", "তেছিল"},
         {"তেসেন", "তেছেন"},
+        {"তেশেন", "তেছেন"},
         {"তেসি", "তেছি"},
+        {"তেশি", "তেছি"},
         {"তেসে", "তেছে"},
+        {"তেশে", "তেছে"},
         {"তেসো", "তেছো"},
+        {"তেশো", "তেছো"},
     };
 
     private static final class Snapshot {
@@ -173,13 +181,14 @@ public final class GboardRamblerBanglaLexicon {
         if (containsUtf8(s, word.getBytes(StandardCharsets.UTF_8))) {
             return word;
         }
-        // Agglutinative suffix stripping fallback (e.g. শবকিছুই -> সবকিছু + ই, অবস্যই -> অবশ্য + ই)
+        // Agglutinative suffix stripping fallback (e.g. শবকিছুই -> সবকিছু + ই, আনশতুকু -> অংশ + টুকু)
         for (String suf : SUFFIXES) {
             if (word.length() > suf.length() + 1 && word.endsWith(suf)) {
                 String stem = word.substring(0, word.length() - suf.length());
                 String fixedStem = correctNoSuffix(s, stem);
-                if (!fixedStem.equals(stem)) {
-                    return fixedStem + suf;
+                String outSuf = "তুকু".equals(suf) ? "টুকু" : suf;
+                if (!fixedStem.equals(stem) || !outSuf.equals(suf)) {
+                    return fixedStem + outSuf;
                 }
             }
         }
@@ -194,6 +203,19 @@ public final class GboardRamblerBanglaLexicon {
         String clean = fixIllegalJofola(word);
         if (containsUtf8(s, clean.getBytes(StandardCharsets.UTF_8))) {
             return clean;
+        }
+        // Exact missing-hasanta geminate conjunct repair (চছ -> চ্ছ, চচ -> চ্চ, e.g. যাচছে -> যাচ্ছে, খাচছে -> খাচ্ছে, হচছে -> হচ্ছে)
+        if (clean.contains("চছ")) {
+            String cand = clean.replace("চছ", "চ্ছ");
+            if (containsUtf8(s, cand.getBytes(StandardCharsets.UTF_8))) {
+                return cand;
+            }
+            clean = cand;
+        } else if (clean.contains("চচ")) {
+            String cand = clean.replace("চচ", "চ্চ");
+            if (containsUtf8(s, cand.getBytes(StandardCharsets.UTF_8))) {
+                return cand;
+            }
         }
         // Colloquial Bengali verb endings (-তেসি -> -তেছি, -তেসে -> -তেছে, etc.) on OOV verbs
         for (String[] pair : COLLOQUIAL_VERB_ENDINGS) {
@@ -518,7 +540,8 @@ public final class GboardRamblerBanglaLexicon {
 
     /**
      * Level-3 Romanized-Banglish Repair Skeleton: collapses dental vs retroflex ambiguity
-     * (ট/ঠ/ত/থ -> ত, ড/ঢ/দ/ধ -> দ), initial আ <-> অ, and Avro diphthongs (ৈ -> ই, ৌ -> উ).
+     * (ট/ঠ/ত/থ -> ত, ড/ঢ/দ/ধ -> দ), initial আ <-> অ, Avro diphthongs (ৈ -> ই, ৌ -> উ),
+     * missing conjunct hasanta (্: হচছে -> হচ্ছে, কিনতু -> কিন্তু), and nasal+sibilant (নস -> ংস: আনশ -> অংশ).
      */
     static String skeleton3(String w) {
         String s2 = skeleton2(w);
@@ -526,19 +549,31 @@ public final class GboardRamblerBanglaLexicon {
         StringBuilder sb = new StringBuilder(n);
         for (int i = 0; i < n; i++) {
             char c = s2.charAt(i);
-            if (i == 0 && c == '\u0986') { // initial আ -> অ
-                sb.append('\u0985');
-            } else if (c == '\u099f' || c == '\u09a0' || c == '\u09a5') { // ট, ঠ, থ -> ত
-                sb.append('\u09a4');
-            } else if (c == '\u09a1' || c == '\u09a2' || c == '\u09a7') { // ড, ঢ, ধ -> দ
-                sb.append('\u09a6');
-            } else if (c == '\u09c8') { // ৈ -> ই
-                sb.append('\u0987');
-            } else if (c == '\u09cc') { // ৌ -> উ
-                sb.append('\u0989');
-            } else {
-                sb.append(c);
+            if (c == '\u09cd') { // ignore missing/extra hasanta in OOV conjunct repair (হচছে -> হচ্ছে)
+                continue;
             }
+            char mapped;
+            if (i == 0 && c == '\u0986') { // initial আ -> অ
+                mapped = '\u0985';
+            } else if (c == '\u09a8' && i + 1 < n && s2.charAt(i + 1) == '\u09b8') {
+                // nasal + sibilant (নশ/নস -> ংস, e.g. আনশ -> অংশ, সংসা -> শংসা)
+                mapped = '\u0982';
+            } else if (c == '\u099f' || c == '\u09a0' || c == '\u09a5') { // ট, ঠ, থ -> ত
+                mapped = '\u09a4';
+            } else if (c == '\u09a1' || c == '\u09a2' || c == '\u09a7') { // ড, ঢ, ধ -> দ
+                mapped = '\u09a6';
+            } else if (c == '\u09c8') { // ৈ -> ই
+                mapped = '\u0987';
+            } else if (c == '\u09cc') { // ৌ -> উ
+                mapped = '\u0989';
+            } else {
+                mapped = c;
+            }
+            // Collapse adjacent identical consonants exposed after stripping hasanta (চ+্+ছ -> চচ -> চ)
+            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == mapped && mapped >= '\u0995' && mapped <= '\u09b9') {
+                continue;
+            }
+            sb.append(mapped);
         }
         return sb.toString();
     }
